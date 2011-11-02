@@ -1,0 +1,3 @@
+# Git ignore file for the Brainfuck runtime.
+.cproject
+.project
