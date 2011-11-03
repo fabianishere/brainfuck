@@ -11,7 +11,7 @@
 #include <stdint.h>
 // Constants.
 #define FILE_SELF "interpreter.c"
-#define RUNTIME_VERSION "1.0"
+#define interpreter_VERSION "1.0"
 // Program
 typedef struct
 {
@@ -28,7 +28,7 @@ typedef struct
 /**
  * Output the given char.
  */
-void runtime_output_char(char c) {
+void interpreter_output_char(char c) {
 	printf("%c", c);
 	fflush(stdout);
 }
@@ -36,7 +36,7 @@ void runtime_output_char(char c) {
 /**
  * Generates error message.
  */
-void runtime_error(char* message, char *method) {
+void interpreter_error(char* message, char *method) {
 	printf("Error at file \"%s\": %s\n", FILE_SELF, message);
 	printf("Caused by: %s()\n", method);
 	exit(EXIT_FAILURE);
@@ -45,8 +45,8 @@ void runtime_error(char* message, char *method) {
 /*
  * Prints out the version of the program.
  */
-void runtime_version() {
-    printf("BrainFuck interpreter, version %s.\n\n", RUNTIME_VERSION);
+void interpreter_version() {
+    printf("BrainFuck interpreter, version %s.\n\n", interpreter_VERSION);
     printf("For more info, try \"./brainfuck -h\".\n");
 
     exit(EXIT_SUCCESS);
@@ -55,8 +55,8 @@ void runtime_version() {
 /*
  * Prints out the help of the program.
  */
-void runtime_help() {
-    printf("BrainFuck interpreter, version %s.\n\n", RUNTIME_VERSION);
+void interpreter_help() {
+    printf("BrainFuck interpreter, version %s.\n\n", interpreter_VERSION);
 
     printf("Usage: ./brainfuck <input_file>.\n");
     printf("\t\"-v\"    Prints the version of the program.\n");
@@ -79,9 +79,9 @@ void parse_args(Program *program, int argc, char *argv[]) {
 
     for(i = 1; i < argc; i++) {
         if(!strcmp("-v", argv[i])) {
-        	runtime_version();
+        	interpreter_version();
         } else if(!strcmp("-h", argv[i])) {
-        	runtime_help();
+        	interpreter_help();
         } else {
     		program->file = argv[i];
     	}
@@ -93,8 +93,8 @@ void parse_args(Program *program, int argc, char *argv[]) {
  */
 void interpret(Program *program) {
 	if(!program->file || program->file == "") {
-	    printf("Missing required arguments, runtime terminating. \n");
-		runtime_help();
+	    printf("Missing required arguments, interpreter terminating. \n");
+		interpreter_help();
 		exit(EXIT_FAILURE);
 	}
 
@@ -102,7 +102,7 @@ void interpret(Program *program) {
 	FILE *input = fopen(program->file, "r");
 
 	if(!input) {
-		runtime_error("Could not access input file.", "interpret");
+		interpreter_error("Could not access input file.", "interpret");
 	}
 
 	// Set the amount of cells to 30000
@@ -113,7 +113,7 @@ void interpret(Program *program) {
 	// Points to the current Loop through all characters.index.
 	int dataPointer = 0;
 
-	// Get size of file.runtime_output_char(c);
+	// Get size of file.interpreter_output_char(c);
 	fseek(input, 0, SEEK_END); // seek to end of file
 	int file_size = ftell(input); // get current file pointer
 	fseek(input, 0, SEEK_SET); // seek back to beginning of file
@@ -137,13 +137,13 @@ void interpret(Program *program) {
 		switch(c) {
 		case '>':
 			if ((dataPointer + 1) > sizeof(data)) {
-				runtime_error("Data pointer is too big.", "interpret");
+				interpreter_error("Data pointer is too big.", "interpret");
 			}
 			dataPointer++;
 			break;
 		case '<':
 			if ((dataPointer - 1) < 0) {
-				runtime_error("Data pointer is negative.", "interpret");
+				interpreter_error("Data pointer is negative.", "interpret");
 			}
 			dataPointer--;
 			break;
@@ -154,7 +154,7 @@ void interpret(Program *program) {
 			data[dataPointer]--;
 			break;
 		case '.':
-			runtime_output_char(data[dataPointer]);
+			interpreter_output_char(data[dataPointer]);
 			break;
 		case ',':
 			data[dataPointer] = (int) fgetc(stdin);
