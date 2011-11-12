@@ -46,7 +46,7 @@ void interpreter_error(char* message, char *method) {
  * Prints out the version of the program.
  */
 void interpreter_version() {
-    printf("BrainFuck interpreter, version %s.\n\n", interpreter_VERSION);
+    printf("Brainfuck interpreter, version %s.\n\n", interpreter_VERSION);
     printf("For more info, try \"./brainfuck -h\".\n");
 
     exit(EXIT_SUCCESS);
@@ -56,7 +56,7 @@ void interpreter_version() {
  * Prints out the help of the program.
  */
 void interpreter_help() {
-    printf("BrainFuck interpreter, version %s.\n\n", interpreter_VERSION);
+    printf("Brainfuck interpreter, version %s.\n\n", interpreter_VERSION);
 
     printf("Usage: ./brainfuck <input_file>.\n");
     printf("\t\"-v\"    Prints the version of the program.\n");
@@ -184,6 +184,20 @@ void interpret(Program *program) {
 						i++;
 				}
 				charPointer--;
+			}
+			break;
+		// Allow hashtag (#) to allow user to put "#!/usr/bin/brainfuck" in their code.
+		case '#':
+			// Pointless if statement
+			// , but otherwise we could not declare a variable.
+			if (0 == 0) {
+				int i = 1;
+				while (i > 0) {
+					char next = chars[++charPointer];
+					
+					if (next == '\n')
+						i--;
+				}
 			}
 			break;
 		}
