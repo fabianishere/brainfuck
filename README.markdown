@@ -9,6 +9,7 @@ Written on a machine running Ubuntu (linux). Not tested on other platforms.
 
 Brainfuck
 ---------
+Urban Müller created brainfuck in 1993 with the intention of designing a language which could be implemented with the smallest possible compiler.
 
 ### Commands
 The eight language commands, each consisting of a single character:
