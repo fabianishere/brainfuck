@@ -10,7 +10,7 @@ Written on a machine running Ubuntu (linux). Not tested on other platforms.
 Brainfuck
 ---------
 
-#### Commands
+### Commands
 The eight language commands, each consisting of a single character:
 
 | Character | Meaning                                                                                                                                                                           |
