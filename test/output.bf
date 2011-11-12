@@ -1,2 +1,2 @@
-#!../Debug/brainfuck
+#!/usr/bin/brainfuck
 +.
