@@ -1,15 +1,3 @@
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
 /**
  * Lightweight, open-source brainfuck interpreter written in C.
  *
