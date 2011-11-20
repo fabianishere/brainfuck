@@ -1,3 +1,15 @@
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
 /**
  * Lightweight, open-source brainfuck interpreter written in C.
  *
@@ -59,7 +71,7 @@ void interpreter_help() {
     printf("Brainfuck interpreter, version %s.\n\n", interpreter_VERSION);
 
     printf("Usage: ./brainfuck <input_file>.\n");
-    printf("\t\"-v\"    Prints the version of the program.\n");
+    printf("\t\"-v\"    Prints out the version of the program.\n");
     printf("\t\"-h\"    Prints out the help (what you are seeing).\n");
 
     exit(EXIT_SUCCESS);
