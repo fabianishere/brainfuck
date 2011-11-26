@@ -123,6 +123,9 @@ void interpret(Program *program) {
 	// Array that contains all characters.
 	char *chars[file_size];
 	// Index at the character array.
+name	age	history message
+..		
+	interpreter.c
 	int charPointer = 0;
 
 	// Get file contents.
@@ -186,7 +189,7 @@ void interpret(Program *program) {
 				charPointer--;
 			}
 			break;
-		// Allow hashtag (#) to allow user to put "#!/usr/bin/brainfuck" in their code.
+		// Allow hashtags (#).
 		case '#':
 			// Pointless if statement
 			// , but otherwise we could not declare a variable.
