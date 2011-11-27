@@ -10,8 +10,7 @@
 #include <string.h>
 #include <stdint.h>
 // Constants.
-#define FILE_SELF "interpreter.c"
-#define interpreter_VERSION "1.0"
+#define VERSION "1.0"
 // Program
 typedef struct
 {
@@ -36,9 +35,8 @@ void interpreter_output_char(char c) {
 /**
  * Generates error message.
  */
-void interpreter_error(char* message, char *method) {
-	printf("Error at file \"%s\": %s\n", FILE_SELF, message);
-	printf("Caused by: %s()\n", method);
+void interpreter_error(char* message) {
+	printf("Error at line %i, file \"%s\": %s\n",__LINE__, __FILE__, message);
 	exit(EXIT_FAILURE);
 }
 
@@ -123,9 +121,6 @@ void interpret(Program *program) {
 	// Array that contains all characters.
 	char *chars[file_size];
 	// Index at the character array.
-name	age	history message
-..		
-	interpreter.c
 	int charPointer = 0;
 
 	// Get file contents.
@@ -133,6 +128,8 @@ name	age	history message
 		chars[charPointer] = (char) c;
 		charPointer++;
 	}
+	
+	int i = 0;
 
 	// Loop through all characters.
 	for (charPointer = 0; charPointer < file_size; charPointer++) {
@@ -140,13 +137,13 @@ name	age	history message
 		switch(c) {
 		case '>':
 			if ((dataPointer + 1) > sizeof(data)) {
-				interpreter_error("Data pointer is too big.", "interpret");
+				interpreter_error("Data pointer is too big.");
 			}
 			dataPointer++;
 			break;
 		case '<':
 			if ((dataPointer - 1) < 0) {
-				interpreter_error("Data pointer is negative.", "interpret");
+				interpreter_error("Data pointer is negative.");
 			}
 			dataPointer--;
 			break;
@@ -162,9 +159,8 @@ name	age	history message
 		case ',':
 			data[dataPointer] = (int) fgetc(stdin);
 			break;
-		case '[':
-			if (data[dataPointer] == 0) {
-				int i = 1;
+		case '[': {	
+				i = 1;
 				while (i > 0) {
 					char next = chars[++charPointer];
 					if (next == '[')
@@ -174,11 +170,8 @@ name	age	history message
 				}
 			}
 			break;
-		case ']':
-			// Pointless if statement
-			// , but otherwise we could not declare a variable.
-			if (0 == 0) {
-				int i = 1;
+		case ']': {
+				i = 1;
 				while (i > 0) {
 					char previous = chars[--charPointer];
 					if (previous == '[')
@@ -190,11 +183,8 @@ name	age	history message
 			}
 			break;
 		// Allow hashtags (#).
-		case '#':
-			// Pointless if statement
-			// , but otherwise we could not declare a variable.
-			if (0 == 0) {
-				int i = 1;
+		case '#': {
+				i = 1;
 				while (i > 0) {
 					char next = chars[++charPointer];
 					
