@@ -73,9 +73,9 @@ void parse_args(Program *program, int argc, char *argv[]) {
 	// Clear program->file value.
 	program->file = "";
 	// Make it compatible with C90.
-	int i = 0;
+	int i = 1;
 
-    for(i = 1; i < argc; i++) {
+    for(; i < argc; i++) {
         if(!strcmp("-v", argv[i])) {
         	interpreter_version();
         } else if(!strcmp("-h", argv[i])) {
