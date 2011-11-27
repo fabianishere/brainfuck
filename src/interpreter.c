@@ -111,7 +111,7 @@ void interpret(Program *program) {
 	// Points to the current Loop through all characters.index.
 	int dataPointer = 0;
 
-	// Get size of file.interpreter_output_char(c);
+	// Get size of file.
 	fseek(input, 0, SEEK_END); // seek to end of file
 	int file_size = ftell(input); // get current file pointer
 	fseek(input, 0, SEEK_SET); // seek back to beginning of file
