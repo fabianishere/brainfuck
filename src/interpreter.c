@@ -9,9 +9,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdint.h>
+
 // Constants.
-#define FILE_SELF "interpreter.c"
-#define interpreter_VERSION "1.0"
+#define VERSION "1.0"
+
 // Program
 typedef struct
 {
@@ -36,9 +37,8 @@ void interpreter_output_char(char c) {
 /**
  * Generates error message.
  */
-void interpreter_error(char* message, char *method) {
-	printf("Error at file \"%s\": %s\n", FILE_SELF, message);
-	printf("Caused by: %s()\n", method);
+void interpreter_error(char* message) {
+	printf("Error at line %i, file \"%s\": %s\n",__LINE__, __FILE__, message);
 	exit(EXIT_FAILURE);
 }
 
@@ -59,7 +59,7 @@ void interpreter_help() {
     printf("Brainfuck interpreter, version %s.\n\n", interpreter_VERSION);
 
     printf("Usage: ./brainfuck <input_file>.\n");
-    printf("\t\"-v\"    Prints the version of the program.\n");
+    printf("\t\"-v\"    Prints out the version of the program.\n");
     printf("\t\"-h\"    Prints out the help (what you are seeing).\n");
 
     exit(EXIT_SUCCESS);
@@ -75,9 +75,9 @@ void parse_args(Program *program, int argc, char *argv[]) {
 	// Clear program->file value.
 	program->file = "";
 	// Make it compatible with C90.
-	int i = 0;
+	int i = 1;
 
-    for(i = 1; i < argc; i++) {
+    for(; i < argc; i++) {
         if(!strcmp("-v", argv[i])) {
         	interpreter_version();
         } else if(!strcmp("-h", argv[i])) {
@@ -113,7 +113,7 @@ void interpret(Program *program) {
 	// Points to the current Loop through all characters.index.
 	int dataPointer = 0;
 
-	// Get size of file.interpreter_output_char(c);
+	// Get size of file.
 	fseek(input, 0, SEEK_END); // seek to end of file
 	int file_size = ftell(input); // get current file pointer
 	fseek(input, 0, SEEK_SET); // seek back to beginning of file
@@ -131,19 +131,21 @@ void interpret(Program *program) {
 		charPointer++;
 	}
 
+	int i = 0;
+
 	// Loop through all characters.
 	for (charPointer = 0; charPointer < file_size; charPointer++) {
 		c = chars[charPointer];
 		switch(c) {
 		case '>':
 			if ((dataPointer + 1) > sizeof(data)) {
-				interpreter_error("Data pointer is too big.", "interpret");
+				interpreter_error("Data pointer is too big.");
 			}
 			dataPointer++;
 			break;
 		case '<':
 			if ((dataPointer - 1) < 0) {
-				interpreter_error("Data pointer is negative.", "interpret");
+				interpreter_error("Data pointer is negative.");
 			}
 			dataPointer--;
 			break;
@@ -159,9 +161,8 @@ void interpret(Program *program) {
 		case ',':
 			data[dataPointer] = (int) fgetc(stdin);
 			break;
-		case '[':
-			if (data[dataPointer] == 0) {
-				int i = 1;
+		case '[': {	
+				i = 1;
 				while (i > 0) {
 					char next = chars[++charPointer];
 					if (next == '[')
@@ -171,11 +172,8 @@ void interpret(Program *program) {
 				}
 			}
 			break;
-		case ']':
-			// Pointless if statement
-			// , but otherwise we could not declare a variable.
-			if (0 == 0) {
-				int i = 1;
+		case ']': {
+				i = 1;
 				while (i > 0) {
 					char previous = chars[--charPointer];
 					if (previous == '[')
@@ -186,15 +184,12 @@ void interpret(Program *program) {
 				charPointer--;
 			}
 			break;
-		// Allow hashtag (#) to allow user to put "#!/usr/bin/brainfuck" in their code.
-		case '#':
-			// Pointless if statement
-			// , but otherwise we could not declare a variable.
-			if (0 == 0) {
-				int i = 1;
+		// Allow hashtags (#).
+		case '#': {
+				i = 1;
 				while (i > 0) {
 					char next = chars[++charPointer];
-					
+
 					if (next == '\n')
 						i--;
 				}
@@ -215,3 +210,4 @@ int main(int argc, char *argv[]) {
     interpret(&program);
     return 0;
 }
+
