@@ -141,6 +141,7 @@ void cli_help() {
     printf("\t\"-h\"    Prints out the help (what you are seeing).\n");
 }
 
+/* Main */
 int main(int argc, char *argv[]) {
 	Program program;
 	cli_args(&program, argc, argv);
