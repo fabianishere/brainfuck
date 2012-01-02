@@ -1,170 +1,91 @@
-/**
- * Lightweight, open-source brainfuck interpreter written in C.
- *
- * @author Fabian M.
- */
-/* Includes. */
+/* Author: Fabian M. */
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <stdint.h>
 
-// Constants.
-#define VERSION "1.0"
+/* Constants */
+#define VERSION "1.1"
+#define MAX_CELLS 65536
 
-// Program
+/* Program */
 typedef struct
 {
-	/**
-	 * The file to interpret.
-	 */
     char *file;
-    /**
-     * The amount of memory cells to reserve.
-     */
-    uint32_t cells;
+    int cells;
 } Program;
 
-/**
- * Output the given char.
- */
-void interpreter_output_char(char c) {
+
+/* Output */
+void output(char c) {
 	printf("%c", c);
 	fflush(stdout);
 }
-
-/**
- * Generates error message.
- */
-void interpreter_error(char* message) {
+void program_error(char* message) {
 	printf("Error at line %i, file \"%s\": %s\n",__LINE__, __FILE__, message);
+
+	exit(EXIT_FAILURE);
+}
+void error(char* message) {
+	printf("%s", message);
+	cli_help();
 	exit(EXIT_FAILURE);
 }
 
-/*
- * Prints out the version of the program.
- */
-void interpreter_version() {
-    printf("Brainfuck interpreter, version %s.\n\n", interpreter_VERSION);
-    printf("For more info, try \"./brainfuck -h\".\n");
-
-    exit(EXIT_SUCCESS);
-}
-
-/*
- * Prints out the help of the program.
- */
-void interpreter_help() {
-    printf("Brainfuck interpreter, version %s.\n\n", interpreter_VERSION);
-
-    printf("Usage: ./brainfuck <input_file>.\n");
-    printf("\t\"-v\"    Prints out the version of the program.\n");
-    printf("\t\"-h\"    Prints out the help (what you are seeing).\n");
-
-    exit(EXIT_SUCCESS);
-}
-/**
- * Parses the command line arguments.
- *
- * @param Program *program, the program information.
- * @param int argc, the number of arguments.
- * @param char *argv[], the arguments passed string.
- */
-void parse_args(Program *program, int argc, char *argv[]) {
-	// Clear program->file value.
-	program->file = "";
-	// Make it compatible with C90.
-	int i = 1;
-
-    for(; i < argc; i++) {
-        if(!strcmp("-v", argv[i])) {
-        	interpreter_version();
-        } else if(!strcmp("-h", argv[i])) {
-        	interpreter_help();
-        } else {
-    		program->file = argv[i];
-    	}
-    }
-}
-
-/**
- * Interprets the file given at startup.
- */
+/* Interpreter */
 void interpret(Program *program) {
-	if(!program->file || program->file == "") {
-	    printf("Missing required arguments, interpreter terminating. \n");
-		interpreter_help();
-		exit(EXIT_FAILURE);
+	if(program->file == "") {
+	    error("Missing required arguments.");
 	}
+	program->cells = MAX_CELLS;
 
-	// Open file wrapper
 	FILE *input = fopen(program->file, "r");
 
-	if(!input) {
-		interpreter_error("Could not access input file.", "interpret");
-	}
+	int tape[program->cells];
+	int pointer = 0;
 
-	// Set the amount of cells to 30000
-	program->cells = 30000;
+	fseek(input, 0, SEEK_END);
+	int file_size = ftell(input);
+	fseek(input, 0, SEEK_SET);
 
-	// Contains all memory.
-	int data[program->cells];
-	// Points to the current Loop through all characters.index.
-	int dataPointer = 0;
-
-	// Get size of file.
-	fseek(input, 0, SEEK_END); // seek to end of file
-	int file_size = ftell(input); // get current file pointer
-	fseek(input, 0, SEEK_SET); // seek back to beginning of file
-
-	// Current char.
 	char c;
-	// Array that contains all characters.
 	char *chars[file_size];
-	// Index at the character array.
-	int charPointer = 0;
+	int char_pointer = 0;
 
-	// Get file contents.
 	while((c = fgetc(input)) != EOF) {
-		chars[charPointer] = (char) c;
-		charPointer++;
+		chars[char_pointer] = (char) c;
+		char_pointer++;
 	}
 
-	int i = 0;
-
-	// Loop through all characters.
-	for (charPointer = 0; charPointer < file_size; charPointer++) {
-		c = chars[charPointer];
+	while(char_pointer < file_size) {
+		c = chars[char_pointer];
 		switch(c) {
 		case '>':
-			if ((dataPointer + 1) > sizeof(data)) {
-				interpreter_error("Data pointer is too big.");
-			}
-			dataPointer++;
+			if ((pointer + 1) > sizeof(tape))
+				program_error("Pointer higher than max-size.");
+			pointer++;
 			break;
 		case '<':
-			if ((dataPointer - 1) < 0) {
-				interpreter_error("Data pointer is negative.");
-			}
-			dataPointer--;
+			if ((pointer - 1) < 0)
+				program_error("Pointer is negative.");
+			pointer--;
 			break;
 		case '+':
-			data[dataPointer]++;
+			tape[pointer]++;
 			break;
 		case '-':
-			data[dataPointer]--;
+			tape[pointer]--;
 			break;
 		case '.':
-			interpreter_output_char(data[dataPointer]);
+			output(tape[pointer]);
 			break;
 		case ',':
-			data[dataPointer] = (int) fgetc(stdin);
+			tape[pointer] = (int) fgetc(stdin);
 			break;
 		case '[': {	
-				i = 1;
+				int i = 1;
+
 				while (i > 0) {
-					char next = chars[++charPointer];
+					char next = chars[++char_pointer];
 					if (next == '[')
 						i++;
 					else if (next == ']')
@@ -173,41 +94,52 @@ void interpret(Program *program) {
 			}
 			break;
 		case ']': {
-				i = 1;
+				int i = 1;
 				while (i > 0) {
-					char previous = chars[--charPointer];
+					char previous = chars[--char_pointer];
 					if (previous == '[')
 						i--;
 					else if (previous == ']')
 						i++;
 				}
-				charPointer--;
-			}
-			break;
-		// Allow hashtags (#).
-		case '#': {
-				i = 1;
-				while (i > 0) {
-					char next = chars[++charPointer];
-
-					if (next == '\n')
-						i--;
-				}
+				char_pointer--;
 			}
 			break;
 		}
 	}
 }
 
-/**
- * Main execution method of the BrainFuck interpreter.
- */
-int main(int argc, char *argv[]) {
-    Program program;
-    // Parse arguments.
-    parse_args(&program, argc, argv);
-    // Interpret the program.
-    interpret(&program);
-    return 0;
+
+/* Command line interface */
+void cli_parse(Program *program, int argc, char *argv[]) {
+	program->file = "";
+	int i = 0;
+
+    for(i = 1; i < argc; i++) {
+        if(!strcmp("-v", argv[i])) {
+        	cli_version();
+        	exit(EXIT_SUCCESS);
+        } else if(!strcmp("-h", argv[i])) {
+        	cli_help();
+        	exit(EXIT_SUCCESS);
+        } else {
+    		program->file = argv[i];
+    	}
+    }
 }
+
+void cli_version() {
+    printf("Brainfuck interpreter, version %s.\n\n", VERSION);
+    printf("For more info, try \"./brainfuck -h\".\n");
+}
+
+void cli_help() {
+    printf("Brainfuck interpreter, version %s.\n\n", VERSION);
+
+    printf("Usage: ./brainfuck <input_file>.\n");
+    printf("\t\"-v\"    Prints out the version of the program.\n");
+    printf("\t\"-h\"    Prints out the help (what you are seeing).\n");
+}
+
+
 

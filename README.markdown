@@ -1,13 +1,10 @@
 Brainfuck interpreter
 ==================
 
-Lightweight, open-source brainfuck interpreter written in C.
+Lightweight, open-source Brainfuck interpreter written in C.
 
 Notice
 ----------------
-<<<<<<< HEAD
-Written on a machine running Ubuntu (Linux). Not tested on other platforms.
-=======
 Written on a machine running Ubuntu (Linux). Not tested on other platforms yet.
 
 Brainfuck
@@ -28,8 +25,6 @@ The eight language commands, each consisting of a single character:
 |     [     | if the byte at the data pointer is zero, then instead of moving the instruction pointer forward to the next command, jump it forward to the command after the matching ] command*.|
 |     ]     | if the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to the next command, jump it back to the command after the matching [ command*.|
 
-
->>>>>>> 75e88d64984093f8184b0b7e1cae2c849152c5dc
 
 Author
 -----------
