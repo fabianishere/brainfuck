@@ -1,72 +1,54 @@
-/* Author: Fabian M. */
+// Copyright (c) 2012, Fabian M.
+// Please see the AUTHORS file for other authors. All rights reserved.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* Constants */
-#define VERSION "1.1"
+#define VERSION "1.2"
 #define MAX_CELLS 65536
 
-/* Program */
-typedef struct
-{
-    char *file;
-    int cells;
-} Program;
-
-
-/* Output */
-void output(char c) {
-	printf("%c", c);
-	fflush(stdout);
-}
-void program_error(char* message) {
-	printf("Error at line %i, file \"%s\": %s\n",__LINE__, __FILE__, message);
-
-	exit(EXIT_FAILURE);
-}
-void error(char* message) {
-	printf("%s", message);
-	cli_help();
-	exit(EXIT_FAILURE);
-}
-
 /* Interpreter */
-void interpret(Program *program) {
-	if(program->file == "") {
-	    error("Missing required arguments.");
-	}
-	program->cells = MAX_CELLS;
-
-	FILE *input = fopen(program->file, "r");
-
-	int tape[program->cells];
-	int pointer = 0;
-
-	fseek(input, 0, SEEK_END);
-	int file_size = ftell(input);
-	fseek(input, 0, SEEK_SET);
-
+void interpret(char *filename) {
+	/* Variable declaration */
 	char c;
-	char *chars[file_size];
+
+	FILE *file;
+
+	int pointer = 0;
+	int size = 0;
 	int char_pointer = 0;
+	int loop = 0;
+	int tape[MAX_CELLS];
 
-	while((c = fgetc(input)) != EOF) {
-		chars[char_pointer] = (char) c;
-		char_pointer++;
-	}
+	/* Get the size of the file */
+	file = fopen(filename, "r");
+	if (file == NULL)
+		exit(EXIT_FAILURE);
 
-	while(char_pointer < file_size) {
-		c = chars[char_pointer];
-		switch(c) {
+	fseek(file, 0, SEEK_END);
+	size = ftell(file);
+	fseek(file, 0, SEEK_SET);
+	char chars[size];
+
+	/* Put every character in character array */
+	while ((c = fgetc(file)) != EOF)
+		chars[pointer++] = (char) c;
+
+
+	/* Close file */
+	fclose(file);
+
+	/* Set the pointer back to 0 */
+	pointer = 0;
+
+	/* Loop through all character in the character array */
+	while (char_pointer++ < sizeof(chars))
+		switch (chars[char_pointer]) {
 		case '>':
-			if ((pointer + 1) > sizeof(tape))
-				program_error("Pointer higher than max-size.");
 			pointer++;
 			break;
 		case '<':
-			if ((pointer - 1) < 0)
-				program_error("Pointer is negative.");
 			pointer--;
 			break;
 		case '+':
@@ -76,78 +58,46 @@ void interpret(Program *program) {
 			tape[pointer]--;
 			break;
 		case '.':
-			output(tape[pointer]);
+			putchar(tape[pointer]);
+			fflush(stdout);
 			break;
 		case ',':
-			tape[pointer] = (int) fgetc(stdin);
+			tape[pointer] = (int) getchar();
 			break;
-		case '[': {	
-				int i = 1;
-
-				while (i > 0) {
-					char next = chars[++char_pointer];
-					if (next == '[')
-						i++;
-					else if (next == ']')
-						i--;
+		case '[':
+			if (tape[pointer] == 0) {
+				loop = 1;
+				while (loop > 0) {
+					c = chars[++char_pointer];
+					if (c == '[')
+						loop++;
+					else if (c == ']')
+						loop--;
 				}
 			}
 			break;
-		case ']': {
-				int i = 1;
-				while (i > 0) {
-					char previous = chars[--char_pointer];
-					if (previous == '[')
-						i--;
-					else if (previous == ']')
-						i++;
-				}
-				char_pointer--;
+		case ']':
+			loop = 1;
+			while (loop > 0) {
+				c = chars[--char_pointer];
+				if (c == '[')
+					loop--;
+				else if (c == ']')
+					loop++;
 			}
+			char_pointer--;
+			break;
+		case '#':
+			while (chars[++char_pointer] != '\n');
 			break;
 		}
-	}
-}
-
-
-/* Command line interface */
-void cli_parse(Program *program, int argc, char *argv[]) {
-	program->file = "";
-	int i = 0;
-
-    for(i = 1; i < argc; i++) {
-        if(!strcmp("-v", argv[i])) {
-        	cli_version();
-        	exit(EXIT_SUCCESS);
-        } else if(!strcmp("-h", argv[i])) {
-        	cli_help();
-        	exit(EXIT_SUCCESS);
-        } else {
-    		program->file = argv[i];
-    	}
-    }
-}
-
-void cli_version() {
-    printf("Brainfuck interpreter, version %s.\n\n", VERSION);
-    printf("For more info, try \"./brainfuck -h\".\n");
-}
-
-void cli_help() {
-    printf("Brainfuck interpreter, version %s.\n\n", VERSION);
-
-    printf("Usage: ./brainfuck <input_file>.\n");
-    printf("\t\"-v\"    Prints out the version of the program.\n");
-    printf("\t\"-h\"    Prints out the help (what you are seeing).\n");
 }
 
 /* Main */
 int main(int argc, char *argv[]) {
-	Program program;
-	cli_args(&program, argc, argv);
-	interpret(&program);
-
+	if (argc < 2)
+		return EXIT_FAILURE;
+	interpret(argv[1]);
 	return EXIT_SUCCESS;
 }
-
 
