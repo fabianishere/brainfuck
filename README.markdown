@@ -10,3 +10,4 @@ See LICENSE file.
 
 ## Notice
 Written on a machine running Ubuntu (Linux). Not tested on other platforms yet.
+Tested on Mac OS X 10.6.8 x86_64.
