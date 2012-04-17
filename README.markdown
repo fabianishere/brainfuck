@@ -9,5 +9,6 @@ See LICENSE file.
     Fabian M. mail.fabianm@gmail.com http://www.github.com/FabianM
 
 ## Notice
-Written on a machine running Ubuntu (Linux). Not tested on other platforms yet.
+Written on a machine running Ubuntu (Linux).
+
 Tested on Mac OS X 10.6.8 x86_64.
