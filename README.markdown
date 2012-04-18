@@ -12,6 +12,6 @@ See LICENSE file.
     Fabian M. mail.fabianm@gmail.com http://www.github.com/FabianM
 
 ## Notice
-This Brainfuck interpreter is tested on:
+This Brainfuck interpreter is tested on:  
 * Ubuntu 11.10 x86_32
 * Mac OS X 10.6.8 x86_64
