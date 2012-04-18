@@ -13,5 +13,5 @@ See LICENSE file.
 
 ## Notice
 This Brainfuck interpreter is tested on:  
-* Ubuntu 11.10 x86_32
+* Ubuntu 11.10 x86_32  
 * Mac OS X 10.6.8 x86_64
