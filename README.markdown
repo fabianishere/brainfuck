@@ -9,7 +9,8 @@ Lightweight Brainfuck interpreter written in C.
 See LICENSE file.
 
 ## Authors
-    Fabian M. mail.fabianm@gmail.com http://www.github.com/FabianM
+    Fabian M. https://www.github.com/FabianM  mail.fabianm@gmail.com
+    aliclubb https://www.github.com/aliclubb
 
 ## Notice
 This Brainfuck interpreter is tested on:  
