@@ -1,6 +1,6 @@
 Brainfuck 
 ===========
-Lightweight Brainfuck interpreter written in C.
+A lightweight, embeddable Brainfuck interpreter written in C.
 
 ## Usage
     brainfuck [-if] <filename>
