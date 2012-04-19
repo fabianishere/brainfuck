@@ -19,7 +19,7 @@ void brainfuck_eval(char chars[]) {
 	int loop = 0;
 	int tape[MAX_CELLS];
 	/* Loop through all character in the character array */
-	while (char_pointer++ < strlen(chars)) {
+	while (char_pointer++ < strlen(chars)) 
 		switch (chars[char_pointer]) {
 		case '>':
 			pointer++;
@@ -66,7 +66,6 @@ void brainfuck_eval(char chars[]) {
 			while (chars[++char_pointer] != '\n');
 			break;
 		}
-	}
 }
 void brainfuck_file(char filename[]) {
 
