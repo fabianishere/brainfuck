@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 	}
 	else if(strcmp(argv[1], "-i") == 0)
 	{
-		printf("Entering interactive mode...");
+		printf("Entering interactive mode...\n");
 		#if defined __APPLE__ || defined __unix__ || defined unix || defined _unix
 			fflush(stdout);
 		#endif
