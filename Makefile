@@ -13,6 +13,11 @@ ifeq ($(OS), CYGWIN_NT-5.1)
 endif
 install:
 	cp src/brainfuck /usr/local/bin/brainfuck
+ifeq ($(OS), Linux)
+	cp src/brainfuck_linux.1 /usr/local/man/man1/brainfuck.1
+endif
+ifeq ($(OS), Darwin)
+	cp src/brainfuck_darwin.1 /usr/local/man/man1/brainfuck.1
 
 clean:
 	rm -f src/*.o
@@ -20,3 +25,4 @@ clean:
 
 uninstall:
 	rm -f /usr/local/bin/brainfuck
+	rm -f /usr/local/man/man1/brainfuck.1
