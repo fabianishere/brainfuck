@@ -22,7 +22,7 @@ void brainfuck_eval(char chars[]) {
 	int loop = 0;
 	int tape[MAX_CELLS];
 	/* Loop through all character in the character array */
-	while (char_pointer++ < strlen(chars)) 
+	while (char_pointer++ < strlen(chars)) {
 		switch (chars[char_pointer]) {
 		case '>':
 			pointer++;
@@ -65,63 +65,6 @@ void brainfuck_eval(char chars[]) {
 			}
 			char_pointer--;
 			break;
-		case '#':
-			while (chars[++char_pointer] != '\n');
-			break;
 		}
-}
-void brainfuck_file(char filename[]) {
-
-	FILE *file;
-	char c;
-	int pointer = 0;
-	int size = 0;
-
-	/* Get the size of the file */
-	file = fopen(filename, "r");
-	if (file == NULL) {
-		printf("Failed to open file.\n");
-		exit(EXIT_FAILURE);
 	}
-	fseek(file, 0, SEEK_END);
-	size = ftell(file);
-	fseek(file, 0, SEEK_SET);
-	char chars[size];
-	/* Put every character in character array */
-	while ((c = fgetc(file)) != EOF)
-		chars[pointer++] = (char) c;
-	/* Close file */
-	fclose(file);
-	/* Run the code */
-	brainfuck_eval(chars);
-}
-int main(int argc, char *argv[]) {
-	if (argc < 2)
-	{
-		#if defined _INTERPRETER_
-			printf("Usage: brainfuck [-if] <filename>\n");
-		#else
-			printf("Usage: brainfuck -f <filename>\n");
-		#endif
-		return EXIT_FAILURE;
-	}
-	#if defined _INTERPRETER_
-		else if(strcmp(argv[1], "-i") == 0)
-		{
-			brainfuck_interpreter();
-		}
-	#endif
-	else if(strcmp(argv[1], "-f") == 0)
-	{
-		brainfuck_file(argv[2]);
-	}
-	else
-	{
-		#if defined _INTERPRETER_
-			printf("Error: Invalid command line option!\nUsage: brainfuck [-if] <filename>\n\t-i  Interactive Mode\n\t-f  <filename>\n");
-		#else
-			printf("Error: Invalid command line option!\nUsage: brainfuck -f <filename>\n\t-f  <filename>\n");
-		#endif
-	}
-	return EXIT_SUCCESS;
 }

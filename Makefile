@@ -3,13 +3,13 @@ OS := $(shell uname)
 
 all:
 ifeq ($(OS), Darwin)
-	$(CC) -o src/brainfuck -D_INTERPRETER_ -O2 -Wall src/brainfuck.c src/brainfuck_interpreter.c
+	$(CC) -o bin/brainfuck src/*
 endif
 ifeq ($(OS), Linux)
-	$(CC) -o src/brainfuck -D_INTERPRETER_ -O2 -Wall src/brainfuck.c src/brainfuck_interpreter.c
+	$(CC) -o bin/brainfuck src/*
 endif
 ifeq ($(OS), CYGWIN_NT-5.1)
-	$(CC) -o src/brainfuck -D_INTERPRETER_ -O2 -Wall src/brainfuck.c src/brainfuck_interpreter.c
+	$(CC) -c src/* -o bin/brainfuck
 endif
 no_interactive:
 	ifeq ($(OS), Darwin)
@@ -22,16 +22,16 @@ no_interactive:
 		$(CC) -c src/brainfuck.c -o src/brainfuck
 	endif
 install:
-	cp src/brainfuck /usr/local/bin/brainfuck
+	cp bin/brainfuck /usr/local/bin/brainfuck
 ifeq ($(OS), Linux)
-	cp src/brainfuck_linux.1 /usr/local/man/man1/brainfuck.1
+	cp man/brainfuck_linux.1 /usr/local/man/man1/brainfuck.1
 endif
 ifeq ($(OS), Darwin)
-	cp src/brainfuck_darwin.1 /usr/local/man/man1/brainfuck.1
+	cp man/brainfuck_darwin.1 /usr/local/man/man1/brainfuck.1
 endif
 clean:
 	rm -f src/*.o
-	rm -f src/brainfuck
+	rm -f bin/brainfuck
 
 uninstall:
 	rm -f /usr/local/bin/brainfuck
