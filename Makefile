@@ -18,7 +18,7 @@ ifeq ($(OS), Linux)
 endif
 ifeq ($(OS), Darwin)
 	cp src/brainfuck_darwin.1 /usr/local/man/man1/brainfuck.1
-
+endif
 clean:
 	rm -f src/*.o
 	rm -f src/brainfuck
