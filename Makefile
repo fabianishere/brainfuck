@@ -3,14 +3,24 @@ OS := $(shell uname)
 
 all:
 ifeq ($(OS), Darwin)
-	$(CC) -o src/brainfuck src/brainfuck.c
+	$(CC) -o src/brainfuck -D_INTERPRETER_ -O2 -Wall src/brainfuck.c src/brainfuck_interpreter.c
 endif
 ifeq ($(OS), Linux)
-	$(CC) -o src/brainfuck src/brainfuck.c
+	$(CC) -o src/brainfuck -D_INTERPRETER_ -O2 -Wall src/brainfuck.c src/brainfuck_interpreter.c
 endif
 ifeq ($(OS), CYGWIN_NT-5.1)
-	$(CC) -c src/brainfuck.c -o src/brainfuck
+	$(CC) -o src/brainfuck -D_INTERPRETER_ -O2 -Wall src/brainfuck.c src/brainfuck_interpreter.c
 endif
+no_interactive:
+	ifeq ($(OS), Darwin)
+		$(CC) -o src/brainfuck src/brainfuck.c
+	endif
+	ifeq ($(OS), Linux)
+		$(CC) -o src/brainfuck src/brainfuck.c
+	endif
+	ifeq ($(OS), CYGWIN_NT-5.1)
+		$(CC) -c src/brainfuck.c -o src/brainfuck
+	endif
 install:
 	cp src/brainfuck /usr/local/bin/brainfuck
 ifeq ($(OS), Linux)

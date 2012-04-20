@@ -9,6 +9,9 @@
 #endif
 #include <stdlib.h>
 #include <string.h>
+#ifdef _INTERPRETER_
+#include "brainfuck.h"
+#endif
 
 #define MAX_CELLS 65536
 
@@ -95,48 +98,30 @@ void brainfuck_file(char filename[]) {
 int main(int argc, char *argv[]) {
 	if (argc < 2)
 	{
-		printf("Usage: brainfuck [-if] <filename>\n");
+		#if defined _INTERPRETER_
+			printf("Usage: brainfuck [-if] <filename>\n");
+		#else
+			printf("Usage: brainfuck -f <filename>\n");
+		#endif
 		return EXIT_FAILURE;
 	}
-	else if(strcmp(argv[1], "-i") == 0)
-	{
-		printf("Entering interactive mode...\n");
-		#if defined __APPLE__ || defined __unix__ || defined unix || defined _unix
-			fflush(stdout);
-		#endif
-		#if !defined __WIN32__ || !defined _WIN32_ || !defined _WIN32
-			sleep(1);
-		#endif
-		#if !defined __WIN32__ || !defined _WIN32_ || !defined _WIN32
-			sleep(1);
-		#endif
-		printf("Welcome to the Brainfuck Interpreter!");
-		#if defined __APPLE__ || defined __unix__ || defined unix || defined _unix
-		fflush(stdout);
-		#endif
-		for(;;)
+	#if defined _INTERPRETER_
+		else if(strcmp(argv[1], "-i") == 0)
 		{
-			printf("\nbrainfuck> ");
-			char c;
-			int pointer = 0;
-			/* Put every character in character array */
-			int size = 1048576;
-			char chars[size];
-			c = ' ';
-			chars[pointer++] = (char) c;
-			while ((c = getchar()) != '\n')
-				chars[pointer++] = (char) c;
-			/* Run the code */
-			brainfuck_eval(chars);
+			brainfuck_interpreter();
 		}
-	}
+	#endif
 	else if(strcmp(argv[1], "-f") == 0)
 	{
 		brainfuck_file(argv[2]);
 	}
 	else
 	{
-		printf("Error: Invalid command line option!\nUsage: brainfuck [-if] <filename>\n\t-i  Interactive Mode\n\t-f  <filename>\n");
+		#if defined _INTERPRETER_
+			printf("Error: Invalid command line option!\nUsage: brainfuck [-if] <filename>\n\t-i  Interactive Mode\n\t-f  <filename>\n");
+		#else
+			printf("Error: Invalid command line option!\nUsage: brainfuck -f <filename>\n\t-f  <filename>\n");
+		#endif
 	}
 	return EXIT_SUCCESS;
 }
