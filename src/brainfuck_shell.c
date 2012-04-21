@@ -69,7 +69,14 @@ int main(int argc, char *argv[]) {
 			brainfuck_eval(chars);
 		}
 	} else if(strcmp(argv[1], "-f") == 0) {
-		brainfuck_file(argv[2]);
+		if(argc < 3)
+		{
+			printf("Error: No file specified!\n");
+		}
+		else
+		{
+			brainfuck_file(argv[2]);
+		}
 	} else {
 		printf("Error: Invalid command line option!\nUsage: brainfuck [-if] <filename>\n\t-i  Interactive Mode\n\t-f  <filename>\n");
 	}
