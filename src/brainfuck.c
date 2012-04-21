@@ -1,15 +1,8 @@
 #include <stdio.h>
-#include <stdarg.h>
-#if defined __WIN32__ || defined _WIN32_ || defined _WIN32
-#include <time.h>
-#include <windows.h>
-#endif
-#if defined __APPLE__ || defined __unix__ || defined unix || defined _unix
-#include <unistd.h>
-#endif
 #include <stdlib.h>
 #include <string.h>
-#ifdef _INTERPRETER_
+
+#ifndef BRAINFUCK_H
 #include "brainfuck.h"
 #endif
 
