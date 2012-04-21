@@ -2,6 +2,7 @@ CC = gcc
 OS := $(shell uname)
 
 all:
+	mkdir bin
 ifeq ($(OS), Darwin)
 	$(CC) -o bin/brainfuck src/*
 endif
@@ -31,7 +32,7 @@ ifeq ($(OS), Darwin)
 endif
 clean:
 	rm -f src/*.o
-	rm -f bin/brainfuck
+	rm -r bin/
 
 uninstall:
 	rm -f /usr/local/bin/brainfuck
