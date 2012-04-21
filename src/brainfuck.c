@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #ifndef BRAINFUCK_H
 #include "brainfuck.h"
 #endif
-
 #define MAX_CELLS 65536
 
 void brainfuck_eval(char chars[]) {
