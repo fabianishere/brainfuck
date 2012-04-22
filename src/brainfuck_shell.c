@@ -37,7 +37,7 @@ void brainfuck_file(char filename[]) {
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
-		printf("Usage: brainfuck [-if] <filename>\n");
+		printf("Usage: brainfuck [-fi] <filename>\n");
 		return EXIT_FAILURE;
 	} else if(strcmp(argv[1], "-i") == 0) {
 		printf("Entering interactive mode...\n");
@@ -50,12 +50,12 @@ int main(int argc, char *argv[]) {
 		#if !defined __WIN32__ || !defined _WIN32_ || !defined _WIN32
 			sleep(1);
 		#endif
-		printf("Welcome to the Brainfuck Interpreter!");
+		printf("Welcome to the Brainfuck Interpreter!\n");
 		#if defined __APPLE__ || defined __unix__ || defined unix || defined _unix
 		fflush(stdout);
 		#endif
 		for(;;) {
-			printf("\nbrainfuck> ");
+			printf("brainfuck> ");
 			char c;
 			int pointer = 0;
 			/* Put every character in character array */
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
 			brainfuck_file(argv[2]);
 		}
 	} else {
-		printf("Error: Invalid command line option!\nUsage: brainfuck [-if] <filename>\n\t-i  Interactive Mode\n\t-f  <filename>\n");
+		printf("Error: Invalid command line option!\nUsage: brainfuck [-fi] <filename>\n\t-f  <filename>\n\t-i  Interactive Mode\n");
 	}
 	return EXIT_SUCCESS;
 }
