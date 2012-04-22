@@ -15,10 +15,10 @@ endif
 install:
 	cp bin/brainfuck /usr/local/bin/brainfuck
 ifeq ($(OS), Linux)
-	cp man/brainfuck_linux.1 /usr/local/man/man1/brainfuck.1
+	cp man/brainfuck_linux.1 /usr/local/share/man/man1/brainfuck.1
 endif
 ifeq ($(OS), Darwin)
-	cp man/brainfuck_darwin.1 /usr/local/man/man1/brainfuck.1
+	cp man/brainfuck_darwin.1 /usr/local/share/man/man1/brainfuck.1
 endif
 clean:
 	rm -f src/*.o
@@ -26,4 +26,4 @@ clean:
 
 uninstall:
 	rm -f /usr/local/bin/brainfuck
-	rm -f /usr/local/man/man1/brainfuck.1
+	rm -f /usr/local/share/man/man1/brainfuck.1
