@@ -1,18 +1,15 @@
 #include "brainfuck.h"
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 
 #if defined __WIN32__ || defined _WIN32_ || defined _WIN32
 #include <time.h>
 #include <windows.h>
-#endif
-
-#if defined __APPLE__ || defined __unix__ || defined unix || defined _unix || defined __unix
+#elif defined __APPLE__ || defined __unix__ || defined unix || defined _unix || defined __unix
 #include <unistd.h>
 #endif
-
-#include <stdlib.h>
-#include <string.h>
 
 void brainfuck_file(char filename[]) {
 	FILE *file;

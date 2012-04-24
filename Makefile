@@ -2,7 +2,7 @@ CC = gcc
 OS := $(shell uname)
 
 all:
-	mkdir bin
+	mkdir -p bin
 ifeq ($(OS), Darwin)
 	$(CC) -o bin/brainfuck src/*
 endif
