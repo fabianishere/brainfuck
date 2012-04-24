@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #ifndef BRAINFUCK_H
 #include "brainfuck.h"
