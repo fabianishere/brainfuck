@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 			char c;
 			int pointer = 0;
 			/* Put every character in character array */
-			int size = 1048576;
+			int size = 36000;
 			char chars[size];
 			c = ' ';
 			chars[pointer++] = (char) c;
