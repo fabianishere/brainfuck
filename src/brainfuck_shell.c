@@ -26,6 +26,7 @@ void brainfuck_file(char filename[]) {
 	size = ftell(file);
 	fseek(file, 0, SEEK_SET);
 	char chars[size];
+	chars[pointer++] = ' ';
 	while ((c = fgetc(file)) != EOF)
 		chars[pointer++] = (char) c;
 	fclose(file);
@@ -58,8 +59,7 @@ int main(int argc, char *argv[]) {
 			/* Put every character in character array */
 			int size = 36000;
 			char chars[size];
-			c = ' ';
-			chars[pointer++] = (char) c;
+			chars[pointer++] = ' ';
 			while ((c = getchar()) != '\n')
 				chars[pointer++] = (char) c;
 			/* Run the code */
