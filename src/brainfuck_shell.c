@@ -5,7 +5,6 @@
 #include <string.h>
 
 #if defined __WIN32__ || defined _WIN32_ || defined _WIN32
-#include <time.h>
 #include <windows.h>
 #elif defined __APPLE__ || defined __unix__ || defined unix || defined _unix || defined __unix
 #include <unistd.h>
@@ -39,19 +38,7 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	} else if(strcmp(argv[1], "-i") == 0) {
 		printf("Entering interactive mode...\n");
-		#if defined __APPLE__ || defined __unix__ || defined unix || defined _unix || defined __unix
-			fflush(stdout);
-		#endif
-		#if !defined __WIN32__ || !defined _WIN32_ || !defined _WIN32
-			sleep(1);
-		#endif
-		#if !defined __WIN32__ || !defined _WIN32_ || !defined _WIN32
-			sleep(1);
-		#endif
 		printf("Welcome to the Brainfuck Interpreter!\n");
-		#if defined __APPLE__ || defined __unix__ || defined unix || defined _unix || defined __unix
-		fflush(stdout);
-		#endif
 		for(;;) {
 			printf("brainfuck> ");
 			char c;
