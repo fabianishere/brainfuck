@@ -1,15 +1,12 @@
 #include "brainfuck.h"
 #include <stdio.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 
-#if defined __WIN32__ || defined _WIN32_ || defined _WIN32
-#include <windows.h>
-#elif defined __APPLE__ || defined __unix__ || defined unix || defined _unix || defined __unix
+#ifdef __APPLE__ || defined __unix__ || defined unix || defined _unix || defined __unix
 #include <unistd.h>
 #endif
-
+/* Read the file and pass it to the brainfuck_eval() function */
 void brainfuck_file(char filename[]) {
 	FILE *file;
 	char c;
@@ -25,10 +22,13 @@ void brainfuck_file(char filename[]) {
 	size = ftell(file);
 	fseek(file, 0, SEEK_SET);
 	char chars[size];
+	/* Strange fix required in order to run most brainfuck programs... */
 	chars[pointer++] = ' ';
+	/* Place each character from the file into the array */
 	while ((c = fgetc(file)) != EOF)
 		chars[pointer++] = (char) c;
 	fclose(file);
+	/* Run the code */
 	brainfuck_eval(chars);
 }
 
@@ -38,16 +38,15 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	} else if(strcmp(argv[1], "-i") == 0) {
 		printf("Entering interactive mode...\n");
-		printf("Welcome to the Brainfuck Interpreter!\n");
+		printf("Welcome to the Brainfuck Interpreter v0.2!\n");
+		char c;
+		int pointer = 0;
 		for(;;) {
 			printf("brainfuck> ");
-			char c;
-			int pointer = 0;
-			/* Put every character in character array */
 			int size = 36000;
 			char chars[size];
 			chars[pointer++] = ' ';
-			while ((c = getchar()) != '\n')
+			while ((c = getchar()) != 10)
 				chars[pointer++] = (char) c;
 			/* Run the code */
 			brainfuck_eval(chars);

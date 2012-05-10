@@ -4,13 +4,13 @@ OS := $(shell uname)
 all:
 	mkdir -p bin
 ifeq ($(OS), Darwin)
-	$(CC) -o bin/brainfuck src/*
+	$(CC) -O3 -Wall -o bin/brainfuck src/*
 endif
 ifeq ($(OS), Linux)
-	$(CC) -o bin/brainfuck src/*
+	$(CC) -O3 -Wall -o bin/brainfuck src/*
 endif
 ifeq ($(OS), CYGWIN_NT-5.1)
-	$(CC) -c src/* -o bin/brainfuck
+	$(CC) -O3 -Wall -c src/* -o bin/brainfuck
 endif
 install:
 	cp bin/brainfuck /usr/local/bin/brainfuck

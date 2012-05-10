@@ -1,3 +1,4 @@
+/* This is the brainfuck 'backend'. It does all the interpretation :) */
 #include <stdio.h>
 #include <string.h>
 #ifndef BRAINFUCK_H
@@ -57,4 +58,5 @@ void brainfuck_eval(char chars[]) {
 			break;
 		}
 	}
+	putchar(10);
 }
