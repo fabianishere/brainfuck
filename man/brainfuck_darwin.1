@@ -14,7 +14,7 @@
 .Nd Brainfuck interpreter
 .Sh SYNOPSIS             \" Section Header - required - don't modify
 .Nm
-.Op Fl if                \" [-if]
+.Op Fl fi                \" [-fi]
 .Op Fl f Ar filename         \" [-f path] 
 .Sh DESCRIPTION          \" Section Header - required - don't modify
 This is a brainfuck interpreter written in C.
@@ -42,18 +42,18 @@ If the byte at the data pointer is nonzero, then instead of moving the instructi
 .El
 .Sh FLAGS
 .Bl -tag -width -indent  \" Begins a tagged list 
-.It -i               \" Each item preceded by .It macro
-Interactive mode
-.It -f
+.It -f               \" Each item preceded by .It macro
 File mode
+.It -i
+Interactive mode
 .El                      \" Ends the list
 .Pp
 .Sh OPTIONS
 .Bl -tag -width -indent  \" Differs from above in tag removed 
-.It Fl i                 \"-a flag as a list item
-Enters the brainfuck interactive console. ^C to exit.
-.It Fl f
+.It Fl f                 \"-a flag as a list item
 Specify a file containing brainfuck code to execute.
+.It Fl i
+Enters the brainfuck interactive console. Press ^C to exit.
 .El                      \" Ends the list
 .Pp
 .\" .Sh ENVIRONMENT      \" May not be needed
