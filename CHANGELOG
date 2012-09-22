@@ -1,0 +1,10 @@
+Version 0.2
+===========
+Supports (in theory) many brainfuck programs already out there (But not LostKingdom.bf)
+Added interactive console mode (Thanks to aliclubb)
+Added Makefile and UNIX man pages
+Optimised code slightly
+
+Version 0.1
+===========
+First release
