@@ -1,6 +1,6 @@
 brainfuck
 ===========
-A lightweight, embeddable Brainfuck interpreter written in C.
+A lightweight Brainfuck interpreter written in C.
 
 ## Usage
     brainfuck [-fi] <filename>
@@ -24,3 +24,4 @@ This Brainfuck interpreter is tested on:
 * Mac OS X 10.3.9 PowerPC  
 * Windows XP (using tcc)  
 * Windows 7 (using tcc)
+* Windows 8 (using Cygwin)
