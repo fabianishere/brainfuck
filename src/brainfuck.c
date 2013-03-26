@@ -58,5 +58,4 @@ void brainfuck_eval(char chars[]) {
 			break;
 		}
 	}
-	putchar(10);
 }

@@ -1,4 +1,4 @@
-Brainfuck 
+brainfuck
 ===========
 A lightweight, embeddable Brainfuck interpreter written in C.
 

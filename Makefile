@@ -1,29 +1,23 @@
+# Brainfuck Makefile
+SRC = $(shell pwd)/src
+BIN = $(shell pwd)/bin
 CC = gcc
-OS := $(shell uname)
+CCFLAGS = -Wall
+
 
 all:
+	@echo "Building"
 	mkdir -p bin
-ifeq ($(OS), Darwin)
-	$(CC) -O3 -Wall -o bin/brainfuck src/*
-endif
-ifeq ($(OS), Linux)
-	$(CC) -O3 -Wall -o bin/brainfuck src/*
-endif
-ifeq ($(OS), CYGWIN_NT-5.1)
-	$(CC) -O3 -Wall -c src/* -o bin/brainfuck
-endif
-install:
-	cp bin/brainfuck /usr/local/bin/brainfuck
-ifeq ($(OS), Linux)
-	cp man/brainfuck_linux.1 /usr/local/share/man/man1/brainfuck.1
-endif
-ifeq ($(OS), Darwin)
-	cp man/brainfuck_darwin.1 /usr/local/share/man/man1/brainfuck.1
-endif
+	$(CC) $(CCFLAGS) -o $(BIN)/brainfuck $(SRC)/*
 clean:
+	@echo "Cleaning"
 	rm -f src/*.o
 	rm -r bin/
-
+install:
+	@echo "Installing" 
+	cp $(BIN)/brainfuck /usr/local/bin/brainfuck
+	cp man/brainfuck.1 /usr/local/share/man/man1/brainfuck.1
 uninstall:
+	@echo "Uninstalling"
 	rm -f /usr/local/bin/brainfuck
 	rm -f /usr/local/share/man/man1/brainfuck.1
