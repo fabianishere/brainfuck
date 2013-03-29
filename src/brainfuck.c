@@ -1,4 +1,3 @@
-/* This is the brainfuck 'backend'. It does all the interpretation :) */
 #include <stdio.h>
 #include <string.h>
 #ifndef BRAINFUCK_H
@@ -13,7 +12,7 @@ void brainfuck_eval(char chars[]) {
 	int loop = 0;
 	int tape[MAX_CELLS];
 	/* Loop through all character in the character array */
-	while (char_pointer++ < strlen(chars)) {
+	while (char_pointer < strlen(chars)) {
 		switch (chars[char_pointer]) {
 		case '>':
 			pointer++;
@@ -57,5 +56,6 @@ void brainfuck_eval(char chars[]) {
 			char_pointer--;
 			break;
 		}
+		char_pointer++;
 	}
 }
