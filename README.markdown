@@ -3,7 +3,7 @@ brainfuck
 A lightweight Brainfuck interpreter written in C.
 
 ## Usage
-    brainfuck [-fi] <filename>
+    brainfuck [-fc] <filename>
 
 ## License
 See LICENSE file.
@@ -23,5 +23,5 @@ This Brainfuck interpreter is tested on:
 * Mac OS X 10.4.11 PowerPC  
 * Mac OS X 10.3.9 PowerPC  
 * Windows XP (using tcc)  
-* Windows 7 (using tcc)
+* Windows 7 (using tcc)  
 * Windows 8 (using Cygwin)
