@@ -15,7 +15,7 @@ void brainfuck_file(char filename[]) {
 	/* Get the size of the file */
 	file = fopen(filename, "r");
 	if (file == NULL) {
-		printf("Failed to open file.\n");
+		printf("failed to open file.\n");
 		exit(EXIT_FAILURE);
 	}
 	fseek(file, 0, SEEK_END);
@@ -32,12 +32,12 @@ void brainfuck_file(char filename[]) {
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
-		printf("Usage: brainfuck [-fc] <filename>\n\t-f  <filename>\n\t-c  Run code directly\n");
+		printf("usage: brainfuck [-fc] <filename>\n\t-f  <filename>\n\t-c  run code directly\n");
 		return EXIT_FAILURE;
 	} else if(strcmp(argv[1], "-f") == 0) {
 		if(argc < 3)
 		{
-			printf("Error: No file specified!\n");
+			printf("error: no file specified!\n");
 		}
 		else
 		{
@@ -46,14 +46,14 @@ int main(int argc, char *argv[]) {
 	} else if(strcmp(argv[1], "-c") == 0) {
 		if(argc < 3)
 		{
-			printf("Error: No code specified!\n");
+			printf("error: no code specified!\n");
 		}
 		else
 		{
 			brainfuck_eval(argv[2]);
 		}
 	} else {
-		printf("Error: Invalid command line option!\nUsage: brainfuck [-fc] <filename>\n\t-f  <filename>\n\t-c  Run code directly\n");
+		printf("error: invalid command line option!\nusage: brainfuck [-fc] <filename>\n\t-f  <filename>\n\t-c  run code directly\n");
 	}
 	return EXIT_SUCCESS;
 }
