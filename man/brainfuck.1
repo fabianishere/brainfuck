@@ -14,7 +14,7 @@
 .Nd Brainfuck interpreter
 .Sh SYNOPSIS             \" Section Header - required - don't modify
 .Nm
-.Op Fl fc                \" [-fc]
+.Op Fl fcp                \" [-fcp]
 .Op Fl f Ar filename         \" [-f path] 
 .Sh DESCRIPTION          \" Section Header - required - don't modify
 This is a brainfuck interpreter written in C.
@@ -45,7 +45,9 @@ If the byte at the data pointer is nonzero, then instead of moving the instructi
 .It -f               \" Each item preceded by .It macro
 File mode
 .It -c
-Argument mode
+Direct input mode
+.It -p
+Pipe mode
 .El                      \" Ends the list
 .Pp
 .Sh OPTIONS
@@ -54,6 +56,8 @@ Argument mode
 Specify a file containing brainfuck code to execute.
 .It Fl c
 Run code directly.
+.It Fl p
+Pipe code in.
 .El                      \" Ends the list
 .Pp
 .\" .Sh ENVIRONMENT      \" May not be needed
