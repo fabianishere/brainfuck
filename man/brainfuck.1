@@ -5,7 +5,7 @@
 .\"/usr/share/misc/mdoc.template
 .Dd 20/04/2012               \" DATE 
 .Dt brainfuck 1      \" Program name and manual section number 
-.Os Linux
+.Os UNIX
 .Sh NAME                 \" Section Header - required - don't modify 
 .Nm brainfuck
 .\" The following lines are read in generating the apropos(man -k) database. Use only key
@@ -14,7 +14,7 @@
 .Nd Brainfuck interpreter
 .Sh SYNOPSIS             \" Section Header - required - don't modify
 .Nm
-.Op Fl fi                \" [-fi]
+.Op Fl fc                \" [-fc]
 .Op Fl f Ar filename         \" [-f path] 
 .Sh DESCRIPTION          \" Section Header - required - don't modify
 This is a brainfuck interpreter written in C.
@@ -44,8 +44,8 @@ If the byte at the data pointer is nonzero, then instead of moving the instructi
 .Bl -tag -width -indent  \" Begins a tagged list 
 .It -f               \" Each item preceded by .It macro
 File mode
-.It -i
-Interactive mode
+.It -c
+Argument mode
 .El                      \" Ends the list
 .Pp
 .Sh OPTIONS
