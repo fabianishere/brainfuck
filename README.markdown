@@ -12,19 +12,19 @@ See LICENSE file.
     Fabian M. https://www.github.com/FabianM  mail.fabianm@gmail.com
     aliclubb https://www.github.com/aliclubb
 
-## Notice
-This Brainfuck interpreter is tested on:  
+## Building from source
+`gcc` and `make` are required to build this brainfuck interpreter. Build on Windows using MinGW.  
 
-* Ubuntu 11.10  
-* Ubuntu 12.04  
-* Kubuntu 11.10  
-* Xubuntu 11.10  
-* Mac OS X 10.3+  
-* Mac OS X 10.6.8 x86_64  
-* Mac OS X 10.5.8 PowerPC  
-* Mac OS X 10.4.11 PowerPC  
-* Mac OS X 10.3.9 PowerPC  
-* Windows XP (using tcc)  
-* Windows 7 (using tcc)  
-* Windows 8 (using Cygwin)  
-* iOS 4.2.1 (using saurik's iphone-gcc)  
+Get the source code: 
+
+    git clone https://github.com/FabianM/brainfuck.git
+    
+Go into the new directory:
+
+    cd brainfuck
+    
+Build the brainfuck interpreter:
+
+    make
+    
+
