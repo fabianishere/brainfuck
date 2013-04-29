@@ -5,7 +5,7 @@
 
 #include "brainfuck.h"
 
-#define USAGEMSG "usage: brainfuck [-fcp] <filename>\n\t-f  <filename>\n\t-c  run code directly\n"
+#define USAGEMSG "usage: brainfuck [-fc] <filename>\n\t-f  <filename>\n\t-c  run code directly\n"
 /* Read the file and pass it to the brainfuck_eval() function */
 void brainfuck_file(char filename[]) {
 	FILE *file;
