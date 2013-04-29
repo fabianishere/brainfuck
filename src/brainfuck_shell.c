@@ -5,7 +5,7 @@
 
 #include "brainfuck.h"
 
-#define USAGEMSG "usage: brainfuck [-fcp] <filename>\n\t-f  <filename>\n\t-c  run code directly\n"
+#define USAGEMSG "usage: brainfuck [-fc] <filename>\n\t-f  <filename>\n\t-c  run code directly\n"
 /* Read the file and pass it to the brainfuck_eval() function */
 void brainfuck_file(char filename[]) {
 	FILE *file;
@@ -15,7 +15,7 @@ void brainfuck_file(char filename[]) {
 	/* Get the size of the file */
 	file = fopen(filename, "r");
 	if (file == NULL) {
-		printf("failed to open file.\n");
+		printf("error: failed to open file!\n");
 		exit(EXIT_FAILURE);
 	}
 	fseek(file, 0, SEEK_END);
@@ -36,42 +36,20 @@ int main(int argc, char *argv[]) {
 	if (argc < 2) {
 		printf(USAGEMSG);
 		return EXIT_FAILURE;
-	} else if(strcmp(argv[1], "-f") == 0) {
-		if((argc < 3) && (isatty(fileno(stdin))) == 1)
-		{
-			printf("error: no file specified!\n");
-		}
-		else
-		{
-			if(isatty(fileno(stdin)))
-			{
-				brainfuck_file(argv[2]);
-			}
-			else
-			{
-				while(-1 != (pipe[i++] = getchar()));
-				brainfuck_eval(pipe);
-			}
-		}
-	} else if(strcmp(argv[1], "-c") == 0) {
-		if((argc < 3) && (isatty(fileno(stdin))) == 1)
-		{
-			printf("error: no code specified!\n");
-		}
-		else
-		{
-			if(isatty(fileno(stdin)))
-			{
-				brainfuck_eval(argv[2]);
-			}
-			else
-			{
-				while(-1 != (pipe[i++] = getchar()));
-				brainfuck_eval(pipe);
-			}
-		}
-	} else {
-		printf("error: invalid command line option!\n%s", USAGEMSG);
+	}
+	else if((argc < 3) && (isatty(fileno(stdin))) == 1) {
+		printf("error: invalid usage!\n%s", USAGEMSG);
+		return EXIT_FAILURE;
+	}
+	else if(isatty(fileno(stdin))) {
+		if(strcmp(argv[1], "-f") == 0)
+			brainfuck_file(argv[2]);
+		else if (strcmp(argv[1], "-c") == 0)
+			brainfuck_eval(argv[2]);
+	}
+	else {
+		while(-1 != (pipe[i++] = getchar()));
+		brainfuck_eval(pipe);
 	}
 	return EXIT_SUCCESS;
 }
