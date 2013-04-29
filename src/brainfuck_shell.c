@@ -6,7 +6,7 @@
 #ifdef __APPLE__ || defined __unix__ || defined unix || defined _unix || defined __unix
 #include <unistd.h>
 #endif
-#define USAGEMSG "usage: brainfuck [-fcp] <filename>\n\t-f  <filename>\n\t-c  run code directly\n\t-p  pipe code in\n"
+#define USAGEMSG "usage: brainfuck [-fcp] <filename>\n\t-f  <filename>\n\t-c  run code directly\n"
 /* Read the file and pass it to the brainfuck_eval() function */
 void brainfuck_file(char filename[]) {
 	FILE *file;
@@ -38,26 +38,39 @@ int main(int argc, char *argv[]) {
 		printf(USAGEMSG);
 		return EXIT_FAILURE;
 	} else if(strcmp(argv[1], "-f") == 0) {
-		if(argc < 3)
+		if((argc < 3) && (isatty(fileno(stdin))) == 1)
 		{
 			printf("error: no file specified!\n");
 		}
 		else
 		{
-			brainfuck_file(argv[2]);
+			if(isatty(fileno(stdin)))
+			{
+				brainfuck_file(argv[2]);
+			}
+			else
+			{
+				while(-1 != (pipe[i++] = getchar()));
+				brainfuck_eval(pipe);
+			}
 		}
 	} else if(strcmp(argv[1], "-c") == 0) {
-		if(argc < 3)
+		if((argc < 3) && (isatty(fileno(stdin))) == 1)
 		{
 			printf("error: no code specified!\n");
 		}
 		else
 		{
-			brainfuck_eval(argv[2]);
+			if(isatty(fileno(stdin)))
+			{
+				brainfuck_eval(argv[2]);
+			}
+			else
+			{
+				while(-1 != (pipe[i++] = getchar()));
+				brainfuck_eval(pipe);
+			}
 		}
-	} else if(strcmp(argv[1], "-p") == 0) {
-		while(-1 != (pipe[i++] = getchar()));
-		brainfuck_eval(pipe);
 	} else {
 		printf("error: invalid command line option!\n%s", USAGEMSG);
 	}
