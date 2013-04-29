@@ -22,7 +22,7 @@
 #include "brainfuck.h"
 
 void print_usage() {
-	printf("usage: brainfuck [-feihds] <filename>\n\t-f  run the given file(s)\n");
+	printf("usage: brainfuck [-feihd] <filename>\n\t-f  run the given file(s)\n");
 	printf("\t-e  run code directly\n\t-i  open the interactive console.\n");
 	printf("\t-h  show a help message.\n\t-d  enable debugging.\n");
 }
@@ -47,12 +47,6 @@ static int file_flag;
 static int interactive_flag;
 
 int main(int argc, char *argv[]) {
-	if (!isatty(fileno(stdin))) {
-		char line[65536];
-		fgets(line, sizeof(line), stdin);
-		fgets(line, sizeof(line), stdin);
-		printf("%s", line);
-	}
 	int c;
 	char *eval_code = 0;
 	while (1) {
