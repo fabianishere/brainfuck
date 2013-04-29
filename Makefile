@@ -1,8 +1,8 @@
 # Brainfuck Makefile
-SRC ?= $(shell pwd)/src
-BIN ?= $(shell pwd)/bin
-CC ?= gcc
-CFLAGS ?= -Wall 
+SRC = $(shell pwd)/src
+BIN = $(shell pwd)/bin
+CC = gcc
+CFLAGS = -Wall
 
 
 all:
