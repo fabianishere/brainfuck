@@ -1,3 +1,9 @@
+Version 0.2.0
+=============
+The source code has been rewritten.
+Improve command line interface.
+Added debugging option. (needs improvement)
+
 Version 0.1.2
 =============
 Added pipe support - now you can pipe output from other programs into the interpreter!
@@ -9,3 +15,4 @@ Tweaked output messages
 Version 0.1.0
 =============
 First stable release
+

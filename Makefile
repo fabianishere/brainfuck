@@ -1,14 +1,14 @@
 # Brainfuck Makefile
-SRC = $(shell pwd)/src
-BIN = $(shell pwd)/bin
-CC = gcc
-CCFLAGS = -Wall
+SRC ?= $(shell pwd)/src
+BIN ?= $(shell pwd)/bin
+CC ?= gcc
+CFLAGS ?= -Wall 
 
 
 all:
 	@echo "Building"
 	mkdir -p bin
-	$(CC) $(CCFLAGS) -o $(BIN)/brainfuck $(SRC)/*
+	$(CC) $(CFLAGS) -o $(BIN)/brainfuck $(SRC)/*
 clean:
 	@echo "Cleaning"
 	rm -f src/*.o
