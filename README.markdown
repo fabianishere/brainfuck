@@ -3,7 +3,7 @@ brainfuck
 A lightweight Brainfuck interpreter written in C.
 
 ## Usage
-    brainfuck [-fcp] <filename>
+    brainfuck [-fc] <filename>
 
 ## License
 See LICENSE file.
