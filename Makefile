@@ -2,7 +2,7 @@
 SRC = $(shell pwd)/src
 BIN = $(shell pwd)/bin
 CC = gcc
-CCFLAGS = -Wall
+CCFLAGS = -Wall 
 
 
 all:

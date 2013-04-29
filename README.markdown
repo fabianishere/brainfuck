@@ -1,9 +1,25 @@
 brainfuck
 ===========
-A lightweight Brainfuck interpreter written in C.
+Brainfuck interpreter written in C.
 
 ## Usage
-    brainfuck [-fc] <filename>
+    brainfuck [-fcih] <filename>
+	-f  run the given file
+	-e  run code directly
+	-i  open the interactive console.
+	-h  show a help message.
+	
+or from C:
+
+    #include <brainfuck.h>
+    
+    main() {
+    	BrainfuckState *state = brainfuck_new_state(SIZE, DEBUG); // 0 is debug disabled
+    	brainfuck_put_token_string(state, "+++.");
+    	brainfuck_run(state);
+    	brainfuck_end_state(state);
+    }
+
 
 ## License
 See LICENSE file.
@@ -11,20 +27,9 @@ See LICENSE file.
 ## Authors
     Fabian M. https://www.github.com/FabianM  mail.fabianm@gmail.com
     aliclubb https://www.github.com/aliclubb
+    
+## Tested
+Currently tested on:
 
-## Notice
-This Brainfuck interpreter is tested on:  
+* Ubuntu 12.04
 
-* Ubuntu 11.10  
-* Ubuntu 12.04  
-* Kubuntu 11.10  
-* Xubuntu 11.10  
-* Mac OS X 10.3+  
-* Mac OS X 10.6.8 x86_64  
-* Mac OS X 10.5.8 PowerPC  
-* Mac OS X 10.4.11 PowerPC  
-* Mac OS X 10.3.9 PowerPC  
-* Windows XP (using tcc)  
-* Windows 7 (using tcc)  
-* Windows 8 (using Cygwin)  
-* iOS 4.2.1 (using saurik's iphone-gcc)  
