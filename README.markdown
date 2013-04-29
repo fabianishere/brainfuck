@@ -27,7 +27,7 @@ See LICENSE file.
 ## Authors
     Fabian M. https://www.github.com/FabianM  mail.fabianm@gmail.com
     aliclubb https://www.github.com/aliclubb
-    
+
 ## Building from source
 `gcc` and `make` are required to build this brainfuck interpreter. Build on Windows using MinGW.  
 
