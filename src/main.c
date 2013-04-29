@@ -23,8 +23,8 @@
 
 void print_usage() {
 	printf("usage: brainfuck [-feihd] <filename>\n\t-f  run the given file(s)\n");
-	printf("\t-e  run code directly\n\t-i  open the interactive console.\n");
-	printf("\t-h  show a help message.\n\t-d  enable debugging.\n");
+	printf("\t-e  run code directly\n\t-i  open the interactive console\n");
+	printf("\t-h  show a help message\n\t-d  enable debugging\n");
 }
 
 void run_file(FILE *file, int debug_flag) {
