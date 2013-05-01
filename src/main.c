@@ -28,18 +28,15 @@ void print_usage() {
 }
 
 void run_file(FILE *file, int debug_flag) {
-	char c;
-	BrainfuckState *state = brainfuck_new_state(BRAINFUCK_MAX_CELLS, debug_flag);
+	BrainfuckState *state = brainfuck_new_state(debug_flag);
 	if (file == NULL) {
 		printf("failed to open file\n");
 		exit(EXIT_FAILURE);
 	}
-	while ((c = fgetc(file)) != EOF) {
-		brainfuck_put_token(state, c);
-	}
-	fclose(file);
-	brainfuck_run(state);
+	brainfuck_put_instruction(state, brainfuck_read_stream(file));
+	brainfuck_execute(state, state->root);
 	brainfuck_end_state(state);
+	fclose(file);
 }
 
 static int debug_flag;
@@ -95,16 +92,14 @@ int main(int argc, char *argv[]) {
 		}
 	}
  	if (eval_code) {
- 		BrainfuckState *state = brainfuck_new_state(BRAINFUCK_MAX_CELLS, debug_flag);
- 		brainfuck_put_token_string(state, eval_code);
- 		brainfuck_run(state);
+ 		BrainfuckState *state = brainfuck_new_state(debug_flag);
+ 		brainfuck_put_instruction(state, brainfuck_read_string(eval_code));
+ 		brainfuck_execute(state, state->root);
  		brainfuck_end_state(state);
  	} else if (optind < argc && file_flag) {
 		while (optind < argc)
 			run_file(fopen(argv[optind++], "r"), debug_flag);
-
 	} else if (interactive_flag) {
-		// TODO Finish this.
 	} 
 	exit(EXIT_SUCCESS);
 }

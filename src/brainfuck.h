@@ -16,32 +16,33 @@
 #ifndef _BRAINFUCK_H
 #define _BRAINFUCK_H
 
+#include <stdio.h>
+
 #define BRAINFUCK_DEBUG_ENABLED 1
 #define BRAINFUCK_DEBUG_DISABLED 0
 
-#define BRAINFUCK_MAX_CELLS 30000
-
-typedef enum BrainfuckTokenType {
-   UNKNOWN,
-   PLUS,
-   MINUS,
-   NEXT,
-   PREVIOUS,
-   INPUT,
-   OUTPUT,
-   LOOP_START,
-   LOOP_END
-} BrainfuckTokenType;
 
 /*
- * Represents a Brainfuck token like "+", "-" or ">".
+ * Represents an instruction.
  */
-typedef struct BrainfuckToken {
-	struct BrainfuckToken *previous;
-	struct BrainfuckToken *next;
-	char value;
-	enum BrainfuckTokenType type;
-} BrainfuckToken;
+typedef struct BrainfuckInstruction {
+	/*
+	 * The quantity of this instruction.
+	 */
+	long quantity;
+	/*
+	 * The type of this instruction.
+	 */
+	char type;
+	/*
+	 * The next instruction.
+	 */
+	struct BrainfuckInstruction *next;
+	/*
+	 * The first instruction of a loop if this instruction is a loop.
+	 */
+	struct BrainfuckInstruction *loop;
+} BrainfuckInstruction;
 
 
 /*
@@ -49,111 +50,74 @@ typedef struct BrainfuckToken {
  */
 typedef struct BrainfuckState {
 	/**
-	 * The root token of this state.
+	 * The root instruction of the instruction list.
 	 */
-	struct BrainfuckToken *root_token;
-	/*
-	 * The current token of this state.
+	struct BrainfuckInstruction *root;
+	/**
+	 * The last instruction of the interpreter.
 	 */
-	struct BrainfuckToken *current_token;
+	struct BrainfuckInstruction *head;
 	/*
 	 * The data pointer.
 	 */
 	char *pointer;
 	/*
-	 * The current position of the data pointer used to determine if 
-	 * 	the current data pointer is valid.
-	 */
-	int position;
-	/*
-	 * When 0 the interpreter does not show debug messages, otherwise
+	 * When zero the interpreter does not show debug messages, otherwise
 	 *	it does.
 	 */
 	int debug;
 } BrainfuckState;
 
 /*
- * Adds an element to the token array.
+ * Adds an instruction to the instruction array.
  *
- * @param state The Brainfuck state.
- * @param c The character to add.
+ * @param state The state to use.
+ * @param instruction The instruction to add.
  */
-void brainfuck_put_token(BrainfuckState *, const char);
+void brainfuck_put_instruction(BrainfuckState *, BrainfuckInstruction *);
 
 /*
- * Adds elements to the token array.
+ * Reads from a stream and converts it into a list of instructions.
  *
- * @param state The Brainfuck state.
- * @param str The characters to add.
+ * @param stream The stream to read from.
+ * @return The first instruction read.
  */
-void brainfuck_put_token_string(BrainfuckState *, const char *);
+BrainfuckInstruction * brainfuck_read_stream(FILE *);
 
 /*
- * Returns the last token of the token list.
+ * Reads a string and converts it into a list of instructions.
  *
- * @return The last token of the token list.
+ * @param str The string to convert.
+ * @return The first instruction read.
  */
-BrainfuckToken* brainfuck_get_last_token(BrainfuckState *);
-
-/*
- * Moves to the next cell.
- *
- * @return The next cell.
- */
-void brainfuck_next_cell(BrainfuckState *);
-
-/*
- * Moves to the previous element.
- *
- * @return The previous element.
- */
-void brainfuck_previous_cell(BrainfuckState *);
-
-/*
- * Increases the value of the current cell.
- */
-void brainfuck_increase_cell(BrainfuckState *);
-
-/*
- * Decreases the value of the current cell.
- */
-void brainfuck_decrease_cell(BrainfuckState *);
+BrainfuckInstruction * brainfuck_read_string(char *);
 
 /*
  * Creates a new BrainfuckState.
  *
- * @param size The size of the data pointer.
  * @param debug 0 to disable debug, otherwise debug is enabled.
  */
-BrainfuckState * brainfuck_new_state(int, int);
+BrainfuckState * brainfuck_new_state(const int);
 
 /*
- * Clears the given state.
+ * Ends a list of instructions and removes it from the memory.
  * 
- * @param state The BrainfuckState to clear.
- * @param size The size of the new state.
+ * @param instruction The instruction to end.
  */
-void brainfuck_clear_state(BrainfuckState *, int);
+void brainfuck_end_instruction(BrainfuckInstruction *);
 
 /*
- * End a state and remove it from the memory.
+ * Ends a state and removes it from the memory.
  * 
- * @param state The BrainfuckState to end.
+ * @param state The state to end.
  */
 void brainfuck_end_state(BrainfuckState *);
 
 /*
- * Runs the Brainfuck program with the given BrainfuckState.
+ * Runs the brainfuck program with the given state.
  *
- * @param state The BrainfuckState to run.
+ * @param state The state to run.
+ * @param instruction The instruction to execute.
  */
-void brainfuck_run(BrainfuckState *);
-
-/*
- * Runs the given token.
- *
- * @param state The BrainfuckState to run.
- * @param token The token use.
- */
-void brainfuck_run_token(BrainfuckState *, BrainfuckToken *);
+void brainfuck_execute(BrainfuckState *, BrainfuckInstruction *);
 #endif
