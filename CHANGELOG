@@ -1,27 +1,33 @@
 Version 2.2
 =============
-Support for piping again.
-Interactive console.
-Fix for multiple segmentation faults.
+
+- support for piping again.
+- interactive console.
+- fix for multiple segmentation faults.
 
 Version 2.1
 =============
-Rewritten source code.
+
+- rewritten source code.
 
 Version 2.0
 =============
-Rewritten source code.
-Improved CLI
+
+- rewritten source code.
+- improved CLI
 
 Version 1.2
 =============
-Pipe support
+
+- piping support
 
 Version 1.1
 =============
-Tweaked output messages
+
+- tweaked output messages
 
 Version 1.0
 =============
-First stable release.
+
+- first stable release.
 
