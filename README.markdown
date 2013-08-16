@@ -21,7 +21,6 @@ We also provide a C api:
     	brainfuck_end_state(state);
     }
 
-
 ## License
 See LICENSE file.
 
