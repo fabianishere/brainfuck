@@ -25,8 +25,12 @@
  *
  * @param state The state to use.
  * @param instruction The instruction to add.
+ * @return The instruction that is given.
  */
-void brainfuck_put_instruction(BrainfuckState *state, BrainfuckInstruction *instruction) {
+BrainfuckInstruction * brainfuck_put_instruction(BrainfuckState *state, BrainfuckInstruction *instruction) {
+	if (instruction == NULL)
+		return NULL;
+	BrainfuckInstruction *root = instruction;
 	if (!state->root)
 		state->root = instruction;
 	if (state->head)
@@ -38,6 +42,7 @@ void brainfuck_put_instruction(BrainfuckState *state, BrainfuckInstruction *inst
 		}
 		instruction = instruction->next;
 	}
+	return root;
 }
 
 /*
@@ -46,51 +51,65 @@ void brainfuck_put_instruction(BrainfuckState *state, BrainfuckInstruction *inst
  * @param stream The stream to read from.
  */
 BrainfuckInstruction * brainfuck_read_stream(FILE *stream) {
-	BrainfuckInstruction *instruction = (BrainfuckInstruction *) malloc(sizeof(BrainfuckState));
+	return brainfuck_read_stream_until(stream, EOF);
+}
+
+/*
+ * Reads from a stream until the given character and converts it into a list of instructions.
+ *
+ * @param stream The stream to read from.
+ * @param until If this character is found in the stream, we will quit reading and return.
+ */
+BrainfuckInstruction * brainfuck_read_stream_until(FILE *stream, int until) {
+	BrainfuckInstruction *instruction = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
+	instruction->next = 0;
+	instruction->loop = 0;
 	BrainfuckInstruction *root = instruction;
 	char ch;
 	char temp;
 	
-	while ((ch = fgetc(stream)) != EOF) {
+	while ((ch = fgetc(stream)) != until) {
 		instruction->type = ch;
 		instruction->quantity = 1;
 		switch(ch) {
-		case '+':
-		case '-':
-			while ((temp = fgetc(stream)) != EOF && (temp == '+' || temp == '-'))
+		case BRAINFUCK_TOKEN_PLUS:
+		case BRAINFUCK_TOKEN_MINUS:
+			while ((temp = fgetc(stream)) != until && (temp == BRAINFUCK_TOKEN_PLUS || temp == BRAINFUCK_TOKEN_MINUS))
 				if (temp == ch)
 					instruction->quantity++;
 				else
 					instruction->quantity--;
 			ungetc(temp, stream);
 			break;
-		case '<':
-		case '>':
-			while ((temp = fgetc(stream)) != EOF && (temp == '<' || temp == '>'))
+		case BRAINFUCK_TOKEN_NEXT:
+		case BRAINFUCK_TOKEN_PREVIOUS:
+			while ((temp = fgetc(stream)) != until && (temp == BRAINFUCK_TOKEN_NEXT || temp == BRAINFUCK_TOKEN_PREVIOUS))
 				if (temp == ch)
 					instruction->quantity++;
 				else
 					instruction->quantity--;
 			ungetc(temp, stream);
 			break;
-		case '.':
-		case ',':
-			while ((temp = fgetc(stream)) != EOF && temp == ch)
+		case BRAINFUCK_TOKEN_OUTPUT:
+		case BRAINFUCK_TOKEN_INPUT:
+			while ((temp = fgetc(stream)) != until && temp == ch)
 				instruction->quantity++;
 			ungetc(temp, stream);
 			break;
-		case '[':
-			instruction->loop = brainfuck_read_stream(stream);
+		case BRAINFUCK_TOKEN_LOOP_START:
+			instruction->loop = brainfuck_read_stream_until(stream, until);
 			break;
-		case ']':
+		case BRAINFUCK_TOKEN_LOOP_END:
 			return root;
 		default:
 			continue;
 		}
 		instruction->next = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
+		instruction->next->next = 0;
+		instruction->next->loop = 0;
 		instruction = instruction->next;
 	}
-	instruction->type = ']';
+	instruction->type = BRAINFUCK_TOKEN_LOOP_END;
 	return root;
 }
 
@@ -100,6 +119,8 @@ BrainfuckInstruction * brainfuck_read_stream(FILE *stream) {
  * @param buffer The string to convert.
  */
 BrainfuckInstruction * brainfuck_read_string(char *buffer) {
+	if (buffer == NULL)
+		return NULL;
 	FILE *stream;
 	BrainfuckInstruction *instruction;
 	
@@ -118,7 +139,12 @@ BrainfuckInstruction * brainfuck_read_string(char *buffer) {
 BrainfuckState* brainfuck_new_state(int debug) {
 	BrainfuckState *state = (BrainfuckState *) malloc(sizeof(BrainfuckState));
 	
-	state->pointer = malloc(30000 * sizeof(char));
+	state->root = 0;
+	state->head = 0;
+	state->environment = (BrainfuckEnvironment *) malloc(sizeof(BrainfuckEnvironment));
+	state->environment->output_handler = &brainfuck_default_output_handler;
+	state->environment->input_handler = &brainfuck_default_input_handler;
+	state->pointer = malloc(sizeof(char));
 	state->debug = debug;
 	return state;
 }
@@ -126,16 +152,16 @@ BrainfuckState* brainfuck_new_state(int debug) {
 /*
  * Ends a list of instructions and removes it from the memory.
  * 
- * @param instruction The instruction to end.
+ * @param instruction The start of the instruction list.
  */
-void brainfuck_end_instruction(BrainfuckInstruction *instruction) {
+void brainfuck_end_instruction_list(BrainfuckInstruction *instruction) {
 	BrainfuckInstruction *tmp;
 	
 	if (instruction == NULL)
 		return;
 	while(instruction) {
 		tmp = instruction;
-		brainfuck_end_instruction(tmp->loop);
+		brainfuck_end_instruction_list(tmp->loop);
 		instruction = instruction->next;
 		free(tmp);
 		tmp = 0;
@@ -148,9 +174,14 @@ void brainfuck_end_instruction(BrainfuckInstruction *instruction) {
  * @param state The state to end.
  */
 void brainfuck_end_state(BrainfuckState *state) {
-	brainfuck_end_instruction(state->root);
-	state->debug = 0;
+	if (state->root) {
+		brainfuck_end_instruction_list(state->root);
+	}
 	state->pointer = 0;
+	state->environment->output_handler = 0;
+	state->environment->input_handler = 0;
+	free(state->environment);
+	state->environment = 0;
 	free(state->pointer);
 	free(state);
 	state = 0;
@@ -164,57 +195,57 @@ void brainfuck_end_state(BrainfuckState *state) {
  */
 void brainfuck_execute(BrainfuckState *state, BrainfuckInstruction *instruction) {
 	long l;
-	
-	if (state->debug)
-		printf("running instruction\n");
-	while (instruction && instruction->type != ']') {
-		if (state->debug)
-			printf("got: %c\n", instruction->type);
+	while (instruction && instruction->type != BRAINFUCK_TOKEN_LOOP_END) {
 		switch (instruction->type) {
-		case '+':
+		case BRAINFUCK_TOKEN_PLUS:
 			*state->pointer += instruction->quantity;
-			if (state->debug)
-				printf("plus: %i\n", *state->pointer);
 			break;
-		case '-':
+		case BRAINFUCK_TOKEN_MINUS:
 			*state->pointer -= instruction->quantity;
-			if (state->debug)
-				printf("minus: %i\n", *state->pointer);
 			break;
-		case '>':
+		case BRAINFUCK_TOKEN_NEXT:
 			state->pointer += instruction->quantity;
-			if (state->debug)
-				printf("next\n");
 			break;
-		case '<':
+		case BRAINFUCK_TOKEN_PREVIOUS:
 			state->pointer -= instruction->quantity;
-			if (state->debug)
-				printf("minus\n");
 			break;
-		case '.':
+		case BRAINFUCK_TOKEN_OUTPUT:
 			for (l = 0; l < instruction->quantity; l++) {
-				if (state->debug)
-					printf("output: %c\n", *state->pointer);
-				else
-					putchar(*state->pointer);
+				putchar(*state->pointer);
 				fflush(stdout);
 			}
 			break;
-		case ',':
+		case BRAINFUCK_TOKEN_INPUT:
 			for (l = 0; l < instruction->quantity; l++)
 				*state->pointer = getchar();
 			break;
-		case '[':
-			if (state->debug)
-				printf("loop\n");
+		case BRAINFUCK_TOKEN_LOOP_START:
 			while(*state->pointer)
 				brainfuck_execute(state, instruction->loop);
-			if (state->debug)
-				printf("end\n");
 			break;
 		default:
 			return;
 		}
 		instruction = instruction->next;
 	} 
+}
+
+/*
+ * Default output handler which writes the given character to STDOUT and flushes
+ *	it.
+ *
+ * @param chr The character that will be written to STDOUT.
+ */
+void brainfuck_default_output_handler(int chr) {
+	putchar(chr);
+	fflush(stdout);
+}
+
+/*
+ * Default input handler which reads a character from STDIN and returns it.
+ *
+ * @return The character read from STDIN.
+ */
+int brainfuck_default_input_handler(void) {
+	return getchar();
 }

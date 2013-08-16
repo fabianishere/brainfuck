@@ -3,13 +3,13 @@ brainfuck
 Brainfuck interpreter written in C.
 
 ## Usage
-    brainfuck [-fcih] <filename>
+    brainfuck [-fch] <filename>
 	-f  run the given file
 	-e  run code directly
-	-i  open the interactive console.
 	-h  show a help message.
-	
-or from C:
+
+The interactive console can be accessed by passing no arguments.
+We also provide a C api:
 
     #include <stdio.h>
     #include <brainfuck.h>

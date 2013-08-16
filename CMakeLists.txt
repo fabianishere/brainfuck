@@ -10,5 +10,5 @@ set (brainfuck_VERSION_PATCH 1)
 # Set directories.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-add_definitions("-Wall")
+add_definitions("-Wall -g")
 add_executable(brainfuck src/main.c src/brainfuck.c src/brainfuck.h)
