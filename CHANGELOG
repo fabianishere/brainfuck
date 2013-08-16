@@ -1,22 +1,27 @@
-Version 0.2.1
+Version 2.2
 =============
-The source code has been rewritten.
+Support for piping again.
+Interactive console.
+Fix for multiple segmentation faults.
 
-Version 0.2.0
+Version 2.1
 =============
-The source code has been rewritten.
-Improve command line interface.
-Added debugging option. (needs improvement)
+Rewritten source code.
 
-Version 0.1.2
+Version 2.0
 =============
-Added pipe support - now you can pipe output from other programs into the interpreter!
+Rewritten source code.
+Improved CLI
 
-Version 0.1.1
+Version 1.2
+=============
+Pipe support
+
+Version 1.1
 =============
 Tweaked output messages
 
-Version 0.1.0
+Version 1.0
 =============
-First stable release
+First stable release.
 

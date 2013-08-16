@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 
-#define BRAINFUCK_VERSION "2.0"
+#define BRAINFUCK_VERSION "2.2"
 
 #define BRAINFUCK_DEBUG_ENABLED 1
 #define BRAINFUCK_DEBUG_DISABLED 0

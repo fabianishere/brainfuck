@@ -8,7 +8,8 @@ Brainfuck interpreter written in C.
 	-e  run code directly
 	-h  show a help message.
 
-The interactive console can be accessed by passing no arguments.
+The interactive console can be accessed by passing no arguments.    
+
 We also provide a C api:
 
     #include <stdio.h>
