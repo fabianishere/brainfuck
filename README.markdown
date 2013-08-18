@@ -25,6 +25,6 @@ int main() {
 ## License
 See LICENSE file.
 
-## Authors
+## Contributors
     Fabian M. https://www.github.com/FabianM  mail.fabianm@gmail.com
     aliclubb https://www.github.com/aliclubb
