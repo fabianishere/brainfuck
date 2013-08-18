@@ -89,10 +89,9 @@ void run_interactive_console(int debug_flag) {
 
 /* Variables used by getopt.h */
 static int debug_flag;
-static int file_flag;
+static int eval_flag;
 static struct option long_options[] = {
 	{"debug", no_argument, 0, 'd'},
-	{"file", no_argument, 0, 'f'},
 	{"help", no_argument, 0, 'h'},
 	{"eval", no_argument, 0, 'e'},
 	{0, 0, 0, 0}
@@ -107,12 +106,12 @@ static struct option long_options[] = {
 int main(int argc, char *argv[]) {
 	int c;
 	char *eval_code = 0;
-	int eval = 0;
+	int i = 1;
 	int option_index = 0;
 	
 	while (1) {
 		option_index = 0;
-		c = getopt_long (argc, argv, "hfde",
+		c = getopt_long (argc, argv, "hde",
 			long_options, &option_index);
 		if (c == -1)
 			break;
@@ -126,12 +125,9 @@ int main(int argc, char *argv[]) {
 			print_usage();
 			return EXIT_SUCCESS;
 		case 'e':	
-			eval = 1;
+			eval_flag = 1;
 			if (optarg)
 				eval_code = (char *) optarg;
-			break;
-		case 'f':
-			file_flag = 1;
 			break;
 		case 'd':
 			debug_flag = 1;
@@ -145,7 +141,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	// this variable is true when the -e or --eval flag is set.
- 	if (eval) {
+ 	if (eval_flag) {
  		if (isatty(fileno(stdin))) {// check if someone is trying to pipe code.
  			return run_string(eval_code, debug_flag);
  		} else {
@@ -155,12 +151,11 @@ int main(int argc, char *argv[]) {
 			brainfuck_end_state(state);
 			return EXIT_SUCCESS;
 		}
- 	} else if (optind < argc && file_flag) {
-		while (optind < argc)
-			run_file(fopen(argv[optind++], "r"), debug_flag);
+ 	} else if (argc > 0) {
+		while (i < argc)
+			run_file(fopen(argv[i++], "r"), debug_flag);
 		return EXIT_SUCCESS;
 	}
-	
 	run_interactive_console(debug_flag);
 	return EXIT_SUCCESS;
 }
