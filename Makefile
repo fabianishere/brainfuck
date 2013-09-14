@@ -114,12 +114,25 @@ brainfuck/fast:
 	$(MAKE) -f CMakeFiles/brainfuck.dir/build.make CMakeFiles/brainfuck.dir/build
 .PHONY : brainfuck/fast
 
+#=============================================================================
+# Target rules for targets named libbrainfuck
+
+# Build rule for target.
+libbrainfuck: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 libbrainfuck
+.PHONY : libbrainfuck
+
+# fast build rule for target.
+libbrainfuck/fast:
+	$(MAKE) -f CMakeFiles/libbrainfuck.dir/build.make CMakeFiles/libbrainfuck.dir/build
+.PHONY : libbrainfuck/fast
+
 src/brainfuck.o: src/brainfuck.c.o
 .PHONY : src/brainfuck.o
 
 # target to build an object file
 src/brainfuck.c.o:
-	$(MAKE) -f CMakeFiles/brainfuck.dir/build.make CMakeFiles/brainfuck.dir/src/brainfuck.c.o
+	$(MAKE) -f CMakeFiles/libbrainfuck.dir/build.make CMakeFiles/libbrainfuck.dir/src/brainfuck.c.o
 .PHONY : src/brainfuck.c.o
 
 src/brainfuck.i: src/brainfuck.c.i
@@ -127,7 +140,7 @@ src/brainfuck.i: src/brainfuck.c.i
 
 # target to preprocess a source file
 src/brainfuck.c.i:
-	$(MAKE) -f CMakeFiles/brainfuck.dir/build.make CMakeFiles/brainfuck.dir/src/brainfuck.c.i
+	$(MAKE) -f CMakeFiles/libbrainfuck.dir/build.make CMakeFiles/libbrainfuck.dir/src/brainfuck.c.i
 .PHONY : src/brainfuck.c.i
 
 src/brainfuck.s: src/brainfuck.c.s
@@ -135,7 +148,7 @@ src/brainfuck.s: src/brainfuck.c.s
 
 # target to generate assembly for a file
 src/brainfuck.c.s:
-	$(MAKE) -f CMakeFiles/brainfuck.dir/build.make CMakeFiles/brainfuck.dir/src/brainfuck.c.s
+	$(MAKE) -f CMakeFiles/libbrainfuck.dir/build.make CMakeFiles/libbrainfuck.dir/src/brainfuck.c.s
 .PHONY : src/brainfuck.c.s
 
 src/main.o: src/main.c.o
@@ -170,6 +183,7 @@ help:
 	@echo "... depend"
 	@echo "... brainfuck"
 	@echo "... edit_cache"
+	@echo "... libbrainfuck"
 	@echo "... rebuild_cache"
 	@echo "... src/brainfuck.o"
 	@echo "... src/brainfuck.i"

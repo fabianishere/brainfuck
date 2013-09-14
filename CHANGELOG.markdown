@@ -1,3 +1,11 @@
+Version 2.4
+=============
+
+- fix some strings.
+- rename multiple methods.
+- rewrite multiple methods.
+- add examples
+
 Version 2.2
 =============
 
@@ -8,13 +16,13 @@ Version 2.2
 Version 2.1
 =============
 
-- rewritten source code.
+- rewrite source code.
 
 Version 2.0
 =============
 
-- rewritten source code.
-- improved CLI
+- rewrite source code.
+- improve CLI
 
 Version 1.2
 =============
@@ -24,7 +32,7 @@ Version 1.2
 Version 1.1
 =============
 
-- tweaked output messages
+- tweak output messages
 
 Version 1.0
 =============

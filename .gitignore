@@ -7,8 +7,10 @@
 # Ignore the output of the C compiler.
 Debug
 bin
+lib
 
 # CMake Files
+Makefile
 CMakeCache.txt
 CMakeFiles
 cmake_install.cmake

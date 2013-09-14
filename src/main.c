@@ -19,37 +19,36 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#include "brainfuck.h"
+#include "../include/brainfuck.h"
 
 /*
  * Prints the usage message of this program.
  */
 void print_usage() {
-	fprintf(stderr, "usage: brainfuck [-feihd] <filename>\n");
-	fprintf(stderr, "\t-f  run the given file(s)\n");
+	fprintf(stderr, "usage: brainfuck [-eih] file...\n");
 	fprintf(stderr,	"\t-e  run code directly\n");
-	fprintf(stderr,	"\t-i  open the interactive console\n");
 	fprintf(stderr,	"\t-h  show a help message\n");
-	fprintf(stderr,	"\t-d  enable debugging\n");
 }
 
 /*
  * Runs the given brainfuck file.
  *
  * @param file The brainfuck file to run.
- * @param debug_flag Set to 0 to disable debugging, 1 to enable.
  * @return EXIT_SUCCESS if no errors are encountered, otherwise EXIT_FAILURE.
  */
-int run_file(FILE *file, int debug_flag) {
-	BrainfuckState *state = brainfuck_new_state(debug_flag);
+int run_file(FILE *file) {
+	BrainfuckState *state = brainfuck_state();
+	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
 	if (file == NULL) {
-		printf("failed to open file\n");
-		brainfuck_end_state(state);
+		fprintf(stderr, "failed to open file\n");
+		brainfuck_destroy_context(context);
+		brainfuck_destroy_state(state);
 		return EXIT_FAILURE;
 	}
-	brainfuck_put_instruction(state, brainfuck_read_stream(file));
-	brainfuck_execute(state, state->root);
-	brainfuck_end_state(state);
+	brainfuck_add(state, brainfuck_parse_stream(file));
+	brainfuck_execute(state->root, context);
+	brainfuck_destroy_context(context);
+	brainfuck_destroy_state(state);
 	fclose(file);
 	return EXIT_SUCCESS;
 }
@@ -58,42 +57,40 @@ int run_file(FILE *file, int debug_flag) {
  * Runs the given brainfuck string.
  *
  * @param code The brainfuck string to run.
- * @param debug_flag Set to 0 to disable debugging, 1 to enable.
  * @return EXIT_SUCCESS if no errors are encountered, otherwise EXIT_FAILURE.
  */
-int run_string(char *code, int debug_flag) {
-	BrainfuckState *state = brainfuck_new_state(debug_flag);
- 	brainfuck_put_instruction(state, brainfuck_read_string(code));
- 	brainfuck_execute(state, state->root);
- 	brainfuck_end_state(state);
+int run_string(char *code) {
+	BrainfuckState *state = brainfuck_state();
+	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
+	BrainfuckInstruction *instruction = brainfuck_parse_string(code);
+ 	brainfuck_add(state, instruction);
+ 	brainfuck_execute(state->root, context);
+	brainfuck_destroy_context(context);
+ 	brainfuck_destroy_state(state);
  	return EXIT_SUCCESS;
 }
 
 /*
  * Run the brainfuck interpreter in interactive mode.
- *
- * @param debug_flag 
  */
-void run_interactive_console(int debug_flag) {
+void run_interactive_console() {
 	printf("brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__, __TIME__);
-	BrainfuckState *state = brainfuck_new_state(debug_flag);
+	BrainfuckState *state = brainfuck_state();
+	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
 	
 	printf(">> ");
 	while(1) {
 		fflush(stdout);
-		brainfuck_execute(state, brainfuck_put_instruction(state, brainfuck_read_stream_until(stdin, '\n')));
+		brainfuck_execute(brainfuck_add(state, brainfuck_parse_stream_until(stdin, '\n')), context);
 		printf("\n>> ");
 	}
 }
 
 
-/* Variables used by getopt.h */
-static int debug_flag;
-static int eval_flag;
+/* Command line options */
 static struct option long_options[] = {
-	{"debug", no_argument, 0, 'd'},
 	{"help", no_argument, 0, 'h'},
-	{"eval", no_argument, 0, 'e'},
+	{"eval", required_argument, 0, 'e'},
 	{0, 0, 0, 0}
 };
 
@@ -105,13 +102,12 @@ static struct option long_options[] = {
  */
 int main(int argc, char *argv[]) {
 	int c;
-	char *eval_code = 0;
 	int i = 1;
 	int option_index = 0;
 	
 	while (1) {
 		option_index = 0;
-		c = getopt_long (argc, argv, "hde",
+		c = getopt_long (argc, argv, "he:",
 			long_options, &option_index);
 		if (c == -1)
 			break;
@@ -125,13 +121,7 @@ int main(int argc, char *argv[]) {
 			print_usage();
 			return EXIT_SUCCESS;
 		case 'e':	
-			eval_flag = 1;
-			if (optarg)
-				eval_code = (char *) optarg;
-			break;
-		case 'd':
-			debug_flag = 1;
-			break;
+ 			return run_string((char *) optarg);
 		case '?':
 			print_usage();
 			return EXIT_FAILURE;
@@ -139,23 +129,15 @@ int main(int argc, char *argv[]) {
 			abort();
 		}
 	}
-	
-	// this variable is true when the -e or --eval flag is set.
- 	if (eval_flag) {
- 		if (isatty(fileno(stdin))) {// check if someone is trying to pipe code.
- 			return run_string(eval_code, debug_flag);
- 		} else {
- 			BrainfuckState *state = brainfuck_new_state(debug_flag);
-			brainfuck_put_instruction(state, brainfuck_read_stream(stdin));
-			brainfuck_execute(state, state->root);
-			brainfuck_end_state(state);
-			return EXIT_SUCCESS;
-		}
- 	} else if (argc > 0) {
+	if (argc > 0) {
 		while (i < argc)
-			run_file(fopen(argv[i++], "r"), debug_flag);
-		return EXIT_SUCCESS;
+			run_file(fopen(argv[i++], "r"));
+	} else {
+		if (isatty(fileno(stdin))) {
+			run_interactive_console();
+		} else {
+			run_file(stdin);
+		}
 	}
-	run_interactive_console(debug_flag);
 	return EXIT_SUCCESS;
 }
