@@ -16,9 +16,13 @@ We also provide a C api:
 #include <brainfuck.h>
     
 int main() {
-	BrainfuckState *state = brainfuck_new_state(DEBUG); // 0 is debug disabled, anything else enables debug.
-	brainfuck_execute(state, brainfuck_read_stream(fopen("examples/hello_world.bf", "r")));
-	brainfuck_end_state(state);
+	BrainfuckState *state = brainfuck_state();
+	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
+	BrainfuckInstruction *instruction = brainfuck_parse_string("+++++.");
+ 	brainfuck_add(state, instruction);
+ 	brainfuck_execute(state->root, context);
+	brainfuck_destroy_context(context);
+ 	brainfuck_destroy_state(state);
 	return EXIT_SUCCESS;
 }
 ```
