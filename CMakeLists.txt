@@ -9,7 +9,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
-add_definitions("-Wall -g")
+add_definitions("-Wall -Wextra -g")
 add_library(libbrainfuck STATIC src/brainfuck.c)
 set_target_properties(libbrainfuck PROPERTIES PREFIX "")
 add_executable(brainfuck src/main.c)
