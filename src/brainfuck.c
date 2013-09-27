@@ -520,10 +520,10 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 	while (instruction != NULL && instruction->type != BRAINFUCK_TOKEN_LOOP_END) {
 		switch (instruction->type) {
 		case BRAINFUCK_TOKEN_PLUS:
-			*context->tape += (unsigned char)instruction->quantity; // may overflow
+			context->tape[context->tape_index] += (unsigned char)instruction->quantity; // may overflow
 			break;
 		case BRAINFUCK_TOKEN_MINUS:
-			*context->tape -= (unsigned char)instruction->quantity; // may underflow
+			context->tape[context->tape_index] -= (unsigned char)instruction->quantity; // may underflow
 			break;
 		case BRAINFUCK_TOKEN_NEXT:
 			if (instruction->quantity >= INT_MAX - context->tape_size || 
@@ -543,15 +543,15 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 			break;
 		case BRAINFUCK_TOKEN_OUTPUT:
 			for (index = 0; index < instruction->quantity; index++) {
-				context->output_handler(*context->tape);
+				context->output_handler(context->tape[context->tape_index]);
 			}
 			break;
 		case BRAINFUCK_TOKEN_INPUT:
 			for (index = 0; index < instruction->quantity; index++)
-				*context->tape = context->input_handler();
+				context->tape[context->tape_index] = context->input_handler();
 			break;
 		case BRAINFUCK_TOKEN_LOOP_START:
-			while(*context->tape)
+			while(context->tape[context->tape_index])
 				brainfuck_execute(instruction->loop, context);
 			break;
 		default:
