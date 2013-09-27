@@ -101,7 +101,15 @@ typedef struct BrainfuckExecutionContext {
 	/*
 	 * An array containing the memory cells the program can use.
 	 */
-	char *tape;
+	char * const tape;
+	/*
+	 * Index into <code>tape</code>. Modified during execution.
+	 */
+	int tape_index;
+	/*
+	 * size of the tape in umber of cells.
+	 */
+	const size_t tape_size;
 } BrainfuckExecutionContext;
 
 /*

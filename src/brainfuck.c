@@ -36,14 +36,22 @@ BrainfuckState * brainfuck_state() {
  * @param size The size of the tape.
  */
 BrainfuckExecutionContext * brainfuck_context(int size) {
-	BrainfuckExecutionContext *context = (BrainfuckExecutionContext *) 
-			malloc(sizeof(BrainfuckExecutionContext));
 	if (size < 0) {
 		size = BRAINFUCK_TAPE_SIZE;
 	}
-	context->tape = malloc(sizeof(BRAINFUCK_CELL_TYPE) * size);
-	context->input_handler = &getchar;
-	context->output_handler = &putchar;
+	char* tape = malloc(sizeof(BRAINFUCK_CELL_TYPE) * size);
+    //create prototype to initialize the const fields
+    BrainfuckExecutionContext context_prototype = {
+        .output_handler = &putchar,
+        .input_handler = &getchar,
+        .tape = tape,
+        .tape_index = 0,
+        .tape_size = size
+        };
+    // copy to allocated memory
+	BrainfuckExecutionContext *context = (BrainfuckExecutionContext *) 
+			malloc(sizeof(BrainfuckExecutionContext));
+	memcpy(context, &context_prototype, sizeof(BrainfuckExecutionContext));
 	return context;
 }
 
@@ -487,10 +495,18 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 			*context->tape -= instruction->quantity;
 			break;
 		case BRAINFUCK_TOKEN_NEXT:
-			context->tape += instruction->quantity;
+			context->tape_index += instruction->quantity;
+			if (context->tape_index >= context->tape_size) {
+			    fprintf(stderr, "Tape memory out of bounds (overrun)\nExceeded the tape size of %zd cells\n", context->tape_size);
+			    exit(-1);
+			}
 			break;
 		case BRAINFUCK_TOKEN_PREVIOUS:
-			context->tape -= instruction->quantity;
+			context->tape_index -= instruction->quantity;
+			if (context->tape_index < 0) {
+			    fprintf(stderr, "Tape memory out of bounds (underrun)\nUndershot the tape size of %zd cells\n", context->tape_size);
+			    exit(-1);
+			}
 			break;
 		case BRAINFUCK_TOKEN_OUTPUT:
 			for (index = 0; index < instruction->quantity; index++) {
