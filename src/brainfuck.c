@@ -231,7 +231,6 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int unti
 	BrainfuckInstruction *root = instruction;
 	char ch;
 	char temp;
-
 	while ((ch = fgetc(stream)) != until) {
 		instruction->type = ch;
 		instruction->quantity = 1;
@@ -247,10 +246,15 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int unti
 				    }
 					instruction->quantity++;
 				} else {
-				    assert(instruction->quantity > 0);
+				    if(instruction->quantity <= 0){
+				        // handle things such as: +--+ 
+				        assert(instruction->quantity == 0);
+			            goto break_inner_plusminus;
+				    }
 					instruction->quantity--;
 				}
-			}	
+			}
+			break_inner_plusminus:
 			ungetc(temp, stream);
 			break;
 		case BRAINFUCK_TOKEN_NEXT:
@@ -264,10 +268,15 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int unti
 				    }
 					instruction->quantity++;
 				} else {
-				    assert(instruction->quantity > 0);
+				    if(instruction->quantity <= 0){
+				        // handle things such as: ><<<>
+				        assert(instruction->quantity == 0);
+			            goto break_inner_nextprev;
+				    }
 					instruction->quantity--;
 				}
 			}
+			break_inner_nextprev:
 			ungetc(temp, stream);
 			break;
 		case BRAINFUCK_TOKEN_OUTPUT:
@@ -364,6 +373,7 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 				    }
 					instruction->quantity++;
 				} else {
+				    //TODO FIXME: this assertion fails for e.g. +--+
 				    assert(instruction->quantity > 0);
 					instruction->quantity--;
 				}
@@ -382,6 +392,7 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 				    }
 					instruction->quantity++;
 				} else {
+				    //TODO FIXME: this assertion fails for e.g. ><<>
 				    assert(instruction->quantity > 0);
 					instruction->quantity--;
 				}
