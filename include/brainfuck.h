@@ -36,7 +36,7 @@ typedef struct BrainfuckInstruction {
 	/*
 	 * The quantity of this instruction.
 	 */
-	long quantity;
+	unsigned long quantity;
 	/*
 	 * The type of this instruction.
 	 */
