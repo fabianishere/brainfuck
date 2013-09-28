@@ -77,11 +77,14 @@ void run_interactive_console() {
 	printf("brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__, __TIME__);
 	BrainfuckState *state = brainfuck_state();
 	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
+	BrainfuckInstruction *instruction;
 	
 	printf(">> ");
 	while(1) {
 		fflush(stdout);
-		brainfuck_execute(brainfuck_add(state, brainfuck_parse_stream_until(stdin, '\n')), context);
+		instruction = brainfuck_parse_stream_until(stdin, '\n');
+		brainfuck_add(state, instruction);
+		brainfuck_execute(instruction, context);
 		printf("\n>> ");
 	}
 }
@@ -129,7 +132,7 @@ int main(int argc, char *argv[]) {
 			abort();
 		}
 	}
-	if (argc > 0) {
+	if (argc > 1) {
 		while (i < argc)
 			run_file(fopen(argv[i++], "r"));
 	} else {

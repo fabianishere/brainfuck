@@ -16,7 +16,7 @@
 #ifndef BRAINFUCK_H
 #define BRAINFUCK_H
 
-#define BRAINFUCK_VERSION "2.3"
+#define BRAINFUCK_VERSION "2.4"
 #define BRAINFUCK_CELL_TYPE int
 #define BRAINFUCK_TAPE_SIZE 30000
 
@@ -35,6 +35,7 @@
 typedef struct BrainfuckInstruction {
 	/*
 	 * The quantity of this instruction.
+	 * TODO: rename this to a more logical name.
 	 */
 	unsigned long quantity;
 	/*
@@ -101,7 +102,7 @@ typedef struct BrainfuckExecutionContext {
 	/*
 	 * An array containing the memory cells the program can use.
 	 */
-	char * const tape;
+	char *tape;
 	/*
 	 * Index into <code>tape</code>. Modified during execution.
 	 */
@@ -109,7 +110,7 @@ typedef struct BrainfuckExecutionContext {
 	/*
 	 * size of the tape in umber of cells.
 	 */
-	const size_t tape_size;
+	size_t tape_size;
 } BrainfuckExecutionContext;
 
 /*

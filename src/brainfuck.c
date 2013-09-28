@@ -38,23 +38,21 @@ BrainfuckState * brainfuck_state() {
  * @param size The size of the tape.
  */
 BrainfuckExecutionContext * brainfuck_context(int size) {
-	if (size < 0) {
+	if (size < 0)
 		size = BRAINFUCK_TAPE_SIZE;
-	}
+		
 	char* tape = malloc(sizeof(BRAINFUCK_CELL_TYPE) * size);
-    //create prototype to initialize the const fields
-    BrainfuckExecutionContext context_prototype = {
-        .output_handler = &putchar,
-        .input_handler = &getchar,
-        .tape = tape,
-        .tape_index = 0,
-        .tape_size = size
-        };
-    // copy to allocated memory
+	
 	BrainfuckExecutionContext *context = (BrainfuckExecutionContext *) 
 			malloc(sizeof(BrainfuckExecutionContext));
-	memcpy(context, &context_prototype, sizeof(BrainfuckExecutionContext));
-	return context;
+	
+	context->output_handler = &putchar;
+        context->input_handler = &getchar;
+        context->tape = tape;
+        context->tape_index = 0;
+        context->tape_size = size;
+        
+        return context;
 }
 
 /*
@@ -65,12 +63,10 @@ BrainfuckExecutionContext * brainfuck_context(int size) {
  * @return The instruction that is removed.
  */
 BrainfuckInstruction * brainfuck_remove(BrainfuckState *state, BrainfuckInstruction *instruction) {
-	if (state == NULL || instruction == NULL) {
+	if (state == NULL || instruction == NULL)
 		return NULL;
-	}
-	if (state->head == instruction) {
+	if (state->head == instruction)
 		state->head = instruction->previous;
-	}
 	instruction->previous->next = instruction->next;
 	instruction->next->previous = instruction->previous;
 	instruction->previous = 0;
@@ -87,13 +83,11 @@ BrainfuckInstruction * brainfuck_remove(BrainfuckState *state, BrainfuckInstruct
  */
 BrainfuckInstruction * brainfuck_add(BrainfuckState *state, 
 		BrainfuckInstruction *instruction) {
-	if (state == NULL || instruction == NULL) {
+	if (state == NULL || instruction == NULL)
 		return NULL;
-	}
 	instruction->previous = state->head;
-	if (state->head != NULL) {
+	if (state->head != NULL) 
 		state->head->next = instruction;
-	}
 	BrainfuckInstruction *iter = instruction;
 	while (iter != NULL) {
 		if (iter->next == NULL) {
@@ -102,9 +96,8 @@ BrainfuckInstruction * brainfuck_add(BrainfuckState *state,
 		}
 		iter = iter->next;
 	}
-	if (state->root == NULL) {
+	if (state->root == NULL) 
 		state->root = instruction;
-	}
 	return state->head;
 }
 
@@ -117,9 +110,8 @@ BrainfuckInstruction * brainfuck_add(BrainfuckState *state,
  */
 BrainfuckInstruction * brainfuck_add_front(BrainfuckState *state, 
 		BrainfuckInstruction *instruction) {
-	if (state == NULL || instruction == NULL) {
+	if (state == NULL || instruction == NULL)
 		return NULL;
-	}
 	instruction->previous = 0;
 	BrainfuckInstruction *iter = instruction;
 	while (iter != NULL) {
@@ -145,15 +137,13 @@ BrainfuckInstruction * brainfuck_add_front(BrainfuckState *state,
  */
 BrainfuckInstruction * brainfuck_insert_before(BrainfuckState *state, BrainfuckInstruction *before, 
 		BrainfuckInstruction *instruction) {
-	if (state == NULL || before == NULL || instruction == NULL) {
+	if (state == NULL || before == NULL || instruction == NULL)
 			return NULL;
-	}
 	BrainfuckInstruction *previous = before->previous;
 	BrainfuckInstruction *iter = instruction;
 	while (iter != NULL) {
-		if (iter->next == NULL) {
+		if (iter->next == NULL)
 			break;
-		}
 		iter = iter->next;
 	}
 	before->previous = iter;
@@ -163,9 +153,8 @@ BrainfuckInstruction * brainfuck_insert_before(BrainfuckState *state, BrainfuckI
 		previous->next = instruction;
 		instruction->previous = previous;
 	}
-	if (state->root == before) {
+	if (state->root == before)
 		state->root = instruction;
-	}
 	return instruction;
 }
 
@@ -179,18 +168,16 @@ BrainfuckInstruction * brainfuck_insert_before(BrainfuckState *state, BrainfuckI
  */
 BrainfuckInstruction * brainfuck_insert_after(BrainfuckState *state, BrainfuckInstruction *after, 
 			BrainfuckInstruction *instruction) {
-		if (state == NULL || after == NULL || instruction == NULL) {
+		if (state == NULL || after == NULL || instruction == NULL)
 			return NULL;
-		}
 		after->next = instruction;
 		instruction->previous = after;
 			
 		BrainfuckInstruction *next = after->next;
 		BrainfuckInstruction *iter = instruction;
 		while (iter != NULL) {
-			if (iter->next == NULL) {
+			if (iter->next == NULL)
 				break;
-			}
 			iter = iter->next;
 		}
 	
@@ -198,9 +185,8 @@ BrainfuckInstruction * brainfuck_insert_after(BrainfuckState *state, BrainfuckIn
 			next->previous = iter;
 			iter->next = next;
 		}
-		if (state->head == after) {
+		if (state->head == after)
 			state->head = iter;
-		}
 		return instruction;		
 }
 
@@ -240,17 +226,17 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int unti
 			while ((temp = fgetc(stream)) != until && (temp == BRAINFUCK_TOKEN_PLUS 
 					|| temp == BRAINFUCK_TOKEN_MINUS)) {
 				if (temp == ch) {
-				    if (instruction->quantity >= LONG_MAX){
-				        fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
-				        exit(-2);
-				    }
+					if (instruction->quantity >= LONG_MAX) {
+						fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
+						exit(-2);
+					}
 					instruction->quantity++;
 				} else {
-				    if(instruction->quantity <= 0){
-				        // handle things such as: +--+ 
-				        assert(instruction->quantity == 0);
-			            goto break_inner_plusminus;
-				    }
+					if (instruction->quantity <= 0) {
+						// handle things such as: +--+ 
+						assert(instruction->quantity == 0);
+						goto break_inner_plusminus;
+					}
 					instruction->quantity--;
 				}
 			}
@@ -282,10 +268,10 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int unti
 		case BRAINFUCK_TOKEN_OUTPUT:
 		case BRAINFUCK_TOKEN_INPUT:
 			while ((temp = fgetc(stream)) != until && temp == ch){
-			    if (instruction->quantity >= LONG_MAX){
-			        fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
-			        exit(-2);
-			    }
+				if (instruction->quantity >= LONG_MAX){
+					fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
+					exit(-2);
+				}
 				instruction->quantity++;
 			}
 			ungetc(temp, stream);
@@ -345,12 +331,10 @@ BrainfuckInstruction * brainfuck_parse_substring(char *str, int begin, int end) 
  * @param The head of the linked list containing the instructions.
  */
 BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr, int end) {
-	if (str == NULL || ptr == NULL) {
+	if (str == NULL || ptr == NULL)
 		return NULL;
-	}
-	if (end < 0) {
+	if (end < 0)
 		end = strlen(str);
-	}
 	BrainfuckInstruction *root = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
 	BrainfuckInstruction *instruction = root;
 	instruction->next = 0;
@@ -367,14 +351,14 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 			for (; *ptr < end && (temp_c = str[*ptr]) && 
 					(temp_c == BRAINFUCK_TOKEN_PLUS || temp_c == BRAINFUCK_TOKEN_MINUS); (*ptr)++) {
 				if (temp_c == c) {
-				    if (instruction->quantity >= LONG_MAX){
-				        fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
-				        exit(-2);
-				    }
+					if (instruction->quantity >= LONG_MAX){
+						fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
+						exit(-2);
+					}
 					instruction->quantity++;
 				} else {
-				    //TODO FIXME: this assertion fails for e.g. +--+
-				    assert(instruction->quantity > 0);
+					//TODO FIXME: this assertion fails for e.g. +--+
+					assert(instruction->quantity > 0);
 					instruction->quantity--;
 				}
 			}
@@ -386,14 +370,14 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 			for (; *ptr < end && (temp_c = str[*ptr]) && 
 					(temp_c == BRAINFUCK_TOKEN_NEXT || temp_c == BRAINFUCK_TOKEN_PREVIOUS); (*ptr)++) {
 				if (temp_c == c) {
-				    if (instruction->quantity >= LONG_MAX){
-				        fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
-				        exit(-2);
-				    }
+					if (instruction->quantity >= LONG_MAX) {
+						fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
+						exit(-2);
+					}
 					instruction->quantity++;
 				} else {
-				    //TODO FIXME: this assertion fails for e.g. ><<>
-				    assert(instruction->quantity > 0);
+					//TODO FIXME: this assertion fails for e.g. ><<>
+					assert(instruction->quantity > 0);
 					instruction->quantity--;
 				}
 			}
@@ -403,10 +387,10 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 		case BRAINFUCK_TOKEN_INPUT:
 			(*ptr)++;
 			for (; *ptr < end && (str[*ptr] == c); (*ptr)++) {
-			    if (instruction->quantity >= LONG_MAX){
-			        fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
-			        exit(-2);
-			    }
+				if (instruction->quantity >= LONG_MAX) {
+					fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
+					exit(-2);
+				}
 				instruction->quantity++;
 			}
 			(*ptr)--;		
@@ -466,9 +450,8 @@ BrainfuckInstruction * brainfuck_parse_character(char c) {
  * @param instruction The instruction to destroy.
  */
 void brainfuck_destroy_instruction(BrainfuckInstruction *instruction) {
-	if (instruction == NULL) {
+	if (instruction == NULL)
 		return;
-	}
 	free(instruction);
 	instruction = 0;
 }
@@ -494,9 +477,8 @@ void brainfuck_destroy_instructions(BrainfuckInstruction *root) {
  * @param state The state to destroy
  */
 void brainfuck_destroy_state(BrainfuckState *state) {
-	if (state == NULL) {
+	if (state == NULL)
 		return;
-	}
 	brainfuck_destroy_instructions(state->root);
 	state->head = 0;
 	state->root = 0;
@@ -523,39 +505,37 @@ void brainfuck_destroy_context(BrainfuckExecutionContext *context) {
  *	other execution related variables.
  */
 void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *context) {
-	if (root == NULL || context == NULL) {
+	if (root == NULL || context == NULL)
 		return;
-	}
 	BrainfuckInstruction *instruction = root;
 	unsigned long index;
 	while (instruction != NULL && instruction->type != BRAINFUCK_TOKEN_LOOP_END) {
 		switch (instruction->type) {
 		case BRAINFUCK_TOKEN_PLUS:
-			context->tape[context->tape_index] += (unsigned char)instruction->quantity; // may overflow
+			context->tape[context->tape_index] += (unsigned char) instruction->quantity; // may overflow
 			break;
 		case BRAINFUCK_TOKEN_MINUS:
-			context->tape[context->tape_index] -= (unsigned char)instruction->quantity; // may underflow
+			context->tape[context->tape_index] -= (unsigned char) instruction->quantity; // may underflow
 			break;
 		case BRAINFUCK_TOKEN_NEXT:
 			if (instruction->quantity >= INT_MAX - context->tape_size || 
-			        (((unsigned long)context->tape_index) + instruction->quantity) >= context->tape_size) {
-			    fprintf(stderr, "Tape memory out of bounds (overrun)\nExceeded the tape size of %zd cells\n", context->tape_size);
-			    exit(-1);
+					(((unsigned long)context->tape_index) + instruction->quantity) >= context->tape_size) {
+				fprintf(stderr, "Tape memory out of bounds (overrun)\nExceeded the tape size of %zd cells\n", context->tape_size);
+				exit(-1);
 			}
 			context->tape_index += instruction->quantity;
 			break;
 		case BRAINFUCK_TOKEN_PREVIOUS:
 			if (instruction->quantity >= INT_MAX - context->tape_size || 
-			    ((long)context->tape_index) - (long)instruction->quantity < 0) {
-			    fprintf(stderr, "Tape memory out of bounds (underrun)\nUndershot the tape size of %zd cells\n", context->tape_size);
-			    exit(-1);
+					((long)context->tape_index) - (long)instruction->quantity < 0) {
+				fprintf(stderr, "Tape memory out of bounds (underrun)\nUndershot the tape size of %zd cells\n", context->tape_size);
+				exit(-1);
 			}
 			context->tape_index -= instruction->quantity;
 			break;
 		case BRAINFUCK_TOKEN_OUTPUT:
-			for (index = 0; index < instruction->quantity; index++) {
+			for (index = 0; index < instruction->quantity; index++)
 				context->output_handler(context->tape[context->tape_index]);
-			}
 			break;
 		case BRAINFUCK_TOKEN_INPUT:
 			for (index = 0; index < instruction->quantity; index++)
