@@ -19,6 +19,10 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#	define isatty _isatty
+#endif
+
 #include "../include/brainfuck.h"
 
 /*
@@ -40,7 +44,6 @@ int run_file(FILE *file) {
 	BrainfuckState *state = brainfuck_state();
 	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
 	if (file == NULL) {
-		fprintf(stderr, "failed to open file\n");
 		brainfuck_destroy_context(context);
 		brainfuck_destroy_state(state);
 		return EXIT_FAILURE;
@@ -134,12 +137,14 @@ int main(int argc, char *argv[]) {
 	}
 	if (argc > 1) {
 		while (i < argc)
-			run_file(fopen(argv[i++], "r"));
+			if (run_file(fopen(argv[i++], "r")) == EXIT_FAILURE)
+				fprintf(stderr, "error: failed to read file %s\n", argv[i - 1]);
 	} else {
 		if (isatty(fileno(stdin))) {
 			run_interactive_console();
 		} else {
-			run_file(stdin);
+			if (run_file(stdin) == EXIT_FAILURE) 
+				fprintf(stderr, "error: failed to read from stdin\n");
 		}
 	}
 	return EXIT_SUCCESS;

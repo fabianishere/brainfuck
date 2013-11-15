@@ -33,7 +33,7 @@ BrainfuckState * brainfuck_state() {
 }
 
 /*
- * Creates a new context.
+ * Creates a new brainfuck context.
  *
  * @param size The size of the tape.
  */
@@ -47,12 +47,11 @@ BrainfuckExecutionContext * brainfuck_context(int size) {
 			malloc(sizeof(BrainfuckExecutionContext));
 	
 	context->output_handler = &putchar;
-        context->input_handler = &getchar;
-        context->tape = tape;
-        context->tape_index = 0;
-        context->tape_size = size;
-        
-        return context;
+	context->input_handler = &getchar;
+	context->tape = tape;
+	context->tape_index = 0;
+	context->tape_size = size;
+	return context;
 }
 
 /*
