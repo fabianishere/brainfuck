@@ -32,4 +32,4 @@ See LICENSE file.
 ## Contributors
     Fabian M. https://www.github.com/FabianM  mail.fabianm@gmail.com
     aliclubb https://www.github.com/aliclubb
-	diekman https://www.github.com/diekmann
+	diekmann https://www.github.com/diekmann
