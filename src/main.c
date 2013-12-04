@@ -139,6 +139,7 @@ int main(int argc, char *argv[]) {
 			if (run_file(fopen(argv[i++], "r")) == EXIT_FAILURE)
 				fprintf(stderr, "error: failed to read file %s\n", argv[i - 1]);
 	} else {
+		// checks if someone is piping code or just calling it the normal way.
 		if (isatty(fileno(stdin))) {
 			run_interactive_console();
 		} else {
