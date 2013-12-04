@@ -8,6 +8,7 @@
 Debug
 bin
 lib
+build
 
 # CMake Files
 Makefile

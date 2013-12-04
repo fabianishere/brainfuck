@@ -34,10 +34,10 @@
  */
 typedef struct BrainfuckInstruction {
 	/*
-	 * The quantity of this instruction.
-	 * TODO: rename this to a more logical name.
+	 * The difference between the value of the byte at the currect pointer and 
+	 *   the value we want.
 	 */
-	unsigned long quantity;
+	unsigned long difference;
 	/*
 	 * The type of this instruction.
 	 */

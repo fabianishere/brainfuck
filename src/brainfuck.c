@@ -218,28 +218,18 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int unti
 	char temp;
 	while ((ch = fgetc(stream)) != until) {
 		instruction->type = ch;
-		instruction->quantity = 1;
+		instruction->difference = 1;
 		switch(ch) {
 		case BRAINFUCK_TOKEN_PLUS:
 		case BRAINFUCK_TOKEN_MINUS:
 			while ((temp = fgetc(stream)) != until && (temp == BRAINFUCK_TOKEN_PLUS 
 					|| temp == BRAINFUCK_TOKEN_MINUS)) {
 				if (temp == ch) {
-					if (instruction->quantity >= LONG_MAX) {
-						fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
-						exit(-2);
-					}
-					instruction->quantity++;
+					instruction->difference++;
 				} else {
-					if (instruction->quantity <= 0) {
-						// handle things such as: +--+ 
-						assert(instruction->quantity == 0);
-						goto break_inner_plusminus;
-					}
-					instruction->quantity--;
+					instruction->difference--;
 				}
 			}
-			break_inner_plusminus:
 			ungetc(temp, stream);
 			break;
 		case BRAINFUCK_TOKEN_NEXT:
@@ -247,32 +237,17 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int unti
 			while ((temp = fgetc(stream)) != until && (temp == BRAINFUCK_TOKEN_NEXT 
 					|| temp == BRAINFUCK_TOKEN_PREVIOUS)) {
 				if (temp == ch) {
-				    if (instruction->quantity >= LONG_MAX){
-				        fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
-				        exit(-2);
-				    }
-					instruction->quantity++;
+					instruction->difference++;
 				} else {
-				    if(instruction->quantity <= 0){
-				        // handle things such as: ><<<>
-				        assert(instruction->quantity == 0);
-			            goto break_inner_nextprev;
-				    }
-					instruction->quantity--;
+					instruction->difference--;
 				}
 			}
-			break_inner_nextprev:
 			ungetc(temp, stream);
 			break;
 		case BRAINFUCK_TOKEN_OUTPUT:
 		case BRAINFUCK_TOKEN_INPUT:
-			while ((temp = fgetc(stream)) != until && temp == ch){
-				if (instruction->quantity >= LONG_MAX){
-					fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
-					exit(-2);
-				}
-				instruction->quantity++;
-			}
+			while ((temp = fgetc(stream)) != until && temp == ch)
+				instruction->difference++;
 			ungetc(temp, stream);
 			break;
 		case BRAINFUCK_TOKEN_LOOP_START:
@@ -341,78 +316,60 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 	instruction->loop = 0;
 	char c, temp_c;
 	for (; *ptr < end && (c = str[*ptr]); (*ptr)++) {
-		instruction->type = c;
-		instruction->quantity = 1;
-		switch(c) {
-		case BRAINFUCK_TOKEN_PLUS:
-		case BRAINFUCK_TOKEN_MINUS:
-			(*ptr)++;
-			for (; *ptr < end && (temp_c = str[*ptr]) && 
-					(temp_c == BRAINFUCK_TOKEN_PLUS || temp_c == BRAINFUCK_TOKEN_MINUS); (*ptr)++) {
-				if (temp_c == c) {
-					if (instruction->quantity >= LONG_MAX){
-						fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
-						exit(-2);
+			instruction->type = c;
+			instruction->difference = 1;
+			switch(c) {
+			case BRAINFUCK_TOKEN_PLUS:
+			case BRAINFUCK_TOKEN_MINUS:
+				(*ptr)++;
+				for (; *ptr < end && (temp_c = str[*ptr]) && 
+						(temp_c == BRAINFUCK_TOKEN_PLUS || temp_c == BRAINFUCK_TOKEN_MINUS); (*ptr)++) {
+					if (temp_c == c) {
+						instruction->difference++;
+					} else {
+						instruction->difference--;
 					}
-					instruction->quantity++;
-				} else {
-					//TODO FIXME: this assertion fails for e.g. +--+
-					assert(instruction->quantity > 0);
-					instruction->quantity--;
 				}
-			}
-			(*ptr)--;	
-			break;
-		case BRAINFUCK_TOKEN_NEXT:
-		case BRAINFUCK_TOKEN_PREVIOUS:
-			(*ptr)++;
-			for (; *ptr < end && (temp_c = str[*ptr]) && 
-					(temp_c == BRAINFUCK_TOKEN_NEXT || temp_c == BRAINFUCK_TOKEN_PREVIOUS); (*ptr)++) {
-				if (temp_c == c) {
-					if (instruction->quantity >= LONG_MAX) {
-						fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
-						exit(-2);
+				(*ptr)--;	
+				break;
+			case BRAINFUCK_TOKEN_NEXT:
+			case BRAINFUCK_TOKEN_PREVIOUS:
+				(*ptr)++;
+				for (; *ptr < end && (temp_c = str[*ptr]) && 
+						(temp_c == BRAINFUCK_TOKEN_NEXT || temp_c == BRAINFUCK_TOKEN_PREVIOUS); (*ptr)++) {
+					if (temp_c == c) {
+						instruction->difference++;
+					} else {
+						instruction->difference--;
 					}
-					instruction->quantity++;
-				} else {
-					//TODO FIXME: this assertion fails for e.g. ><<>
-					assert(instruction->quantity > 0);
-					instruction->quantity--;
 				}
-			}
-			(*ptr)--;		
-			break;
-		case BRAINFUCK_TOKEN_OUTPUT:
-		case BRAINFUCK_TOKEN_INPUT:
-			(*ptr)++;
-			for (; *ptr < end && (str[*ptr] == c); (*ptr)++) {
-				if (instruction->quantity >= LONG_MAX) {
-					fprintf(stderr, "Error parsing brainfuck code (%s): too many equal consecutive symbols\n", __func__ );
-					exit(-2);
+				(*ptr)--;		
+				break;
+			case BRAINFUCK_TOKEN_OUTPUT:
+			case BRAINFUCK_TOKEN_INPUT:
+				(*ptr)++;
+				for (; *ptr < end && (str[*ptr] == c); (*ptr)++) {
+					instruction->difference++;
 				}
-				instruction->quantity++;
+				(*ptr)--;		
+				break;
+			case BRAINFUCK_TOKEN_LOOP_START:
+				(*ptr)++;
+				instruction->loop = brainfuck_parse_substring_incremental(str, ptr, end);
+				break;
+			case BRAINFUCK_TOKEN_LOOP_END:
+				return root;
+			default:
+				continue;
 			}
-			(*ptr)--;		
-			break;
-		case BRAINFUCK_TOKEN_LOOP_START: {
-			(*ptr)++;
-			instruction->loop = brainfuck_parse_substring_incremental(str, ptr, end);
-			break;
+			instruction->next = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
+			instruction->next->next = 0;
+			instruction->next->loop = 0;
+			instruction->next->previous = instruction;
+			instruction = instruction->next;
 		}
-		case BRAINFUCK_TOKEN_LOOP_END:
-			return root;
-		default:
-			continue;
-		}
-		instruction->next = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
-		instruction->next->next = 0;
-		instruction->next->loop = 0;
-		instruction->next->previous = instruction;
-		instruction = instruction->next;
-	}
-	instruction->type = BRAINFUCK_TOKEN_LOOP_END;
-	return root;
-
+		instruction->type = BRAINFUCK_TOKEN_LOOP_END;
+		return root;
 }
 
 /*
@@ -425,7 +382,7 @@ BrainfuckInstruction * brainfuck_parse_character(char c) {
 	BrainfuckInstruction *instruction = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
 	instruction->next = 0;
 	instruction->loop = 0;
-	instruction->quantity = 1;
+	instruction->difference = 1;
 	switch(c) {
 	case BRAINFUCK_TOKEN_PLUS:
 	case BRAINFUCK_TOKEN_MINUS:
@@ -511,33 +468,33 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 	while (instruction != NULL && instruction->type != BRAINFUCK_TOKEN_LOOP_END) {
 		switch (instruction->type) {
 		case BRAINFUCK_TOKEN_PLUS:
-			context->tape[context->tape_index] += (unsigned char) instruction->quantity; // may overflow
+			context->tape[context->tape_index] += (unsigned char) instruction->difference; // may overflow
 			break;
 		case BRAINFUCK_TOKEN_MINUS:
-			context->tape[context->tape_index] -= (unsigned char) instruction->quantity; // may underflow
+			context->tape[context->tape_index] -= (unsigned char) instruction->difference; // may underflow
 			break;
 		case BRAINFUCK_TOKEN_NEXT:
-			if (instruction->quantity >= INT_MAX - context->tape_size || 
-					(((unsigned long)context->tape_index) + instruction->quantity) >= context->tape_size) {
-				fprintf(stderr, "Tape memory out of bounds (overrun)\nExceeded the tape size of %zd cells\n", context->tape_size);
-				exit(-1);
+			if (instruction->difference >= INT_MAX - context->tape_size || 
+					(((unsigned long)context->tape_index) + instruction->difference) >= context->tape_size) {
+				fprintf(stderr, "error: tape memory out of bounds (overrun)\nexceeded the tape size of %zd cells\n", context->tape_size);
+				exit(EXIT_FAILURE);
 			}
-			context->tape_index += instruction->quantity;
+			context->tape_index += instruction->difference;
 			break;
 		case BRAINFUCK_TOKEN_PREVIOUS:
-			if (instruction->quantity >= INT_MAX - context->tape_size || 
-					((long)context->tape_index) - (long)instruction->quantity < 0) {
-				fprintf(stderr, "Tape memory out of bounds (underrun)\nUndershot the tape size of %zd cells\n", context->tape_size);
-				exit(-1);
+			if (instruction->difference >= INT_MAX - context->tape_size || 
+					((long)context->tape_index) - (long)instruction->difference < 0) {
+				fprintf(stderr, "error: tape memory out of bounds (underrun)\nundershot the tape size of %zd cells\n", context->tape_size);
+				exit(EXIT_FAILURE);
 			}
-			context->tape_index -= instruction->quantity;
+			context->tape_index -= instruction->difference;
 			break;
 		case BRAINFUCK_TOKEN_OUTPUT:
-			for (index = 0; index < instruction->quantity; index++)
+			for (index = 0; index < instruction->difference; index++)
 				context->output_handler(context->tape[context->tape_index]);
 			break;
 		case BRAINFUCK_TOKEN_INPUT:
-			for (index = 0; index < instruction->quantity; index++)
+			for (index = 0; index < instruction->difference; index++)
 				context->tape[context->tape_index] = context->input_handler();
 			break;
 		case BRAINFUCK_TOKEN_LOOP_START:

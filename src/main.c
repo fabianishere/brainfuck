@@ -92,7 +92,6 @@ void run_interactive_console() {
 	}
 }
 
-
 /* Command line options */
 static struct option long_options[] = {
 	{"help", no_argument, 0, 'h'},
