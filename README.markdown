@@ -45,7 +45,7 @@ Then, simply create the Makefiles:
 ```sh
 $ cmake ..
 ```
-and finally, build it using the building system you choose (e.g. Make):
+and finally, build it using the building system you chose (e.g. Make):
 ```sh
 $ make
 ```
