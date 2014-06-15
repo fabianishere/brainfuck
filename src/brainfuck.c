@@ -51,6 +51,7 @@ BrainfuckExecutionContext * brainfuck_context(int size) {
 	context->tape = tape;
 	context->tape_index = 0;
 	context->tape_size = size;
+	context->shouldStop = 0;
 	return context;
 }
 
@@ -505,5 +506,20 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 			return;
 		}
 		instruction = instruction->next;
+
+		if (context->shouldStop == 1) {
+			instruction = NULL;
+			return;
+		}
 	} 
+}
+
+/*
+ * Stops the currently running program referenced by the given execution context.
+ *
+ * @param context The context of this execution that contains the tape and
+ *	other execution related variables.
+ */
+void brainfuck_execution_stop(BrainfuckExecutionContext *context) {
+	context->shouldStop = 1;
 }

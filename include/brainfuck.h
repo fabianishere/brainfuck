@@ -111,6 +111,10 @@ typedef struct BrainfuckExecutionContext {
 	 * size of the tape in umber of cells.
 	 */
 	size_t tape_size;
+	/*
+	 * A flag that, if set to true, indicates that execution should stop.
+	 */
+	int shouldStop;
 } BrainfuckExecutionContext;
 
 /*
@@ -274,5 +278,13 @@ void brainfuck_destroy_context(struct BrainfuckExecutionContext *);
  *	other execution related variables.
  */
 void brainfuck_execute(struct BrainfuckInstruction *, struct BrainfuckExecutionContext *);
+
+/*
+ * Stops the currently running program referenced by the given execution context.
+ *
+ * @param context The context of this execution that contains the tape and
+ *	other execution related variables.
+ */
+void brainfuck_execution_stop(BrainfuckExecutionContext *);
 
 #endif /* BRAINFUCK_H */
