@@ -256,6 +256,8 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int unti
 			break;
 		case BRAINFUCK_TOKEN_LOOP_END:
 			return root;
+        case BRAINFUCK_TOKEN_BREAK:
+            break;
 		default:
 			continue;
 		}
@@ -360,6 +362,8 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 				break;
 			case BRAINFUCK_TOKEN_LOOP_END:
 				return root;
+            case BRAINFUCK_TOKEN_BREAK:
+                break;
 			default:
 				continue;
 			}
@@ -393,6 +397,7 @@ BrainfuckInstruction * brainfuck_parse_character(char c) {
 	case BRAINFUCK_TOKEN_INPUT:
 	case BRAINFUCK_TOKEN_LOOP_START:
 	case BRAINFUCK_TOKEN_LOOP_END:
+    case BRAINFUCK_TOKEN_BREAK:
 		break;
 	default:
 		return NULL;
@@ -502,6 +507,26 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 			while(context->tape[context->tape_index])
 				brainfuck_execute(instruction->loop, context);
 			break;
+        case BRAINFUCK_TOKEN_BREAK:
+        {
+            int low  = context->tape_index - 10;
+            if (low < 0) low = 0;
+            int high = low + 21;
+            if (high >= context->tape_size) high = context->tape_size-1;
+            for (index = low; index < high; index++)
+                printf("%d\t", index);
+            printf("\n");
+            for (index = low; index < high; index++)
+                printf("%d\t", context->tape[index]);
+            printf("\n");
+            for (index = low; index < high; index++)
+                if (index == context->tape_index)
+                    printf("^\t");
+                else
+                    printf(" \t");
+            printf("\n");
+            break;
+        }
 		default:
 			return;
 		}
