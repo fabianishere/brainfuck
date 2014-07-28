@@ -28,6 +28,7 @@
 #define BRAINFUCK_TOKEN_INPUT ','
 #define BRAINFUCK_TOKEN_LOOP_START '['
 #define BRAINFUCK_TOKEN_LOOP_END ']'
+#define BRAINFUCK_TOKEN_BREAK '#'
 
 /*
  * Represents a brainfuck instruction.
