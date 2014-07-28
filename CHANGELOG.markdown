@@ -1,10 +1,15 @@
+Version 2.6
+=============
+
+- add break token for debugging.
+
 Version 2.4
 =============
 
 - fix some strings.
 - rename multiple methods.
 - rewrite multiple methods.
-- add examples
+- add examples.
 
 Version 2.2
 =============
@@ -22,17 +27,17 @@ Version 2.0
 =============
 
 - rewrite source code.
-- improve CLI
+- improve CLI.
 
 Version 1.2
 =============
 
-- piping support
+- piping support.
 
 Version 1.1
 =============
 
-- tweak output messages
+- tweak output messages.
 
 Version 1.0
 =============
