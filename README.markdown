@@ -54,7 +54,8 @@ $ make
 See LICENSE file.
 
 ## Contributors
-    Fabian M. https://github.com/fabianm  mail.fabianm@gmail.com
+    Fabian M. https://github.com/fabianm mail.fabianm@gmail.com
     aliclubb https://github.com/aliclubb
     diekmann https://github.com/diekmann
     SevenBits https://github.com/SevenBits
+    Alex Burka https://github.com/durka durka42@gmail.com
