@@ -3,9 +3,9 @@ brainfuck
 Brainfuck interpreter written in C.
 
 ## Usage
-    brainfuck [-ch] <filenames>
-	-e  run code directly
-	-h  show a help message.
+    brainfuck [-eh] <filenames>
+	-e --eval  run code directly
+	-h --help  show a help message.
 
 The interactive console can be accessed by passing no arguments.    
 
