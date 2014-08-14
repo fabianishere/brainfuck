@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.6)
 
 project(brainfuck C)
 set(brainfuck_VERSION_MAJOR 2)
-set(brainfuck_VERSION_MINOR 5)
-set(brainfuck_VERSION_PATCH 0)
+set(brainfuck_VERSION_MINOR 6)
+set(brainfuck_VERSION_PATCH 1)
 
 add_definitions("-Wall -Wextra")
 add_library(libbrainfuck STATIC src/brainfuck.c)
