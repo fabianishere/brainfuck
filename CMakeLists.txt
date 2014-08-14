@@ -3,7 +3,12 @@ cmake_minimum_required(VERSION 2.6)
 project(brainfuck C)
 set(brainfuck_VERSION_MAJOR 2)
 set(brainfuck_VERSION_MINOR 6)
-set(brainfuck_VERSION_PATCH 1)
+set(brainfuck_VERSION_PATCH 2)
+
+option(WITH_DEBUG "Enable the debug extension for brainfuck." OFF)
+if(WITH_DEBUG)
+	add_definitions("-DBRAINFUCK_EXTENSION_DEBUG")
+endif()
 
 add_definitions("-Wall -Wextra")
 add_library(libbrainfuck STATIC src/brainfuck.c)

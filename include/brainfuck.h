@@ -16,7 +16,7 @@
 #ifndef BRAINFUCK_H
 #define BRAINFUCK_H
 
-#define BRAINFUCK_VERSION "2.6.1"
+#define BRAINFUCK_VERSION "2.6.2"
 #define BRAINFUCK_CELL_TYPE int
 #define BRAINFUCK_TAPE_SIZE 30000
 
@@ -28,7 +28,11 @@
 #define BRAINFUCK_TOKEN_INPUT ','
 #define BRAINFUCK_TOKEN_LOOP_START '['
 #define BRAINFUCK_TOKEN_LOOP_END ']'
-#define BRAINFUCK_TOKEN_BREAK '#'
+#ifdef BRAINFUCK_EXTENSION_DEBUG
+#	define BRAINFUCK_TOKEN_BREAK '#'
+#else
+#	define BRAINFUCK_TOKEN_BREAK -10
+#endif
 
 /*
  * Represents a brainfuck instruction.

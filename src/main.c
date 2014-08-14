@@ -90,7 +90,9 @@ int run_string(char *code) {
 void run_interactive_console() {
 	printf("brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__,
 		__TIME__);
+#ifdef BRAINFUCK_EXTENSION_DEBUG
 	printf("Use # to inspect tape\n");
+#endif
 	BrainfuckState *state = brainfuck_state();
 	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
 	BrainfuckInstruction *instruction;
