@@ -11,11 +11,11 @@
 .\" The following lines are read in generating the apropos(man -k) database. Use only key
 .\" words here as the database is built based on the words here and in the .ND line. 
 .\" Use .Nm macro to designate other names for the documented program.
-.Nd Brainfuck interpreter
+.Nd brainfuck interpreter
 .Sh SYNOPSIS             \" Section Header - required - don't modify
 .Nm
-.Op Fl feihd                \" [-fehd]
-.Op Fl f Ar filename         \" [-f path] 
+.Op Fl veh                \" [-veh]
+file ...
 .Sh DESCRIPTION          \" Section Header - required - don't modify
 A brainfuck interpreter written in C.
 .Pp                      \" Inserts a space
@@ -42,12 +42,10 @@ If the byte at the data pointer is nonzero, then instead of moving the instructi
 .El
 .Sh FLAGS
 .Bl -tag -width -indent  \" Begins a tagged list 
-.It Fl f | -file              \" Each item preceded by .It macro
-File mode
 .It Fl e | -eval
 Direct input mode
-.It Fl d | -debug
-Enable debugging
+.It Fl v | -version
+Show version information
 .It Fl h | -help
 Show help message
 .El                      \" Ends the list

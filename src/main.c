@@ -20,22 +20,33 @@
 #include <getopt.h>
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-#	define isatty _isatty
+	#define isatty _isatty
 #endif
 
 #include "../include/brainfuck.h"
 
 /*
- * Prints the usage message of this program.
+ * Print the usage message of this program.
  */
 void print_usage() {
-	fprintf(stderr, "usage: brainfuck [-eih] file...\n");
-	fprintf(stderr,	"\t-e  run code directly\n");
-	fprintf(stderr,	"\t-h  show a help message\n");
+	fprintf(stderr, "usage: brainfuck [-veh] file...\n");
+	fprintf(stderr,	"\t-v --version\t\trun code directly\n");
+	fprintf(stderr,	"\t-e --eval\t\trun code directly\n");
+	fprintf(stderr,	"\t-h --help\t\tshow a help message\n");
 }
 
 /*
- * Runs the given brainfuck file.
+ * Print the version information. 
+ */
+void print_version() {
+	fprintf(stderr, "brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__, 
+		__TIME__);
+	fprintf(stderr, "Copyright (c) 2014 Fabian M.");
+	fprintf(stderr, "Distributed under the Apache License Version 2.0.\n");
+}
+
+/*
+ * Run the given brainfuck file.
  *
  * @param file The brainfuck file to run.
  * @return EXIT_SUCCESS if no errors are encountered, otherwise EXIT_FAILURE.
@@ -57,7 +68,7 @@ int run_file(FILE *file) {
 }
 
 /*
- * Runs the given brainfuck string.
+ * Run the given brainfuck string.
  *
  * @param code The brainfuck string to run.
  * @return EXIT_SUCCESS if no errors are encountered, otherwise EXIT_FAILURE.
@@ -77,18 +88,20 @@ int run_string(char *code) {
  * Run the brainfuck interpreter in interactive mode.
  */
 void run_interactive_console() {
-	printf("brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__, __TIME__);
+	fprintf(stderr, "brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__,
+		__TIME__);
+	fprintf(stderr, "Use # to inspect tape\n");
 	BrainfuckState *state = brainfuck_state();
 	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
 	BrainfuckInstruction *instruction;
 	
-	printf(">> ");
+	fprintf(stderr, ">> ");
 	while(1) {
-		fflush(stdout);
+		fflush(stderr);
 		instruction = brainfuck_parse_stream_until(stdin, '\n');
 		brainfuck_add(state, instruction);
 		brainfuck_execute(instruction, context);
-		printf("\n>> ");
+		fprintf(stderr, "\n>> ");
 	}
 }
 
@@ -96,6 +109,7 @@ void run_interactive_console() {
 static struct option long_options[] = {
 	{"help", no_argument, 0, 'h'},
 	{"eval", required_argument, 0, 'e'},
+	{"version", no_argument, 0, 'v'},
 	{0, 0, 0, 0}
 };
 
@@ -112,7 +126,7 @@ int main(int argc, char *argv[]) {
 	
 	while (1) {
 		option_index = 0;
-		c = getopt_long (argc, argv, "he:",
+		c = getopt_long (argc, argv, "ve:h",
 			long_options, &option_index);
 		if (c == -1)
 			break;
@@ -124,6 +138,9 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'h':
 			print_usage();
+			return EXIT_SUCCESS;
+		case 'v':
+			print_version();
 			return EXIT_SUCCESS;
 		case 'e':	
  			return run_string((char *) optarg);

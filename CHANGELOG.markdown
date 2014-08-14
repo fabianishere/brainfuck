@@ -1,3 +1,8 @@
+Version 2.6
+===========
+
+- add version option
+
 Version 2.5
 =============
 
