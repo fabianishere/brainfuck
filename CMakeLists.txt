@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 project(brainfuck C)
 set(brainfuck_VERSION_MAJOR 2)
 set(brainfuck_VERSION_MINOR 6)
-set(brainfuck_VERSION_PATCH 3)
+set(brainfuck_VERSION_PATCH 4)
 
 option(ENABLE_DEBUG "Enable the debug extension for brainfuck." OFF)
 if(ENABLE_DEBUG)
