@@ -3,7 +3,7 @@ brainfuck
 Brainfuck interpreter written in C.
 
 ## Usage
-    brainfuck [-eh] <filenames>
+    brainfuck [-veh] file...
 	-e --eval		run code directly
 	-v --version	show version information
 	-h --help		show a help message.
