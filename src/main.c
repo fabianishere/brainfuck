@@ -41,7 +41,7 @@ void print_usage() {
 void print_version() {
 	fprintf(stderr, "brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__, 
 		__TIME__);
-	fprintf(stderr, "Copyright (c) 2014 Fabian M.");
+	fprintf(stderr, "Copyright (c) 2014 Fabian M.\n");
 	fprintf(stderr, "Distributed under the Apache License Version 2.0.\n");
 }
 
