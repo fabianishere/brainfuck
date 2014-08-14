@@ -88,20 +88,20 @@ int run_string(char *code) {
  * Run the brainfuck interpreter in interactive mode.
  */
 void run_interactive_console() {
-	fprintf(stderr, "brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__,
+	printf("brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__,
 		__TIME__);
-	fprintf(stderr, "Use # to inspect tape\n");
+	printf("Use # to inspect tape\n");
 	BrainfuckState *state = brainfuck_state();
 	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
 	BrainfuckInstruction *instruction;
 	
-	fprintf(stderr, ">> ");
+	printf(">> ");
 	while(1) {
-		fflush(stderr);
+		fflush(stdout);
 		instruction = brainfuck_parse_stream_until(stdin, '\n');
 		brainfuck_add(state, instruction);
 		brainfuck_execute(instruction, context);
-		fprintf(stderr, "\n>> ");
+		printf("\n>> ");
 	}
 }
 

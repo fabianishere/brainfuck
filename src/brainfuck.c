@@ -512,15 +512,16 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
             int low  = context->tape_index - 10;
             if (low < 0) low = 0;
             int high = low + 21;
-            if (high >= context->tape_size) high = context->tape_size-1;
-            for (index = low; index < high; index++)
-                printf("%d\t", index);
+            if (high >= (int) context->tape_size) 
+				high = context->tape_size-1;
+            for (index = low; index < (unsigned long) high; index++)
+                printf("%lu\t", index);
             printf("\n");
-            for (index = low; index < high; index++)
+            for (index = low; index < (unsigned long) high; index++)
                 printf("%d\t", context->tape[index]);
             printf("\n");
-            for (index = low; index < high; index++)
-                if (index == context->tape_index)
+            for (index = low; index < (unsigned long) high; index++)
+                if (index == (unsigned long) context->tape_index)
                     printf("^\t");
                 else
                     printf(" \t");
