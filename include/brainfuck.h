@@ -70,15 +70,16 @@ struct BrainfuckInstruction {
 	 */
 	union attributes {		
 		/*
-		 * Either the difference between de current cell value or index and the 
-		 * 	next one or the amount of times the execution of this instruction 
-		 * 	should be repeated.
+		 * Either the difference between de current cell value or 
+		 * 	index and the next one or the amount of times the 
+		 * 	execution of this instruction should be repeated.
 		 */
 		int delta;
 		
 		/*
-		 * A pointer to a {@link BrainfuckInstruction} that we need to jump back to
-		 *	if this instruction is a break instruction.
+		 * A pointer to a {@link BrainfuckInstruction} that we need to 
+		 * 	jump back to if this instruction is a break 
+		 *	instruction.
 		 */
 		struct BrainfuckInstruction *jump;
 	} attributes;
