@@ -1,550 +1,605 @@
 /*
- * Copyright 2014 Fabian M.
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2014 Fabian M.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
-#include <limits.h>
-#include <assert.h>
 
-#include "../include/brainfuck.h"
+#include <brainfuck.h>
 
 /*
- * Creates a new state.
- */
-BrainfuckState * brainfuck_state() {
-	BrainfuckState *state = (BrainfuckState *) malloc(sizeof(BrainfuckState));
-	state->root = 0;
-	state->head = 0;
-	return state;
-}
-
-/*
- * Creates a new brainfuck context.
+ * Allocate a new {@link BrainfuckInstruction} to the heap.
  *
- * @param size The size of the tape.
+ * @return A pointer to the memory allocated to the heap or 
+ *	<code>NULL</code> if there is no memory available.
  */
-BrainfuckExecutionContext * brainfuck_context(int size) {
-	if (size < 0)
-		size = BRAINFUCK_TAPE_SIZE;
-		
-	char* tape = malloc(sizeof(BRAINFUCK_CELL_TYPE) * size);
-	
-	BrainfuckExecutionContext *context = (BrainfuckExecutionContext *) 
-			malloc(sizeof(BrainfuckExecutionContext));
-	
-	context->output_handler = &putchar;
-	context->input_handler = &getchar;
-	context->tape = tape;
-	context->tape_index = 0;
-	context->tape_size = size;
-	context->shouldStop = 0;
-	return context;
+struct BrainfuckInstruction * brainfuck_instruction_alloc(void)
+{
+	return malloc(sizeof(struct BrainfuckInstruction));
 }
 
-/*
- * Removes the given instruction from the linked list.
+/* 
+ * Free the given {@link BrainfuckInstruction} from the memory.
  * 
- * @param state The state
- * @param instruction The instruction to remove.
- * @return The instruction that is removed.
+ * @param instruction The instruction to free from the memory.
  */
-BrainfuckInstruction * brainfuck_remove(BrainfuckState *state, BrainfuckInstruction *instruction) {
-	if (state == NULL || instruction == NULL)
-		return NULL;
-	if (state->head == instruction)
-		state->head = instruction->previous;
-	instruction->previous->next = instruction->next;
-	instruction->next->previous = instruction->previous;
-	instruction->previous = 0;
-	instruction->next = 0;
-	return instruction;
-}
-
-/*
- * Adds an instruction to the instruction list.
- *
- * @param state The state.
- * @param instruction The instruction to add.
- * @return The new head of the linked list.
- */
-BrainfuckInstruction * brainfuck_add(BrainfuckState *state, 
-		BrainfuckInstruction *instruction) {
-	if (state == NULL || instruction == NULL)
-		return NULL;
-	instruction->previous = state->head;
-	if (state->head != NULL) 
-		state->head->next = instruction;
-	BrainfuckInstruction *iter = instruction;
-	while (iter != NULL) {
-		if (iter->next == NULL) {
-			state->head = iter;
-			break;
-		}
-		iter = iter->next;
-	}
-	if (state->root == NULL) 
-		state->root = instruction;
-	return state->head;
-}
-
-/*
- * Adds an instruction to the front of the instruction list.
- *
- * @param state The state.
- * @param instruction The instruction to add.
- * @return The new head of the linked list.
- */
-BrainfuckInstruction * brainfuck_add_front(BrainfuckState *state, 
-		BrainfuckInstruction *instruction) {
-	if (state == NULL || instruction == NULL)
-		return NULL;
-	instruction->previous = 0;
-	BrainfuckInstruction *iter = instruction;
-	while (iter != NULL) {
-		if (iter->next == NULL) {
-			state->head = iter;
-			break;
-		}
-		iter = iter->next;
-	}
-	iter->next = state->root;
-	state->root->previous = iter;
-	state->root = instruction;
-	return state->head;
-}
-
-/*
- * Adds an instruction to the instruction list.
- *
- * @param state The state.
- * @param before The instruction you want to add another instruction before.
- * @param instruction The instruction to add.
- * @return The instruction that is given.
- */
-BrainfuckInstruction * brainfuck_insert_before(BrainfuckState *state, BrainfuckInstruction *before, 
-		BrainfuckInstruction *instruction) {
-	if (state == NULL || before == NULL || instruction == NULL)
-			return NULL;
-	BrainfuckInstruction *previous = before->previous;
-	BrainfuckInstruction *iter = instruction;
-	while (iter != NULL) {
-		if (iter->next == NULL)
-			break;
-		iter = iter->next;
-	}
-	before->previous = iter;
-	iter->next = iter;
-	
-	if (previous != NULL) {
-		previous->next = instruction;
-		instruction->previous = previous;
-	}
-	if (state->root == before)
-		state->root = instruction;
-	return instruction;
-}
-
-/*
- * Adds an instruction to the instruction list.
- *
- * @param state The state.
- * @param after The instruction you want to add another instruction after.
- * @param instruction The instruction to add.
- * @return The instruction that is given.
- */
-BrainfuckInstruction * brainfuck_insert_after(BrainfuckState *state, BrainfuckInstruction *after, 
-			BrainfuckInstruction *instruction) {
-		if (state == NULL || after == NULL || instruction == NULL)
-			return NULL;
-		after->next = instruction;
-		instruction->previous = after;
-			
-		BrainfuckInstruction *next = after->next;
-		BrainfuckInstruction *iter = instruction;
-		while (iter != NULL) {
-			if (iter->next == NULL)
-				break;
-			iter = iter->next;
-		}
-	
-		if (next != NULL) {
-			next->previous = iter;
-			iter->next = next;
-		}
-		if (state->head == after)
-			state->head = iter;
-		return instruction;		
-}
-
-/*
- * Reads a character, converts it to an instruction and repeats until the EOF character
- * 	occurs and will then return a linked list containing all instructions.
- *
- * @param head The head of the linked list that contains the instructions. 
- * @param stream The stream to read from.
- * @param The head of the linked list containing the instructions.
- */
-BrainfuckInstruction * brainfuck_parse_stream(FILE *stream) {
-	return brainfuck_parse_stream_until(stream, EOF);
-}
-
-/*
- * Reads a character, converts it to an instruction and repeats until the given character
- * 	occurs and will then return a linked list containing all instructions.
- *
- * @param stream The stream to read from.
- * @param until If this character is found in the stream, we will quit reading and return.
- * @param The head of the linked list containing the instructions.
- */
-BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int until) {
-	BrainfuckInstruction *instruction = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
-	instruction->next = 0;
-	instruction->loop = 0;
-	BrainfuckInstruction *root = instruction;
-	char ch;
-	char temp;
-	while ((ch = fgetc(stream)) != until) {
-		instruction->type = ch;
-		instruction->difference = 1;
-		switch(ch) {
-		case BRAINFUCK_TOKEN_PLUS:
-		case BRAINFUCK_TOKEN_MINUS:
-			while ((temp = fgetc(stream)) != until && (temp == BRAINFUCK_TOKEN_PLUS 
-					|| temp == BRAINFUCK_TOKEN_MINUS)) {
-				if (temp == ch) {
-					instruction->difference++;
-				} else {
-					instruction->difference--;
-				}
-			}
-			ungetc(temp, stream);
-			break;
-		case BRAINFUCK_TOKEN_NEXT:
-		case BRAINFUCK_TOKEN_PREVIOUS:
-			while ((temp = fgetc(stream)) != until && (temp == BRAINFUCK_TOKEN_NEXT 
-					|| temp == BRAINFUCK_TOKEN_PREVIOUS)) {
-				if (temp == ch) {
-					instruction->difference++;
-				} else {
-					instruction->difference--;
-				}
-			}
-			ungetc(temp, stream);
-			break;
-		case BRAINFUCK_TOKEN_OUTPUT:
-		case BRAINFUCK_TOKEN_INPUT:
-			while ((temp = fgetc(stream)) != until && temp == ch)
-				instruction->difference++;
-			ungetc(temp, stream);
-			break;
-		case BRAINFUCK_TOKEN_LOOP_START:
-			instruction->loop = brainfuck_parse_stream_until(stream, until);
-			break;
-		case BRAINFUCK_TOKEN_LOOP_END:
-			return root;
-        case BRAINFUCK_TOKEN_BREAK:
-            break;
-		default:
-			continue;
-		}
-		instruction->next = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
-		instruction->next->next = 0;
-		instruction->next->loop = 0;
-		instruction = instruction->next;
-	}
-	instruction->type = BRAINFUCK_TOKEN_LOOP_END;
-	return root;
-}
-
-/*
- * Reads a character, converts it to an instruction and repeats until the string ends
- *	and will then return a linked list containing all instructions.
- *
- * @param str The string to read from.
- * @param The head of the linked list containing the instructions.
- */
-BrainfuckInstruction * brainfuck_parse_string(char *str) {
-	return brainfuck_parse_substring(str, 0, -1);
-}
-
-/*
- * Reads a character, converts it to an instruction and repeats until the string ends
- *	and will then return a linked list containing all instructions.
- *
- * @param str The string to read from.
- * @param begin The index you want to start parsing at.
- * @param end The index you want to stop parsing at.
- *	When <code>-1</code> is given, it will stop at the end of the string.
- * @param The head of the linked list containing the instructions.
- */
-BrainfuckInstruction * brainfuck_parse_substring(char *str, int begin, int end) {
-	int tmp = begin;
-	return brainfuck_parse_substring_incremental(str, &tmp, end);
-}
-
-/*
- * Reads a character, converts it to an instruction and repeats until the string ends
- *	and will then return a linked list containing all instructions.
- *
- * @param str The string to read from.
- * @param ptr The pointer to the integer holding the index you want to start parsing at.
- *	Since this will be used as counter, the value of the pointer will be increased.
- * @param end The index you want to stop parsing at.
- *	When <code>-1</code> is given, it will stop at the end of the string.
- * @param The head of the linked list containing the instructions.
- */
-BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr, int end) {
-	if (str == NULL || ptr == NULL)
-		return NULL;
-	if (end < 0)
-		end = strlen(str);
-	BrainfuckInstruction *root = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
-	BrainfuckInstruction *instruction = root;
-	instruction->next = 0;
-	instruction->previous = 0;
-	instruction->loop = 0;
-	char c, temp_c;
-	for (; *ptr < end && (c = str[*ptr]); (*ptr)++) {
-			instruction->type = c;
-			instruction->difference = 1;
-			switch(c) {
-			case BRAINFUCK_TOKEN_PLUS:
-			case BRAINFUCK_TOKEN_MINUS:
-				(*ptr)++;
-				for (; *ptr < end && (temp_c = str[*ptr]) && 
-						(temp_c == BRAINFUCK_TOKEN_PLUS || temp_c == BRAINFUCK_TOKEN_MINUS); (*ptr)++) {
-					if (temp_c == c) {
-						instruction->difference++;
-					} else {
-						instruction->difference--;
-					}
-				}
-				(*ptr)--;	
-				break;
-			case BRAINFUCK_TOKEN_NEXT:
-			case BRAINFUCK_TOKEN_PREVIOUS:
-				(*ptr)++;
-				for (; *ptr < end && (temp_c = str[*ptr]) && 
-						(temp_c == BRAINFUCK_TOKEN_NEXT || temp_c == BRAINFUCK_TOKEN_PREVIOUS); (*ptr)++) {
-					if (temp_c == c) {
-						instruction->difference++;
-					} else {
-						instruction->difference--;
-					}
-				}
-				(*ptr)--;		
-				break;
-			case BRAINFUCK_TOKEN_OUTPUT:
-			case BRAINFUCK_TOKEN_INPUT:
-				(*ptr)++;
-				for (; *ptr < end && (str[*ptr] == c); (*ptr)++) {
-					instruction->difference++;
-				}
-				(*ptr)--;		
-				break;
-			case BRAINFUCK_TOKEN_LOOP_START:
-				(*ptr)++;
-				instruction->loop = brainfuck_parse_substring_incremental(str, ptr, end);
-				break;
-			case BRAINFUCK_TOKEN_LOOP_END:
-				return root;
-            case BRAINFUCK_TOKEN_BREAK:
-                break;
-			default:
-				continue;
-			}
-			instruction->next = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
-			instruction->next->next = 0;
-			instruction->next->loop = 0;
-			instruction->next->previous = instruction;
-			instruction = instruction->next;
-		}
-		instruction->type = BRAINFUCK_TOKEN_LOOP_END;
-		return root;
-}
-
-/*
- * Converts the given character to an instruction.
- *
- * @param c The character to convert.
- * @param The character that's converted into an instruction.
- */
-BrainfuckInstruction * brainfuck_parse_character(char c) {
-	BrainfuckInstruction *instruction = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
-	instruction->next = 0;
-	instruction->loop = 0;
-	instruction->difference = 1;
-	switch(c) {
-	case BRAINFUCK_TOKEN_PLUS:
-	case BRAINFUCK_TOKEN_MINUS:
-	case BRAINFUCK_TOKEN_NEXT:
-	case BRAINFUCK_TOKEN_PREVIOUS:
-	case BRAINFUCK_TOKEN_OUTPUT:
-	case BRAINFUCK_TOKEN_INPUT:
-	case BRAINFUCK_TOKEN_LOOP_START:
-	case BRAINFUCK_TOKEN_LOOP_END:
-    case BRAINFUCK_TOKEN_BREAK:
-		break;
-	default:
-		return NULL;
-	}
-	instruction->type = c;
-	return instruction;
-}
-
-/*
- * Destroys the given instruction.
- * 
- * @param instruction The instruction to destroy.
- */
-void brainfuck_destroy_instruction(BrainfuckInstruction *instruction) {
-	if (instruction == NULL)
-		return;
+void brainfuck_instruction_free(struct BrainfuckInstruction *instruction)
+{
 	free(instruction);
 	instruction = 0;
 }
 
 /*
- * Destroys a linked list containing instructions.
- * 
- * @param root The start of the instruction list.
+ * Create a cell value mutation instruction and returns it.
+ *
+ * @param delta The difference between the current cell value and the value
+ * 	that is going to be set.
+ * @return The cell value mutation instruction.
  */
-void brainfuck_destroy_instructions(BrainfuckInstruction *root) {
-	BrainfuckInstruction *tmp;
-	while (root != NULL) {
-		tmp = root;
-		brainfuck_destroy_instructions(root->loop);
-		root = root->next;
-		brainfuck_destroy_instruction(tmp);
+struct BrainfuckInstruction * brainfuck_instruction_create_cell_mutation(
+	int delta)
+{
+	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	if (!instruction)
+		return NULL;
+	instruction->id = BRAINFUCK_ICELL;
+	instruction->attributes.delta = delta;
+	return instruction;
+}
+
+/*
+ * Create an index mutation instruction and returns it.
+ *
+ * @param delta The difference between the current index and the index
+ * 	that is going to be set.
+ * @return The index mutation instruction.
+ */
+struct BrainfuckInstruction * brainfuck_instruction_create_index_mutation(
+	int delta)
+{
+	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	if (!instruction)
+		return NULL;
+	instruction->id = BRAINFUCK_IINDEX;
+	instruction->attributes.delta = delta;
+	return instruction;
+}
+
+/*
+ * Create an output instruction and returns it.
+ *
+ * @param times The amount of times this instruction will be executed.
+ * @return The output instruction.
+ */
+struct BrainfuckInstruction * brainfuck_instruction_create_output(int times)
+{
+	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	if (!instruction)
+		return NULL;
+	instruction->id = BRAINFUCK_IOUTPUT;
+	instruction->attributes.delta = times;
+	return instruction;
+}
+
+/*
+ * Create an input instruction and returns it.
+ *
+ * @param times The amount of times this instruction will be executed.
+ * @return The input instruction.
+ */
+struct BrainfuckInstruction * brainfuck_instruction_create_input(int times)
+{
+	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	if (!instruction)
+		return NULL;
+	instruction->id = BRAINFUCK_IINPUT;
+	instruction->attributes.delta = times;
+	return instruction;
+}
+
+/*
+ * Create a loop instruction and return it.
+ *
+ * @return The break instruction.
+ */
+struct BrainfuckInstruction * brainfuck_instruction_create_loop()
+{
+	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	if (!instruction)
+		return NULL;
+	instruction->id = BRAINFUCK_ILOOP;
+	instruction->attributes.delta = 1;
+	return instruction;
+}
+
+/*
+ * Create a break instruction and return it.
+ *
+ * @param jump The jump of this break instruction.
+ * @return The break instruction.
+ */
+struct BrainfuckInstruction * brainfuck_instruction_create_break(
+	struct BrainfuckInstruction *jump)
+{
+	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	if (!instruction)
+		return NULL;
+	instruction->id = BRAINFUCK_IBREAK;
+	instruction->attributes.jump = jump;
+	return instruction;
+}
+
+/*
+ * Allocate a new {@link BrainfuckFileStream} from the heap.
+ *
+ * @return A pointer to the memory allocated to the heap or 
+ *	<code>NULL</code> if there is no memory available.
+ */
+struct BrainfuckFileStream * brainfuck_stream_file_alloc(void)
+{
+	return malloc(sizeof(struct BrainfuckFileStream));
+}
+
+/* 
+ * Free the given {@link BrainfuckStringStream} from the memory.
+ * 
+ * @param stream The stream to free from the memory.
+ */
+void brainfuck_stream_file_free(struct BrainfuckFileStream *stream)
+{
+	free(stream);
+	stream = 0;
+}
+
+/*
+ * Read a character from the stream and return it.
+ * 
+ * @param stream The stream to unget the character from.
+ * @return The character read from the stream.
+ */
+int brainfuck_stream_file_get(struct BrainfuckStream *stream)
+{
+	struct BrainfuckFileStream *file_stream = 
+		brainfuck_stream_file_cast(stream);
+	return fgetc(file_stream->file);
+}
+
+/*
+ * Unget a character from the stream.
+ *
+ * @param stream The stream to unget the character from.
+ * @param character The character to unget.
+ */
+void brainfuck_stream_file_unget(struct BrainfuckStream *stream, int character)
+{
+	struct BrainfuckFileStream *file_stream = 
+		brainfuck_stream_file_cast(stream);
+	ungetc(character, file_stream->file);
+}
+
+/*
+ * Initialise the given {@link BrainfuckFileStream} with
+ * 	the given {@link FILE}.
+ *
+ * @param stream The {@ink BrainfuckFileStream} to initialise.
+ * @param file The {@link FILE} of the file stream.
+ */
+void brainfuck_stream_file_init(struct BrainfuckFileStream *stream, FILE *file)
+{
+	if (!stream)
+		return;
+	stream->file = file;
+	stream->base.get = &brainfuck_stream_file_get;
+	stream->base.unget = &brainfuck_stream_file_unget;
+}
+
+/*
+ * Create a new {@link BrainfuckFileStream} with the given file.
+ *
+ * @param file The file to create the new file stream with.
+ * @return The file stream.
+ */
+struct BrainfuckFileStream * brainfuck_stream_file(FILE *file)
+{
+	struct BrainfuckFileStream *stream = brainfuck_stream_file_alloc();
+	brainfuck_stream_file_init(stream, file);
+	return stream;
+}
+
+/*
+ * Allocate a new {@link BrainfuckBufferStream} from the heap.
+ *
+ * @return A pointer to the memory allocated to the heap or 
+ *	<code>NULL</code> if there is no memory available.
+ */
+struct BrainfuckBufferStream * brainfuck_stream_buffer_alloc()
+{
+	return malloc(sizeof(struct BrainfuckBufferStream));
+}
+
+/* 
+ * Free the given {@link BrainfuckBufferStream} from the memory.
+ * 
+ * @param stream The stream to free from the memory.
+ */
+void brainfuck_stream_buffer_free(struct BrainfuckBufferStream *stream)
+{
+	free(stream);
+	stream = 0;
+}
+
+/*
+ * Read a character from the stream and return it.
+ * 
+ * @param stream The stream to unget the character from.
+ * @return The character read from the stream.
+ */
+int brainfuck_stream_buffer_get(struct BrainfuckStream *stream)
+{
+	struct BrainfuckBufferStream *buf_stream = 
+		brainfuck_stream_buffer_cast(stream);
+	if (!stream || buf_stream->index >= buf_stream->length)
+		return BRAINFUCK_EOF;
+	return buf_stream->buffer[buf_stream->index++];
+}
+
+/*
+ * Unget a character from the stream.
+ *
+ * @param stream The stream to unget the character from.
+ * @param character The character to unget.
+ */
+void brainfuck_stream_buffer_unget(struct BrainfuckStream *stream, 
+		int character)
+{
+	struct BrainfuckBufferStream *buf_stream = 
+		brainfuck_stream_buffer_cast(stream);
+	if (!stream || character < 0)
+		return;
+	buf_stream->buffer[--buf_stream->index] = character;
+}
+
+/*
+ * Initialise the given {@link BrainfuckBufferStream} with
+ * 	the given buffer, index and length.
+ *
+ * @param stream The {@ink BrainfuckBufferStream} to initialise.
+ * @param buffer The memory buffer of this {@link BrainfuckBufferStream}.
+ * @param index The index in memory buffer of this 
+ *	{@link BrainfuckBufferStream}.
+ * @param length The length of the memory buffer of this 
+ *	{@link BrainfuckBufferStream}.
+ */
+void brainfuck_stream_buffer_init(struct BrainfuckBufferStream *stream, 
+		char *buffer, int index, int length)
+{
+	if (!stream)
+		return;
+	stream->buffer = buffer;
+	stream->index = index;
+	stream->length = length;
+	stream->base.get = &brainfuck_stream_buffer_get;
+	stream->base.unget = &brainfuck_stream_buffer_unget;
+}
+
+/*
+ * Create a new {@link BrainfuckBufferStream} with the given string.
+ *
+ * @param string The string to create the new {@link BrainfuckBufferStream} 
+ * 	with.
+ * @return The created {@link BrainfuckBufferStream}.
+ */
+struct BrainfuckBufferStream * brainfuck_stream_string(char *string)
+{
+	struct BrainfuckBufferStream *stream = brainfuck_stream_buffer_alloc();
+	char *copy = strdup(string);
+	if (!copy)
+		return NULL;
+	brainfuck_stream_buffer_init(stream, copy, 0, strlen(string));
+	return stream;
+}
+
+/*
+ * Allocate a new {@link BrainfuckContext} to the heap.
+ *
+ * @return A pointer to the memory allocated to the heap or 
+ *	<code>NULL</code> if there is no memory available.
+ */
+struct BrainfuckContext * brainfuck_context_alloc(void)
+{
+	return malloc(sizeof(struct BrainfuckContext));
+}
+
+/* 
+ * Free the given {@link BrainfuckContext} from the memory.
+ * 
+ * @param ctx The context to free from the memory.
+ */
+void brainfuck_context_free(struct BrainfuckContext *ctx)
+{
+	if (!ctx)
+		return;
+	free(ctx->memory);
+	free(ctx);
+	ctx = 0;
+}
+
+/*
+ * Return a new {@link BrainfuckContext} initialised with the default
+ * 	values.
+ * 
+ * @return The default {@link BrainfuckContext}.
+ */
+struct BrainfuckContext * brainfuck_context_default(void)
+{
+	struct BrainfuckContext *ctx = brainfuck_context_alloc();
+	
+	if (!ctx)
+		return NULL;
+	
+	ctx->read = &getchar;
+	ctx->write = &putchar;
+	ctx->mem_size = BRAINFUCK_DEFAULT_MEMSIZE;
+	ctx->memory = malloc(sizeof(int) * ctx->mem_size);
+	
+	if (!ctx->memory)
+		return NULL;
+	
+	ctx->index = 0;
+	ctx->running = 0;
+	return ctx;
+}
+
+/*
+ * The {@link BrainfuckJump} structure is a internal strucutre that is used
+ *	as a stack that contains loop {@link BrainfuckInstruction}s for 
+ *	break {@link BrainfuckInstruction}s to jump back to the loop instruction.
+ */
+struct BrainfuckJump {
+	
+	/*
+	 * The previous {@link BrainfuckJump} in the list.
+	 */
+	struct BrainfuckJump *previous;
+	
+	/*
+	 * The pointer to the loop {@link BrainfuckInstruction}.
+	 */
+	struct BrainfuckInstruction *instruction;
+	
+} BrainfuckJump;
+
+/*
+ * Allocate a new {@link BrainfuckJump} to the heap.
+ *
+ * @return A pointer to the memory allocated to the heap or 
+ *	<code>NULL</code> if there is no memory available.
+ */
+struct BrainfuckJump * brainfuck_jump_alloc(void)
+{
+	return malloc(sizeof(struct BrainfuckJump));
+}
+
+/* 
+ * Free the given {@link BrainfuckJump} from the memory.
+ * 
+ * @param jump The {@link BrainfuckJump} to free from the memory.
+ */
+void brainfuck_jump_free(struct BrainfuckJump *jump)
+{
+	free(jump);
+	jump = 0;
+}
+
+/* 
+ * Parse the given string.
+ *
+ * @param string The string to read the script from.
+ * @param error A pointer to an integer that will be set to either a 
+ * 	success or an error code.
+ * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code> 
+ *	if the parsing failed.
+ */
+struct BrainfuckScript * brainfuck_parse_string(char *string, int *error)
+{
+	if (!string) {
+		if (error)
+			*error = BRAINFUCK_EPARAM;
+		return NULL;
 	}
+	struct BrainfuckBufferStream *stream = brainfuck_stream_string(string);
+	struct BrainfuckScript *script = brainfuck_parse(
+		brainfuck_stream_cast(stream), error);
+	brainfuck_stream_buffer_free(stream);
+	return script;
 }
 
-/*
- * Destroys a state.
- * 
- * @param state The state to destroy
- */
-void brainfuck_destroy_state(BrainfuckState *state) {
-	if (state == NULL)
-		return;
-	brainfuck_destroy_instructions(state->root);
-	state->head = 0;
-	state->root = 0;
-	free(state);
-	state = 0;
-}
-
-/*
- * Destroys a context.
- * 
- * @param context The context to destroy
- */
-void brainfuck_destroy_context(BrainfuckExecutionContext *context) {
-	free(context);
-	context = 0;
-}
-
-/*
- * Executes the given linked list containing instructions.
+/* 
+ * Parse the given {@link FILE}.
  *
- * @param root The start of the linked list of instructions you want
- * 	to execute.
- * @param context The context of this execution that contains the tape and
- *	other execution related variables.
+ * @param string The string to read the script from.
+ * @param error A pointer to an integer that will be set to either a 
+ * 	success or an error code.
+ * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code> 
+ *	if the parsing failed.
  */
-void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *context) {
-	if (root == NULL || context == NULL)
-		return;
-	BrainfuckInstruction *instruction = root;
-	unsigned long index;
-	while (instruction != NULL && instruction->type != BRAINFUCK_TOKEN_LOOP_END) {
-		switch (instruction->type) {
-		case BRAINFUCK_TOKEN_PLUS:
-			context->tape[context->tape_index] += (unsigned char) instruction->difference; // may overflow
+struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error)
+{
+	if (!file) {
+		if (error)
+			*error = BRAINFUCK_EPARAM;
+		return NULL;
+	}
+	struct BrainfuckFileStream *stream = brainfuck_stream_file(file);
+	struct BrainfuckScript *script = brainfuck_parse(
+		brainfuck_stream_cast(stream), error);
+	brainfuck_stream_file_free(stream);
+	return script;
+}
+
+/* 
+ * Parse the given {@link BrainfuckStream}.
+ *
+ * @param stream The stream to read the script from.
+ * @param error A pointer to an integer that will be set to either a 
+ * 	success or an error code.
+ * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code> 
+ *	if the parsing failed.
+ */
+struct BrainfuckScript * brainfuck_parse(struct BrainfuckStream *stream, 
+	int *error)
+{
+	struct BrainfuckInstruction *script = NULL;
+	struct BrainfuckInstruction *top = NULL;
+	struct BrainfuckInstruction *instruction = NULL;
+	struct BrainfuckJump *jump_list = NULL;
+	struct BrainfuckJump *jump;
+	char character;
+	int delta;
+	int error_holder = BRAINFUCK_OK;
+	
+	if (!error)
+		error = &error_holder;
+	if (!stream) {
+		*error = BRAINFUCK_EPARAM;
+		return NULL;
+	}
+	
+	while((character = stream->get(stream)) != EOF) {
+		delta = 1;
+		switch(character) {
+		case '-':
+			delta = -1;
+		case '+':
+			while ((character = stream->get(stream)) == '+' 
+					|| character == '-')
+				delta += (character == '+' ? 1 : -1);
+			stream->unget(stream, character);
+			instruction = brainfuck_instruction_create_cell_mutation(delta);
 			break;
-		case BRAINFUCK_TOKEN_MINUS:
-			context->tape[context->tape_index] -= (unsigned char) instruction->difference; // may underflow
+		case '<':
+			delta = -1;
+		case '>':
+			while ((character = stream->get(stream)) == '>' 
+					|| character == '<')
+				delta += (character == '>' ? 1 : -1);
+			stream->unget(stream, character);
+			instruction = brainfuck_instruction_create_index_mutation(delta);
 			break;
-		case BRAINFUCK_TOKEN_NEXT:
-			if (instruction->difference >= INT_MAX - context->tape_size || 
-					(((unsigned long)context->tape_index) + instruction->difference) >= context->tape_size) {
-				fprintf(stderr, "error: tape memory out of bounds (overrun)\nexceeded the tape size of %zd cells\n", context->tape_size);
-				exit(EXIT_FAILURE);
+		case '.':
+			while ((character = stream->get(stream)) == '.')
+				delta++;
+			stream->unget(stream, character);
+			instruction = brainfuck_instruction_create_output(delta);
+			break;
+		case ',':
+			while ((character = stream->get(stream)) == ',')
+				delta++;
+			stream->unget(stream, character);
+			instruction = brainfuck_instruction_create_input(delta);
+			break;
+		case '[':
+			instruction = brainfuck_instruction_create_loop();
+			jump = brainfuck_jump_alloc();
+			if (!jump) {
+				*error = BRAINFUCK_ENOMEM;
+				return NULL;
 			}
-			context->tape_index += instruction->difference;
+			jump->instruction = instruction;
+			jump->previous = jump_list;
+			jump_list = jump;
 			break;
-		case BRAINFUCK_TOKEN_PREVIOUS:
-			if (instruction->difference >= INT_MAX - context->tape_size || 
-					((long)context->tape_index) - (long)instruction->difference < 0) {
-				fprintf(stderr, "error: tape memory out of bounds (underrun)\nundershot the tape size of %zd cells\n", context->tape_size);
-				exit(EXIT_FAILURE);
+		case ']':
+			jump = jump_list;
+			if (!jump) {
+				*error = BRAINFUCK_ESYNTAX;
+				return NULL;
 			}
-			context->tape_index -= instruction->difference;
+			jump_list = jump_list->previous;
+			instruction = brainfuck_instruction_create_break(jump->instruction);
+			jump->instruction->attributes.jump = instruction;
+			brainfuck_jump_free(jump);
 			break;
-		case BRAINFUCK_TOKEN_OUTPUT:
-			for (index = 0; index < instruction->difference; index++)
-				context->output_handler(context->tape[context->tape_index]);
-			break;
-		case BRAINFUCK_TOKEN_INPUT:
-			for (index = 0; index < instruction->difference; index++)
-				context->tape[context->tape_index] = context->input_handler();
-			break;
-		case BRAINFUCK_TOKEN_LOOP_START:
-			while(context->tape[context->tape_index])
-				brainfuck_execute(instruction->loop, context);
-			break;
-        case BRAINFUCK_TOKEN_BREAK:
-        {
-            int low  = context->tape_index - 10;
-            if (low < 0) low = 0;
-            int high = low + 21;
-            if (high >= context->tape_size) high = context->tape_size-1;
-            for (index = low; index < high; index++)
-                printf("%d\t", index);
-            printf("\n");
-            for (index = low; index < high; index++)
-                printf("%d\t", context->tape[index]);
-            printf("\n");
-            for (index = low; index < high; index++)
-                if (index == context->tape_index)
-                    printf("^\t");
-                else
-                    printf(" \t");
-            printf("\n");
-            break;
-        }
 		default:
-			return;
+			continue;
 		}
-		instruction = instruction->next;
-
-		if (context->shouldStop == 1) {
-			instruction = NULL;
-			return;
+		if (!instruction) {
+			*error = BRAINFUCK_ENOMEM;
+			return NULL;
 		}
-	} 
+		if (!top && !script) {
+			top = script = instruction;
+		} else {
+			top->next = instruction;
+			top = instruction;
+		}
+	}
+	return script;
 }
 
 /*
- * Stops the currently running program referenced by the given execution context.
+ * Run the given {@link BrainfuckScript} with the given 
+ *	{@link BrainfuckContext}.
  *
- * @param context The context of this execution that contains the tape and
- *	other execution related variables.
+ * @param script The script to run.
+ * @param ctx The execution context that will provide the memory management and
+ *	the environment for the execution. 
+ * @return a integer with a value of zero or higher if the script executed 
+ *	successfully, a value lower than zero otherwise.
  */
-void brainfuck_execution_stop(BrainfuckExecutionContext *context) {
-	context->shouldStop = 1;
+int brainfuck_run(struct BrainfuckScript *script, 
+	struct BrainfuckContext *ctx)
+{
+	if (!script || !ctx)
+		return BRAINFUCK_EPARAM;
+	ctx->instruction = script;
+	ctx->running = 1;
+	while (ctx->instruction && ctx->running) {
+		switch(ctx->instruction->id) {
+		case BRAINFUCK_ICELL:
+			ctx->memory[ctx->index] += ctx->instruction->attributes.delta;
+			break;
+		case BRAINFUCK_IINDEX:
+			ctx->index += ctx->instruction->attributes.delta;
+			break;
+		case BRAINFUCK_IINPUT:
+			ctx->memory[ctx->index] = ctx->read();
+			break;
+		case BRAINFUCK_IOUTPUT:
+			ctx->write(ctx->memory[ctx->index]);
+			break;
+		case BRAINFUCK_ILOOP:
+			if (ctx->memory[ctx->index])
+				break;
+			ctx->instruction = ctx->instruction->attributes.jump;
+			continue;
+		case BRAINFUCK_IBREAK:
+			if (!ctx->memory[ctx->index])
+				break;
+			ctx->instruction = ctx->instruction->attributes.jump;
+			continue;
+		}
+		ctx->instruction = ctx->instruction->next;
+	}
+	return BRAINFUCK_OK;
 }
