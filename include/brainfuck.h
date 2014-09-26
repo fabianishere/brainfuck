@@ -146,7 +146,7 @@ struct BrainfuckInstruction * brainfuck_instruction_create_input(int times);
  *
  * @return The loop instruction.
  */
-struct BrainfuckInstruction * brainfuck_instruction_create_loop();
+struct BrainfuckInstruction * brainfuck_instruction_create_loop(void);
 
 /*
  * Create a break instruction and return it.
@@ -163,12 +163,12 @@ struct BrainfuckInstruction * brainfuck_instruction_create_break(
  */
 struct BrainfuckStream {
 
-   /*
-    * Read a character from the stream and return it.
-    * 
-    * @param stream The stream to unget the character from.
-    * @return The character read from the stream.
-    */
+	/*
+	 * Read a character from the stream and return it.
+	 * 
+	 * @param stream The stream to unget the character from.
+	 * @return The character read from the stream.
+	 */
 	int (*get)(struct BrainfuckStream *stream);
 	
 	/*
@@ -229,7 +229,7 @@ struct BrainfuckBufferStream {
  * @return A pointer to the memory allocated to the heap or 
  *	<code>NULL</code> if there is no memory available.
  */
-struct BrainfuckBufferStream * brainfuck_stream_buffer_alloc();
+struct BrainfuckBufferStream * brainfuck_stream_buffer_alloc(void);
 
 /* 
  * Free the given {@link BrainfuckBufferStream} from the memory.
@@ -261,7 +261,6 @@ void brainfuck_stream_buffer_init(struct BrainfuckBufferStream *stream,
  */
 struct BrainfuckBufferStream * brainfuck_stream_string(char *string);
 
-
 /*
  * A {@link BrainfuckFileStream} is a stream that is connected to a file.
  */
@@ -292,7 +291,7 @@ struct BrainfuckFileStream {
  * @return A pointer to the memory allocated to the heap or 
  *	<code>NULL</code> if there is no memory available.
  */
-struct BrainfuckFileStream * brainfuck_stream_file_alloc();
+struct BrainfuckFileStream * brainfuck_stream_file_alloc(void);
 
 /* 
  * Free the given {@link BrainfuckStringStream} from the memory.
@@ -319,7 +318,7 @@ void brainfuck_stream_file_init(struct BrainfuckFileStream *stream, FILE *file);
 struct BrainfuckFileStream * brainfuck_stream_file(FILE *file);
 
 /*
- * A {@link BrainfuckExecutionContext} structure is passed to the execution
+ * A {@link BrainfuckContext} structure is passed to the execution
  *	engine and provides communication for the execution engine with the 
  * 	outside, like providing the input and output and memory management.
  */
