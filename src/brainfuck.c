@@ -213,27 +213,30 @@ struct BrainfuckContext * brainfuck_context_default(void)
 }
 
 /*
- * The {@link BrainfuckState} struct contains the current state of a parser.
- * This structure is currently only available internally.
+ * Allocate a new {@link BrainfuckState} to the heap.
+ *
+ * @return A pointer to the memory allocated to the heap or 
+ *	<code>NULL</code> if there is no memory available.
  */
-struct BrainfuckState {
+struct BrainfuckState * brainfuck_state_alloc(void)
+{
+	return malloc(sizeof(struct BrainfuckState));
+}
 
-	/*
-	 * An array of pointers to {@link BrainfuckInstruction}s.
-	 */
-	struct BrainfuckInstruction **jumps;
-
-	/*
-	 * The size of the array.
-	 */
-	int jumps_size;
+/* 
+ * Free the given {@link BrainfuckContext} from the memory.
+ * 
+ * @param state The state to free from the memory.
+ */
+void brainfuck_state_free(struct BrainfuckState *state)
+{
+	if (!state)
+		return;
 	
-	/*
-	 * The index of the top of the array.
-	 */
-	int jumps_top;
-
-} BrainfuckState;
+	free(state->jumps.array);
+	free(state);
+	state = 0;
+}
 
 /*
  * Parse the given string with the given state.
@@ -258,7 +261,9 @@ struct BrainfuckScript * brainfuck_parse_string_state(
 	char character;
 	int delta;
 	int error_holder = BRAINFUCK_EOK;
+
 	error = error ? error : &error_holder;
+
 	if (!string || !state) {
 		*error = BRAINFUCK_EPARAM;
 		return NULL;
@@ -298,32 +303,32 @@ struct BrainfuckScript * brainfuck_parse_string_state(
 			instruction = brainfuck_instruction_create_input(delta);
 			break;
 		case '[':
-			if (!state->jumps_size) {
-				state->jumps = malloc(BRAINFUCK_DINITIALDEPTH *
-					sizeof(struct BrainfuckInstruction *));
-				state->jumps_size = BRAINFUCK_DINITIALDEPTH;				
-			} /* else if (state->jumps_top >= state->jumps_size) {
-				state->jumps_size *= 2;
-				state->jumps = realloc(state->jumps, 
-					state->jumps_size * sizeof(struct BrainfuckInstruction *));
-			} else if (4 * state->jumps_top <= state->jumps_size 
-					&& state->jumps_size > BRAINFUCK_DINITIALDEPTH) {
-				state->jumps_size /= 2;
-				state->jumps = realloc(state->jumps, 
-					state->jumps_size * sizeof(struct BrainfuckInstruction *));
-			}*/
+			if (!state->jumps.array || state->jumps.size <= 0) {
+				state->jumps.size = BRAINFUCK_DINITIALDEPTH;
+				state->jumps.array = malloc(state->jumps.size * sizeof(struct BrainfuckInstruction *));
+			} else if (state->jumps.top + 1 >= state->jumps.size) {
+				state->jumps.size *= 2;
+				state->jumps.array = realloc(state->jumps.array, state->jumps.size * sizeof(struct BrainfuckInstruction *));
+			} else if (4 * state->jumps.top + 4 <= state->jumps.size 
+					&& state->jumps.size > BRAINFUCK_DINITIALDEPTH) {
+				state->jumps.size /= 2;
+				state->jumps.array = realloc(state->jumps.array, state->jumps.size * sizeof(struct BrainfuckInstruction *));
+			}
 			instruction = brainfuck_instruction_create_loop();
-			state->jumps[state->jumps_top++] = instruction;
+			state->jumps.array[++state->jumps.top] = instruction;
 			break;
 		case ']':
-			jump = state->jumps[state->jumps_top];
+			if (state->jumps.top < 0) {
+				*error = BRAINFUCK_ESYNTAX;
+				return NULL;
+			}
+			jump = state->jumps.array[state->jumps.top--];
 			if (!jump) {
 				*error = BRAINFUCK_EINTERNAL;
 				return NULL;
 			}
 			instruction = brainfuck_instruction_create_break(jump);
 			jump->attributes.jump = instruction;
-			state->jumps[state->jumps_top--] = NULL;
 			break;
 		default:
 			continue;
@@ -354,29 +359,38 @@ struct BrainfuckScript * brainfuck_parse_string_state(
 struct BrainfuckScript * brainfuck_parse_string(char *string, int *error)
 {
 	int error_holder = BRAINFUCK_EOK;
+	struct BrainfuckState *state = NULL;
+	struct BrainfuckScript *script = NULL;
+	
 	error = error ? error :  &error_holder;
+	state = brainfuck_state_alloc();
 
-	struct BrainfuckState *state = malloc(sizeof(struct BrainfuckState));
 	if (!state) {
 		*error = BRAINFUCK_ENOMEM;
 		return NULL;
 	}
 
-	state->jumps = NULL;
-	state->jumps_size = 0;
-	state->jumps_top = 0;
+	state->jumps.array = NULL;
+	state->jumps.size = 0;
+	state->jumps.top = -1;
 
-	struct BrainfuckScript *script = 
-		brainfuck_parse_string_state(string, state, error);
+	script = brainfuck_parse_string_state(string, state, error);
 
-	if (state->jumps_top > 0) {
+
+	if (*error != BRAINFUCK_EOK) {
+		goto error;
+	} else if (state->jumps.top > 0) {
 		*error = BRAINFUCK_ESYNTAX;
-		return NULL;
+		goto error;
 	}
-
-	free(state->jumps);
-	free(state);
+	
+	brainfuck_state_free(state);
 	return script;
+
+	/* goto this label on error */
+	error:
+		brainfuck_state_free(state);
+		return NULL;
 }
 
 /*
@@ -396,6 +410,7 @@ struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error)
 	struct BrainfuckInstruction *top = NULL;
 	struct BrainfuckInstruction *instruction = NULL;
 	struct BrainfuckState *state = NULL;
+
 	error = error ? error : &error_holder;
 
 	if (!file) {
@@ -403,14 +418,16 @@ struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error)
 		return NULL;
 	}
 
-	state = malloc(sizeof(struct BrainfuckState));
+	state = brainfuck_state_alloc();
+
 	if (!state) {
 		*error = BRAINFUCK_ENOMEM;
 		return NULL;
 	}
-	state->jumps = NULL;
-	state->jumps_size = 0;
-	state->jumps_top = 0;
+
+	state->jumps.array = NULL;
+	state->jumps.size = 0;
+	state->jumps.top = -1;
 
 	while (!feof(file)) {
 		memset(&buffer, 0, sizeof(buffer));
@@ -420,7 +437,7 @@ struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error)
 		instruction = brainfuck_parse_string_state(buffer, state,
  			error);
 		if (*error != BRAINFUCK_EOK)
-			return NULL;
+			goto error;
 		script = script ? script : instruction;
 		if (top)
 			top->next = instruction;
@@ -429,14 +446,18 @@ struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error)
 		top = instruction;
 	}
 
-	if (state->jumps_top > 0) {
+	if (state->jumps.top > 0) {
 		*error = BRAINFUCK_ESYNTAX;
-		return NULL;
+		goto error;
 	}
+	
+	brainfuck_state_free(state);
+	return script;	
 
-	free(state->jumps);
-	free(state);
-	return script;
+	/* goto this label on error */
+	error:
+		brainfuck_state_free(state);
+		return NULL;
 }
 
 /*
@@ -459,7 +480,6 @@ int brainfuck_run(struct BrainfuckScript *script,
 	int index = 0;
 
 	while (ctx->instruction && ctx->running) {
-		printf("type: %i\n", ctx->instruction->type);
 		switch(ctx->instruction->type) {
 		case VALUE:
 			ctx->memory[ctx->index] += ctx->instruction->attributes.delta;

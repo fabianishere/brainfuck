@@ -38,14 +38,14 @@
 int main(void)
 {
 	int error = BRAINFUCK_EOK;
-	/*FILE *file = fopen("../examples/mandel.bf", "r");
+	FILE *file = fopen("../examples/mandel.bf", "r");
 	if (!file) {
 		fprintf(stderr, "error: failed to open file.\n");
 		return 0;
-	}*/
+	}
 	struct BrainfuckContext *ctx = brainfuck_context_default();
-	struct BrainfuckScript *script = brainfuck_parse_string("+[[[[[[[[[[-]]]]]]]]]]]]]+.", &error);
-	/*struct BrainfuckScript *script = brainfuck_parse_file(file, &error);*/
+	/*struct BrainfuckScript *script = brainfuck_parse_string("+[[[[[[[[[[[[-]]]]]]]]]]]]+.", &error);
+	*/struct BrainfuckScript *script = brainfuck_parse_file(file, &error);
 	if (error != BRAINFUCK_EOK) {
 		fprintf(stderr, "error: program failed with error code %i\n", error);
 		return 0;

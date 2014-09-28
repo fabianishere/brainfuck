@@ -9,7 +9,7 @@ option(WITH_CLI
 	"Build the command line interface for brainfuck." ON)
 
 add_definitions("-W -Wall -Werror -Wformat-security")
-add_definitions("-std=c89 -g")
+add_definitions("-std=c89 -O3")
 add_definitions("-fno-exceptions -fstack-protector")
 
 include_directories(include/)

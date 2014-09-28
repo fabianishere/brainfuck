@@ -75,7 +75,8 @@ struct BrainfuckInstruction {
 	/*
 	 * The attributes of this instruction.
 	 */
-	union attributes {		
+	union attributes {
+		
 		/*
 		 * Either the difference between de current cell value or 
 		 * 	index and the next one or the amount of times the 
@@ -89,6 +90,7 @@ struct BrainfuckInstruction {
 		 *	instruction.
 		 */
 		struct BrainfuckInstruction *jump;
+
 	} attributes;
 	
 	/*
@@ -240,6 +242,67 @@ void brainfuck_context_free(struct BrainfuckContext *ctx);
  * @return The default {@link BrainfuckContext}.
  */
 struct BrainfuckContext * brainfuck_context_default(void);
+
+/*
+ * The {@link BrainfuckState} struct contains the current state of a parser.
+ */
+struct BrainfuckState {
+
+	/*
+ 	 * A stack of jumps which are basically pointers to
+ 	 *  a {@link BrainfuckInstruction}.
+	 */
+	struct jumps {
+	
+		/*
+		 * The size of the stack.
+		 */
+		int size;
+
+		/*
+		 * The index of the top of the stack.
+		 */
+		int top;
+
+		/*
+ 		 * The array of jumps.
+		 */
+		struct BrainfuckInstruction **array;
+
+	} jumps;
+
+} BrainfuckState;
+
+/*
+ * Allocate a new {@link BrainfuckState} to the heap.
+ *
+ * @return A pointer to the memory allocated to the heap or 
+ *	<code>NULL</code> if there is no memory available.
+ */
+struct BrainfuckState * brainfuck_state_alloc(void);
+
+/* 
+ * Free the given {@link BrainfuckContext} from the memory.
+ * 
+ * @param state The state to free from the memory.
+ */
+void brainfuck_state_free(struct BrainfuckState *state);
+
+/*
+ * Parse the given string with the given state.
+ *
+ * @param string The string to read the script from.
+ * @param jumps Pointer to an array of pointers to {@link BrainfuckInstruction}s.
+ * @param jumps_size Pointer to the size of the jumps array.
+ * @param jumps_top Pointer to the current index of the jumps array.
+ * @param error A pointer to an integer that will be set to either a success
+ *	or an error code.
+ * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code>
+ *	if the parsing failed.
+ * @notice Currently only available internally.
+ */
+struct BrainfuckScript * brainfuck_parse_string_state(
+		char *string, struct BrainfuckState *state, int *error);
 
 /* 
  * Parse the given string.
