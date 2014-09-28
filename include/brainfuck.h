@@ -28,7 +28,7 @@
 
 #define BRAINFUCK_VERSION "3.0.0"
 
-#define BRAINFUCK_OK 1 /* Everything is OK */
+#define BRAINFUCK_EOK 1 /* Everything is OK */
 #define BRAINFUCK_EOF EOF /* End of file */
 #define BRAINFUCK_ENOMEM -5 /* Out of memory */
 #define BRAINFUCK_ESYNTAX -6 /* Syntax error */
@@ -36,14 +36,21 @@
 #define BRAINFUCK_EBOUNDS -8 /* Index is out of bounds */
 #define BRAINFUCK_EINTERNAL -9 /* Internal error */
 
-#define BRAINFUCK_ICELL 1 /* Cell value mutation */
-#define BRAINFUCK_IINDEX 2 /* Index mutation */
-#define BRAINFUCK_IOUTPUT 3 /* Write cell value to the output */
-#define BRAINFUCK_IINPUT 4 /* Set cell value to the retrieved input */
-#define BRAINFUCK_ILOOP 5 /* Indicate the start of a loop */
-#define BRAINFUCK_IBREAK 6 /* Indicate the end of a loop */
+#define BRAINFUCK_DMEMSIZE 30000 /* Size of the allocated memory block */ 
+#define BRAINFUCK_DINITIALDEPTH 10 /* Initial depth of a loop */
 
-#define BRAINFUCK_DEFAULT_MEMSIZE 30000
+/*
+ * The {@link BrainfuckType} enum contains the legal types 
+ *	{@link BrainfuckInstruction}s can have.
+ */
+enum BrainfuckType {
+	VALUE, /* Cell value mutation */
+	INDEX, /* Memory index mutation */
+	OUTPUT, /* Write cell value to output stream */ 
+	INPUT, /* Set cel value to retrieved input */
+	LOOP, /* Indicate the start of a loop */
+	BREAK /* Indicate the end of a loop. */
+} BrainfuckType;
 
 /*
  * A {@link BrainfuckScript} is the head of a linked list of instructions.
@@ -61,9 +68,9 @@
 struct BrainfuckInstruction {
 	
 	/* 
-	 * The id of this instruction.
+	 * The type of this instruction.
 	 */
-	unsigned char id;
+	enum BrainfuckType type;
 
 	/*
 	 * The attributes of this instruction.
@@ -113,7 +120,7 @@ void brainfuck_instruction_free(struct BrainfuckInstruction *instruction);
  * 	that is going to be set.
  * @return The cell value mutation instruction.
  */
-struct BrainfuckInstruction * brainfuck_instruction_create_cell_mutation(
+struct BrainfuckInstruction * brainfuck_instruction_create_value_mutation(
 	int delta);
 
 /*
@@ -159,166 +166,6 @@ struct BrainfuckInstruction * brainfuck_instruction_create_break(
 	struct BrainfuckInstruction *jump);
 
 /*
- * A {@link BrainfuckStream} is a stream from which we read characters or to
- *	which we write characters.
- */
-struct BrainfuckStream {
-
-	/*
-	 * Read a character from the stream and return it.
-	 * 
-	 * @param stream The stream to unget the character from.
-	 * @return The character read from the stream.
-	 */
-	int (*get)(struct BrainfuckStream *stream);
-	
-	/*
-	 * Unget a character from the stream.
-	 *
-	 * @param stream The stream to unget the character from.
-	 * @param character The character to unget.
-	 */
-	void (*unget)(struct BrainfuckStream *stream, int character);
-
-} BrainfuckStream;
-
-/*
- * Cast the given variable to {@link BrainfuckStream}.
- *
- * @param var The variable to cast to {@link BrainfuckStream}.
- */
-#define brainfuck_stream_cast(var) ((struct BrainfuckStream *) var)
-
-/*
- * A {@link BrainfuckBufferStream} is a stream that is connected to a memory
- *	buffer.
- */
-struct BrainfuckBufferStream {
-	
-	/*
-	 * The base {@link BrainfuckStream} structure.
-	 */
-	struct BrainfuckStream base;
-	
-	/*
- 	 * The memory buffer of this {@link BrainfuckBufferStream}.
-	 */
-	char *buffer;
-
-	/*
- 	 * The index in memory buffer of this {@link BrainfuckBufferStream}.
-	 */
-	int index;
-	
-	/*
-	 * The length of the memory buffer of this {@link BrainfuckBufferStream}.
-	 */
-	int length;
-	
-} BrainfuckBufferStream;
-
-/*
- * Cast the given variable to {@link BrainfuckBufferStream}.
- *
- * @param var The variable to cast to {@link BrainfuckBufferStream}.
- */
-#define brainfuck_stream_buffer_cast(var) ((struct BrainfuckBufferStream *) var)
-
-/*
- * Allocate a new {@link BrainfuckBufferStream} from the heap.
- *
- * @return A pointer to the memory allocated to the heap or 
- *	<code>NULL</code> if there is no memory available.
- */
-struct BrainfuckBufferStream * brainfuck_stream_buffer_alloc(void);
-
-/* 
- * Free the given {@link BrainfuckBufferStream} from the memory.
- * 
- * @param stream The stream to free from the memory.
- */
-void brainfuck_stream_buffer_free(struct BrainfuckBufferStream *stream);
-
-/*
- * Initialise the given {@link BrainfuckBufferStream} with
- * 	the given buffer, index and length.
- *
- * @param stream The {@ink BrainfuckBufferStream} to initialise.
- * @param buffer The memory buffer of this {@link BrainfuckBufferStream}.
- * @param index The index in memory buffer of this 
- *	{@link BrainfuckBufferStream}.
- * @param length The length of the memory buffer of this 
- *	{@link BrainfuckBufferStream}.
- */
-void brainfuck_stream_buffer_init(struct BrainfuckBufferStream *stream, 
-	char *buffer, int index, int length);
-
-/*
- * Create a new {@link BrainfuckBufferStream} with the given string.
- *
- * @param string The string to create the new {@link BrainfuckBufferStream} 
- * 	with.
- * @return The created {@link BrainfuckBufferStream}.
- */
-struct BrainfuckBufferStream * brainfuck_stream_string(char *string);
-
-/*
- * A {@link BrainfuckFileStream} is a stream that is connected to a file.
- */
-struct BrainfuckFileStream {
-	
-	/*
-	 * The base {@link BrainfuckStream} structure.
-	 */
-	struct BrainfuckStream base;
-	
-	/*
-	 * The {@link FILE} structure to read from and write to.
-	 */
-	FILE *file;
-	
-} BrainfuckFileStream;
-
-/*
- * Cast the given variable to {@link BrainfuckFileStream}.
- *
- * @param var The variable to cast to {@link BrainfuckFileStream}.
- */
-#define brainfuck_stream_file_cast(var) ((struct BrainfuckFileStream *) var)
-
-/*
- * Allocate a new {@link BrainfuckFileStream} from the heap.
- *
- * @return A pointer to the memory allocated to the heap or 
- *	<code>NULL</code> if there is no memory available.
- */
-struct BrainfuckFileStream * brainfuck_stream_file_alloc(void);
-
-/* 
- * Free the given {@link BrainfuckStringStream} from the memory.
- * 
- * @param stream The stream to free from the memory.
- */
-void brainfuck_stream_file_free(struct BrainfuckFileStream *stream);
-
-/*
- * Initialise the given {@link BrainfuckFileStream} with
- * 	the given {@link FILE}.
- *
- * @param stream The {@ink BrainfuckFileStream} to initialise.
- * @param file The {@link FILE} of the file stream.
- */
-void brainfuck_stream_file_init(struct BrainfuckFileStream *stream, FILE *file);
-
-/*
- * Create a new {@link BrainfuckFileStream} with the given file.
- *
- * @param file The file to create the new file stream with.
- * @return The file stream.
- */
-struct BrainfuckFileStream * brainfuck_stream_file(FILE *file);
-
-/*
  * A {@link BrainfuckContext} structure is passed to the execution
  *	engine and provides communication for the execution engine with the 
  * 	outside, like providing the input and output and memory management.
@@ -347,9 +194,9 @@ struct BrainfuckContext {
 	size_t mem_size;
 	
 	/*
-	 * Pointer to the allocated memory a program can work with.
+	 * Pointer to the allocated memory the program can work with.
 	 */
-	int *memory;
+	unsigned int *memory;
 	
 	/*
 	 * The current index in the memory.
@@ -405,28 +252,16 @@ struct BrainfuckContext * brainfuck_context_default(void);
  */
 struct BrainfuckScript * brainfuck_parse_string(char *string, int *error);
 
-/* 
- * Parse the given {@link FILE}.
+/*
+ * Parse the given file.
  *
- * @param string The string to read the script from.
- * @param error A pointer to an integer that will be set to either a 
- * 	success or an error code.
- * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code> 
+ * @param file The file to read the script from.
+ * @param error A pointer to an integer that will be set to either a success
+ *	or an error code.
+ * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code>
  *	if the parsing failed.
  */
 struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error);
-
-/* 
- * Parse the given {@link BrainfuckStream}.
- *
- * @param stream The stream to read the script from.
- * @param error A pointer to an integer that will be set to either a 
- * 	success or an error code.
- * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code> 
- *	if the parsing failed.
- */
-struct BrainfuckScript * brainfuck_parse(struct BrainfuckStream *stream, 
-	int *error);
 
 /*
  * Run the given {@link BrainfuckScript} with the given 

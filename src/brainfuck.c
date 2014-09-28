@@ -56,14 +56,16 @@ void brainfuck_instruction_free(struct BrainfuckInstruction *instruction)
  * 	that is going to be set.
  * @return The cell value mutation instruction.
  */
-struct BrainfuckInstruction * brainfuck_instruction_create_cell_mutation(
+struct BrainfuckInstruction * brainfuck_instruction_create_value_mutation(
 	int delta)
 {
-	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	struct BrainfuckInstruction *instruction = 
+			brainfuck_instruction_alloc();
 	if (!instruction)
 		return NULL;
-	instruction->id = BRAINFUCK_ICELL;
+	instruction->type = VALUE;
 	instruction->attributes.delta = delta;
+	instruction->next = NULL;
 	return instruction;
 }
 
@@ -77,11 +79,13 @@ struct BrainfuckInstruction * brainfuck_instruction_create_cell_mutation(
 struct BrainfuckInstruction * brainfuck_instruction_create_index_mutation(
 	int delta)
 {
-	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	struct BrainfuckInstruction *instruction = 
+			brainfuck_instruction_alloc();
 	if (!instruction)
 		return NULL;
-	instruction->id = BRAINFUCK_IINDEX;
+	instruction->type = INDEX;
 	instruction->attributes.delta = delta;
+	instruction->next = NULL;
 	return instruction;
 }
 
@@ -93,11 +97,13 @@ struct BrainfuckInstruction * brainfuck_instruction_create_index_mutation(
  */
 struct BrainfuckInstruction * brainfuck_instruction_create_output(int times)
 {
-	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	struct BrainfuckInstruction *instruction = 
+			brainfuck_instruction_alloc();
 	if (!instruction)
 		return NULL;
-	instruction->id = BRAINFUCK_IOUTPUT;
+	instruction->type = OUTPUT;
 	instruction->attributes.delta = times;
+	instruction->next = NULL;
 	return instruction;
 }
 
@@ -109,11 +115,13 @@ struct BrainfuckInstruction * brainfuck_instruction_create_output(int times)
  */
 struct BrainfuckInstruction * brainfuck_instruction_create_input(int times)
 {
-	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	struct BrainfuckInstruction *instruction = 
+			brainfuck_instruction_alloc();
 	if (!instruction)
 		return NULL;
-	instruction->id = BRAINFUCK_IINPUT;
+	instruction->type = INPUT;
 	instruction->attributes.delta = times;
+	instruction->next = NULL;
 	return instruction;
 }
 
@@ -124,11 +132,13 @@ struct BrainfuckInstruction * brainfuck_instruction_create_input(int times)
  */
 struct BrainfuckInstruction * brainfuck_instruction_create_loop()
 {
-	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	struct BrainfuckInstruction *instruction = 
+			brainfuck_instruction_alloc();
 	if (!instruction)
 		return NULL;
-	instruction->id = BRAINFUCK_ILOOP;
-	instruction->attributes.delta = 1;
+	instruction->type = LOOP;
+	instruction->attributes.jump = NULL;
+	instruction->next = NULL;
 	return instruction;
 }
 
@@ -141,182 +151,14 @@ struct BrainfuckInstruction * brainfuck_instruction_create_loop()
 struct BrainfuckInstruction * brainfuck_instruction_create_break(
 	struct BrainfuckInstruction *jump)
 {
-	struct BrainfuckInstruction *instruction = brainfuck_instruction_alloc();
+	struct BrainfuckInstruction *instruction = 
+			brainfuck_instruction_alloc();
 	if (!instruction)
 		return NULL;
-	instruction->id = BRAINFUCK_IBREAK;
+	instruction->type = BREAK;
 	instruction->attributes.jump = jump;
+	instruction->next = NULL;
 	return instruction;
-}
-
-/*
- * Allocate a new {@link BrainfuckFileStream} from the heap.
- *
- * @return A pointer to the memory allocated to the heap or 
- *	<code>NULL</code> if there is no memory available.
- */
-struct BrainfuckFileStream * brainfuck_stream_file_alloc(void)
-{
-	return malloc(sizeof(struct BrainfuckFileStream));
-}
-
-/* 
- * Free the given {@link BrainfuckStringStream} from the memory.
- * 
- * @param stream The stream to free from the memory.
- */
-void brainfuck_stream_file_free(struct BrainfuckFileStream *stream)
-{
-	free(stream);
-	stream = 0;
-}
-
-/*
- * Read a character from the stream and return it.
- * 
- * @param stream The stream to unget the character from.
- * @return The character read from the stream.
- */
-int brainfuck_stream_file_get(struct BrainfuckStream *stream)
-{
-	struct BrainfuckFileStream *file_stream = 
-		brainfuck_stream_file_cast(stream);
-	return fgetc(file_stream->file);
-}
-
-/*
- * Unget a character from the stream.
- *
- * @param stream The stream to unget the character from.
- * @param character The character to unget.
- */
-void brainfuck_stream_file_unget(struct BrainfuckStream *stream, int character)
-{
-	struct BrainfuckFileStream *file_stream = 
-		brainfuck_stream_file_cast(stream);
-	ungetc(character, file_stream->file);
-}
-
-/*
- * Initialise the given {@link BrainfuckFileStream} with
- * 	the given {@link FILE}.
- *
- * @param stream The {@ink BrainfuckFileStream} to initialise.
- * @param file The {@link FILE} of the file stream.
- */
-void brainfuck_stream_file_init(struct BrainfuckFileStream *stream, FILE *file)
-{
-	if (!stream)
-		return;
-	stream->file = file;
-	stream->base.get = &brainfuck_stream_file_get;
-	stream->base.unget = &brainfuck_stream_file_unget;
-}
-
-/*
- * Create a new {@link BrainfuckFileStream} with the given file.
- *
- * @param file The file to create the new file stream with.
- * @return The file stream.
- */
-struct BrainfuckFileStream * brainfuck_stream_file(FILE *file)
-{
-	struct BrainfuckFileStream *stream = brainfuck_stream_file_alloc();
-	brainfuck_stream_file_init(stream, file);
-	return stream;
-}
-
-/*
- * Allocate a new {@link BrainfuckBufferStream} from the heap.
- *
- * @return A pointer to the memory allocated to the heap or 
- *	<code>NULL</code> if there is no memory available.
- */
-struct BrainfuckBufferStream * brainfuck_stream_buffer_alloc()
-{
-	return malloc(sizeof(struct BrainfuckBufferStream));
-}
-
-/* 
- * Free the given {@link BrainfuckBufferStream} from the memory.
- * 
- * @param stream The stream to free from the memory.
- */
-void brainfuck_stream_buffer_free(struct BrainfuckBufferStream *stream)
-{
-	free(stream);
-	stream = 0;
-}
-
-/*
- * Read a character from the stream and return it.
- * 
- * @param stream The stream to unget the character from.
- * @return The character read from the stream.
- */
-int brainfuck_stream_buffer_get(struct BrainfuckStream *stream)
-{
-	struct BrainfuckBufferStream *buf_stream = 
-		brainfuck_stream_buffer_cast(stream);
-	if (!stream || buf_stream->index >= buf_stream->length)
-		return BRAINFUCK_EOF;
-	return buf_stream->buffer[buf_stream->index++];
-}
-
-/*
- * Unget a character from the stream.
- *
- * @param stream The stream to unget the character from.
- * @param character The character to unget.
- */
-void brainfuck_stream_buffer_unget(struct BrainfuckStream *stream, 
-		int character)
-{
-	struct BrainfuckBufferStream *buf_stream = 
-		brainfuck_stream_buffer_cast(stream);
-	if (!stream || character < 0)
-		return;
-	buf_stream->buffer[--buf_stream->index] = character;
-}
-
-/*
- * Initialise the given {@link BrainfuckBufferStream} with
- * 	the given buffer, index and length.
- *
- * @param stream The {@ink BrainfuckBufferStream} to initialise.
- * @param buffer The memory buffer of this {@link BrainfuckBufferStream}.
- * @param index The index in memory buffer of this 
- *	{@link BrainfuckBufferStream}.
- * @param length The length of the memory buffer of this 
- *	{@link BrainfuckBufferStream}.
- */
-void brainfuck_stream_buffer_init(struct BrainfuckBufferStream *stream, 
-		char *buffer, int index, int length)
-{
-	if (!stream)
-		return;
-	stream->buffer = buffer;
-	stream->index = index;
-	stream->length = length;
-	stream->base.get = &brainfuck_stream_buffer_get;
-	stream->base.unget = &brainfuck_stream_buffer_unget;
-}
-
-/*
- * Create a new {@link BrainfuckBufferStream} with the given string.
- *
- * @param string The string to create the new {@link BrainfuckBufferStream} 
- * 	with.
- * @return The created {@link BrainfuckBufferStream}.
- */
-struct BrainfuckBufferStream * brainfuck_stream_string(char *string)
-{
-	struct BrainfuckBufferStream *stream = brainfuck_stream_buffer_alloc();
-	char *copy = strdup(string);
-	if (!copy)
-		return NULL;
-	brainfuck_stream_buffer_init(stream, copy, 0, strlen(string));
-	return stream;
 }
 
 /*
@@ -359,8 +201,8 @@ struct BrainfuckContext * brainfuck_context_default(void)
 	
 	ctx->read = &getchar;
 	ctx->write = &putchar;
-	ctx->mem_size = BRAINFUCK_DEFAULT_MEMSIZE;
-	ctx->memory = malloc(sizeof(int) * ctx->mem_size);
+	ctx->mem_size = BRAINFUCK_DMEMSIZE;
+	ctx->memory = calloc(ctx->mem_size, sizeof(int));
 	
 	if (!ctx->memory)
 		return NULL;
@@ -371,174 +213,117 @@ struct BrainfuckContext * brainfuck_context_default(void)
 }
 
 /*
- * The {@link BrainfuckJump} structure is a internal strucutre that is used
- *	as a stack that contains loop {@link BrainfuckInstruction}s for 
- *	break {@link BrainfuckInstruction}s to jump back to the loop instruction.
+ * The {@link BrainfuckState} struct contains the current state of a parser.
+ * This structure is currently only available internally.
  */
-struct BrainfuckJump {
+struct BrainfuckState {
+
+	/*
+	 * An array of pointers to {@link BrainfuckInstruction}s.
+	 */
+	struct BrainfuckInstruction **jumps;
+
+	/*
+	 * The size of the array.
+	 */
+	int jumps_size;
 	
 	/*
-	 * The previous {@link BrainfuckJump} in the list.
+	 * The index of the top of the array.
 	 */
-	struct BrainfuckJump *previous;
-	
-	/*
-	 * The pointer to the loop {@link BrainfuckInstruction}.
-	 */
-	struct BrainfuckInstruction *instruction;
-	
-} BrainfuckJump;
+	int jumps_top;
+
+} BrainfuckState;
 
 /*
- * Allocate a new {@link BrainfuckJump} to the heap.
- *
- * @return A pointer to the memory allocated to the heap or 
- *	<code>NULL</code> if there is no memory available.
- */
-struct BrainfuckJump * brainfuck_jump_alloc(void)
-{
-	return malloc(sizeof(struct BrainfuckJump));
-}
-
-/* 
- * Free the given {@link BrainfuckJump} from the memory.
- * 
- * @param jump The {@link BrainfuckJump} to free from the memory.
- */
-void brainfuck_jump_free(struct BrainfuckJump *jump)
-{
-	free(jump);
-	jump = 0;
-}
-
-/* 
- * Parse the given string.
+ * Parse the given string with the given state.
  *
  * @param string The string to read the script from.
- * @param error A pointer to an integer that will be set to either a 
- * 	success or an error code.
- * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code> 
+ * @param jumps Pointer to an array of pointers to {@link BrainfuckInstruction}s.
+ * @param jumps_size Pointer to the size of the jumps array.
+ * @param jumps_top Pointer to the current index of the jumps array.
+ * @param error A pointer to an integer that will be set to either a success
+ *	or an error code.
+ * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code>
  *	if the parsing failed.
+ * @notice Currently only available internally.
  */
-struct BrainfuckScript * brainfuck_parse_string(char *string, int *error)
-{
-	if (!string) {
-		if (error)
-			*error = BRAINFUCK_EPARAM;
-		return NULL;
-	}
-	struct BrainfuckBufferStream *stream = brainfuck_stream_string(string);
-	struct BrainfuckScript *script = brainfuck_parse(
-		brainfuck_stream_cast(stream), error);
-	brainfuck_stream_buffer_free(stream);
-	return script;
-}
-
-/* 
- * Parse the given {@link FILE}.
- *
- * @param string The string to read the script from.
- * @param error A pointer to an integer that will be set to either a 
- * 	success or an error code.
- * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code> 
- *	if the parsing failed.
- */
-struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error)
-{
-	if (!file) {
-		if (error)
-			*error = BRAINFUCK_EPARAM;
-		return NULL;
-	}
-	struct BrainfuckFileStream *stream = brainfuck_stream_file(file);
-	struct BrainfuckScript *script = brainfuck_parse(
-		brainfuck_stream_cast(stream), error);
-	brainfuck_stream_file_free(stream);
-	return script;
-}
-
-/* 
- * Parse the given {@link BrainfuckStream}.
- *
- * @param stream The stream to read the script from.
- * @param error A pointer to an integer that will be set to either a 
- * 	success or an error code.
- * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code> 
- *	if the parsing failed.
- */
-struct BrainfuckScript * brainfuck_parse(struct BrainfuckStream *stream, 
-	int *error)
+struct BrainfuckScript * brainfuck_parse_string_state(
+		char *string, struct BrainfuckState *state, int *error)
 {
 	struct BrainfuckInstruction *script = NULL;
 	struct BrainfuckInstruction *top = NULL;
 	struct BrainfuckInstruction *instruction = NULL;
-	struct BrainfuckJump *jump_list = NULL;
-	struct BrainfuckJump *jump;
+	struct BrainfuckInstruction *jump = NULL;
 	char character;
 	int delta;
-	int error_holder = BRAINFUCK_OK;
-	
-	if (!error)
-		error = &error_holder;
-	if (!stream) {
+	int error_holder = BRAINFUCK_EOK;
+	error = error ? error : &error_holder;
+	if (!string || !state) {
 		*error = BRAINFUCK_EPARAM;
 		return NULL;
-	}
+	}	
 	
-	while((character = stream->get(stream)) != EOF) {
+	while((character = *string++)) {
 		delta = 1;
 		switch(character) {
 		case '-':
 			delta = -1;
 		case '+':
-			while ((character = stream->get(stream)) == '+' 
+			while ((character = *string++) == '+' 
 					|| character == '-')
 				delta += (character == '+' ? 1 : -1);
-			stream->unget(stream, character);
-			instruction = brainfuck_instruction_create_cell_mutation(delta);
+			string--;
+			instruction = brainfuck_instruction_create_value_mutation(delta);
 			break;
 		case '<':
 			delta = -1;
 		case '>':
-			while ((character = stream->get(stream)) == '>' 
+			while ((character = *string++) == '>' 
 					|| character == '<')
 				delta += (character == '>' ? 1 : -1);
-			stream->unget(stream, character);
+			string--;
 			instruction = brainfuck_instruction_create_index_mutation(delta);
 			break;
 		case '.':
-			while ((character = stream->get(stream)) == '.')
+			while ((character = *string++) == '.')
 				delta++;
-			stream->unget(stream, character);
+			string--;
 			instruction = brainfuck_instruction_create_output(delta);
 			break;
 		case ',':
-			while ((character = stream->get(stream)) == ',')
+			while ((character = *string++) == ',')
 				delta++;
-			stream->unget(stream, character);
+			string--;
 			instruction = brainfuck_instruction_create_input(delta);
 			break;
 		case '[':
+			if (!state->jumps_size) {
+				state->jumps = malloc(BRAINFUCK_DINITIALDEPTH *
+					sizeof(struct BrainfuckInstruction *));
+				state->jumps_size = BRAINFUCK_DINITIALDEPTH;				
+			} /* else if (state->jumps_top >= state->jumps_size) {
+				state->jumps_size *= 2;
+				state->jumps = realloc(state->jumps, 
+					state->jumps_size * sizeof(struct BrainfuckInstruction *));
+			} else if (4 * state->jumps_top <= state->jumps_size 
+					&& state->jumps_size > BRAINFUCK_DINITIALDEPTH) {
+				state->jumps_size /= 2;
+				state->jumps = realloc(state->jumps, 
+					state->jumps_size * sizeof(struct BrainfuckInstruction *));
+			}*/
 			instruction = brainfuck_instruction_create_loop();
-			jump = brainfuck_jump_alloc();
-			if (!jump) {
-				*error = BRAINFUCK_ENOMEM;
-				return NULL;
-			}
-			jump->instruction = instruction;
-			jump->previous = jump_list;
-			jump_list = jump;
+			state->jumps[state->jumps_top++] = instruction;
 			break;
 		case ']':
-			jump = jump_list;
+			jump = state->jumps[state->jumps_top];
 			if (!jump) {
-				*error = BRAINFUCK_ESYNTAX;
+				*error = BRAINFUCK_EINTERNAL;
 				return NULL;
 			}
-			jump_list = jump_list->previous;
-			instruction = brainfuck_instruction_create_break(jump->instruction);
-			jump->instruction->attributes.jump = instruction;
-			brainfuck_jump_free(jump);
+			instruction = brainfuck_instruction_create_break(jump);
+			jump->attributes.jump = instruction;
+			state->jumps[state->jumps_top--] = NULL;
 			break;
 		default:
 			continue;
@@ -553,7 +338,104 @@ struct BrainfuckScript * brainfuck_parse(struct BrainfuckStream *stream,
 			top->next = instruction;
 			top = instruction;
 		}
+	}	
+	return script;
+}
+
+/* 
+ * Parse the given string.
+ *
+ * @param string The string to read the script from.
+ * @param error A pointer to an integer that will be set to either a 
+ * 	success or an error code.
+ * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code> 
+ *	if the parsing failed.
+ */
+struct BrainfuckScript * brainfuck_parse_string(char *string, int *error)
+{
+	int error_holder = BRAINFUCK_EOK;
+	error = error ? error :  &error_holder;
+
+	struct BrainfuckState *state = malloc(sizeof(struct BrainfuckState));
+	if (!state) {
+		*error = BRAINFUCK_ENOMEM;
+		return NULL;
 	}
+
+	state->jumps = NULL;
+	state->jumps_size = 0;
+	state->jumps_top = 0;
+
+	struct BrainfuckScript *script = 
+		brainfuck_parse_string_state(string, state, error);
+
+	if (state->jumps_top > 0) {
+		*error = BRAINFUCK_ESYNTAX;
+		return NULL;
+	}
+
+	free(state->jumps);
+	free(state);
+	return script;
+}
+
+/*
+ * Parse the given file.
+ *
+ * @param file The file to read the script from.
+ * @param error A pointer to an integer that will be set to either a success
+ *	or an error code.
+ * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code>
+ *	if the parsing failed.
+ */
+struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error)
+{
+	int error_holder = BRAINFUCK_EOK;
+	char buffer[1024];
+	struct BrainfuckScript *script = NULL;
+	struct BrainfuckInstruction *top = NULL;
+	struct BrainfuckInstruction *instruction = NULL;
+	struct BrainfuckState *state = NULL;
+	error = error ? error : &error_holder;
+
+	if (!file) {
+		*error = BRAINFUCK_EPARAM;
+		return NULL;
+	}
+
+	state = malloc(sizeof(struct BrainfuckState));
+	if (!state) {
+		*error = BRAINFUCK_ENOMEM;
+		return NULL;
+	}
+	state->jumps = NULL;
+	state->jumps_size = 0;
+	state->jumps_top = 0;
+
+	while (!feof(file)) {
+		memset(&buffer, 0, sizeof(buffer));
+		fread(&buffer, sizeof(buffer), 1, file);
+		if (ferror(file))
+			continue;
+		instruction = brainfuck_parse_string_state(buffer, state,
+ 			error);
+		if (*error != BRAINFUCK_EOK)
+			return NULL;
+		script = script ? script : instruction;
+		if (top)
+			top->next = instruction;
+		while (instruction->next)
+			instruction = instruction->next;
+		top = instruction;
+	}
+
+	if (state->jumps_top > 0) {
+		*error = BRAINFUCK_ESYNTAX;
+		return NULL;
+	}
+
+	free(state->jumps);
+	free(state);
 	return script;
 }
 
@@ -574,32 +456,39 @@ int brainfuck_run(struct BrainfuckScript *script,
 		return BRAINFUCK_EPARAM;
 	ctx->instruction = script;
 	ctx->running = 1;
+	int index = 0;
+
 	while (ctx->instruction && ctx->running) {
-		switch(ctx->instruction->id) {
-		case BRAINFUCK_ICELL:
+		printf("type: %i\n", ctx->instruction->type);
+		switch(ctx->instruction->type) {
+		case VALUE:
 			ctx->memory[ctx->index] += ctx->instruction->attributes.delta;
 			break;
-		case BRAINFUCK_IINDEX:
+		case INDEX:
 			ctx->index += ctx->instruction->attributes.delta;
 			break;
-		case BRAINFUCK_IINPUT:
-			ctx->memory[ctx->index] = ctx->read();
+		case INPUT:
+			for (index = 0; index < ctx->instruction->attributes.delta; index++)
+				ctx->memory[ctx->index] = ctx->read();
 			break;
-		case BRAINFUCK_IOUTPUT:
-			ctx->write(ctx->memory[ctx->index]);
+		case OUTPUT:
+			for (index = 0; index < ctx->instruction->attributes.delta; index++)
+				ctx->write(ctx->memory[ctx->index]);
 			break;
-		case BRAINFUCK_ILOOP:
-			if (ctx->memory[ctx->index])
+		case LOOP:
+			if (ctx->memory[ctx->index] || 
+					!ctx->instruction->attributes.jump)
 				break;
 			ctx->instruction = ctx->instruction->attributes.jump;
 			continue;
-		case BRAINFUCK_IBREAK:
-			if (!ctx->memory[ctx->index])
+		case BREAK:
+			if (!ctx->memory[ctx->index] || 
+					!ctx->instruction->attributes.jump)
 				break;
 			ctx->instruction = ctx->instruction->attributes.jump;
 			continue;
 		}
 		ctx->instruction = ctx->instruction->next;
 	}
-	return BRAINFUCK_OK;
+	return BRAINFUCK_EOK;
 }
