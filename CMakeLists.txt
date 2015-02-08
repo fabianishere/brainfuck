@@ -9,8 +9,8 @@ option(WITH_CLI
 	"Build the command line interface for brainfuck." ON)
 
 add_definitions("-W -Wall -Werror -Wformat-security")
-add_definitions("-std=c89 -O3")
-add_definitions("-fno-exceptions -fstack-protector")
+add_definitions("-std=c89 -O2")
+add_definitions("-fno-exceptions")
 
 include_directories(include/)
 add_library(libbrainfuck STATIC src/brainfuck.c)
