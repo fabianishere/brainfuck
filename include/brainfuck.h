@@ -30,16 +30,16 @@
 #define BRAINFUCK_VERSION "3.0.0"
 
 /* Default values */
-#define BRAINFUCK_DMEMSIZE 30000	/* Size of the allocated memory block */ 
-#define BRAINFUCK_DINITIALDEPTH 10	/* Initial scope depth */
-#define BRAINFUCK_DMAXDEPTH 80		/* Maximum scope depth */
-#define BRAINFUCK_DFILEBUFSIZE 1024 /* Size of the file buffer */
+#define BRAINFUCK_DMEMSIZE 30000		/* Size of the allocated memory block */ 
+#define BRAINFUCK_DINITIALDEPTH 10		/* Initial scope depth */
+#define BRAINFUCK_DMAXDEPTH 80			/* Maximum scope depth */
+#define BRAINFUCK_DFILEBUFSIZE 1024 	/* Size of the file buffer */
 
 /* Error codes */
-#define BRAINFUCK_EOK 1			/* Everything is OK */
-#define BRAINFUCK_ENOMEM -5		/* Out of memory */
-#define BRAINFUCK_ESYNTAX -6	/* Syntax error */
-#define BRAINFUCK_EBOUNDS -7	/* Index is out of bounds */
+#define BRAINFUCK_EOK 1				/* Everything is OK */
+#define BRAINFUCK_ENOMEM -5			/* Out of memory */
+#define BRAINFUCK_ESYNTAX -6		/* Syntax error */
+#define BRAINFUCK_EBOUNDS -7		/* Index is out of bounds */
 
 /**
  * The {@link BrainfuckType} enum contains the legal types 
