@@ -83,7 +83,8 @@ void brainfuck_instruction_free(struct BrainfuckInstruction *instruction);
  * @see BrainfuckInstruction
  */
 #define BrainfuckScript BrainfuckInstruction
-#define brainfuck_script_free brainfuck_instruction_free_procedure
+#define brainfuck_script_free brainfuck_instruction_procedure_free
+#define brainfuck_script_add brainfuck_instruction_procedure_add
 
 /**
  * Initialise the given instruction as MUTATE instruction.
@@ -133,26 +134,36 @@ void brainfuck_instruction_write(
 void brainfuck_instruction_procedure(struct BrainfuckInstruction *instruction);
 
 /**
- * Initialise the given instruction as LOOP instruction.
- *
- * @param instruction The instruction to initialise.
- */
-void brainfuck_instruction_loop(struct BrainfuckInstruction *instruction);
-
-/**
- * Free the tail of the given {@link BrainfuckInstruction.}
+ * Add the given instruction to the given procedure.
  * 
- * @param instruction The instruction to free the tail from the heap.
+ * @param procedure The procedure to add the instruction to.
+ * @param instruction The instruction to add to the procedure.
  */
-void brainfuck_instruction_free_tail(struct BrainfuckInstruction *instruction);
+void brainfuck_instruction_procedure_add(struct BrainfuckInstruction *procedure,
+	struct BrainfuckInstruction *instruction);
 
 /**
  * Free a procedure (or procedure-based) instruction from the heap.
  * 
  * @param instruction The instruction to free from the heap.
  */
-void brainfuck_instruction_free_procedure(
+void brainfuck_instruction_procedure_free(
 	struct BrainfuckInstruction *instruction);
+
+/**
+ * Free the tail of the given {@link BrainfuckInstruction}.
+ * 
+ * @param instruction The instruction to free the tail from the heap.
+ */
+void brainfuck_instruction_procedure_free_tail(
+	struct BrainfuckInstruction *instruction);
+
+/**
+ * Initialise the given instruction as LOOP instruction.
+ *
+ * @param instruction The instruction to initialise.
+ */
+void brainfuck_instruction_loop(struct BrainfuckInstruction *instruction);
 
 /**
  * The {@link BrainfuckParserState} struct holds the state of the parser.

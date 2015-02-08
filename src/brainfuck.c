@@ -189,25 +189,42 @@ void brainfuck_instruction_procedure(struct BrainfuckInstruction *instruction)
 }
 
 /**
- * Initialise the given instruction as LOOP instruction.
- *
- * @param instruction The instruction to initialise.
+ * Add the given instruction to the given procedure.
+ * 
+ * @param procedure The procedure to add the instruction to.
+ * @param instruction The instruction to add to the procedure.
  */
-void brainfuck_instruction_loop(struct BrainfuckInstruction *instruction)
+void brainfuck_instruction_procedure_add(struct BrainfuckInstruction *procedure,
+	struct BrainfuckInstruction *instruction)
 {
-	assert(instruction);
-	instruction->type = LOOP;
-	instruction->attributes.procedure.head = NULL;
-	instruction->attributes.procedure.tail = NULL;
-	instruction->next = NULL;
+	assert(procedure && instruction);
+	if (!procedure->attributes.procedure.head)
+		procedure->attributes.procedure.head = instruction;
+	if (procedure->attributes.procedure.tail)
+		procedure->attributes.procedure.tail->next = instruction;
+	procedure->attributes.procedure.tail = instruction;
 }
 
 /**
- * Free the tail of the given {@link BrainfuckInstruction.}
+ * Free a procedure (or procedure-based) instruction from the heap.
+ * 
+ * @param instruction The instruction to free from the heap.
+ */
+void brainfuck_instruction_procedure_free(
+	struct BrainfuckInstruction *instruction)
+{
+	assert(instruction);
+	brainfuck_instruction_procedure_free_tail(instruction);
+	brainfuck_instruction_free(instruction);
+}
+
+/**
+ * Free the tail of the given {@link BrainfuckInstruction}.
  * 
  * @param instruction The instruction to free the tail from the heap.
  */
-void brainfuck_instruction_free_tail(struct BrainfuckInstruction *instruction)
+void brainfuck_instruction_procedure_free_tail(
+	struct BrainfuckInstruction *instruction)
 {
 	assert(instruction);
 	struct BrainfuckInstruction *ptr = instruction->attributes.procedure.head;
@@ -220,16 +237,17 @@ void brainfuck_instruction_free_tail(struct BrainfuckInstruction *instruction)
 }
 
 /**
- * Free a procedure (or procedure-based) instruction from the heap.
- * 
- * @param instruction The instruction to free from the heap.
+ * Initialise the given instruction as LOOP instruction.
+ *
+ * @param instruction The instruction to initialise.
  */
-void brainfuck_instruction_free_procedure(
-	struct BrainfuckInstruction *instruction)
+void brainfuck_instruction_loop(struct BrainfuckInstruction *instruction)
 {
 	assert(instruction);
-	brainfuck_instruction_free_tail(instruction);
-	brainfuck_instruction_free(instruction);
+	instruction->type = LOOP;
+	instruction->attributes.procedure.head = NULL;
+	instruction->attributes.procedure.tail = NULL;
+	instruction->next = NULL;
 }
 
 /**
@@ -309,6 +327,7 @@ void brainfuck_parse_string_state(
 	unsigned int k = 1;
 	char character; 
 	struct BrainfuckInstruction *instruction = NULL;
+	struct BrainfuckInstruction **tmp = NULL;
 	
 	error = error ? error : &error_holder;
 	assert(state);
@@ -365,36 +384,22 @@ void brainfuck_parse_string_state(
 				break;
 			case '[':
 				if (state->scope.depth + 1 >= state->scope.max_depth) {
-					state->scope.max_depth *= 2;
-					
 					/* Prevents allocating too much memory */
 					if (state->scope.max_depth > BRAINFUCK_DMAXDEPTH)
 						goto error_nomem;
-					state->scope.scopes = realloc(state->scope.scopes, 
-						state->scope.max_depth * 
+					tmp = realloc(state->scope.scopes, 
+						state->scope.max_depth * 2 *  
 						sizeof(struct BrainfuckInstruction *));
-				} else if (4 * state->scope.depth + 4 <= state->scope.max_depth 
-						&& state->scope.max_depth > BRAINFUCK_DINITIALDEPTH) {
-					state->scope.max_depth /= 2;
-					state->scope.scopes = realloc(state->scope.scopes, 
-						state->scope.max_depth * 
-						sizeof(struct BrainfuckInstruction *));
+					if  (tmp) {
+						state->scope.scopes = tmp;
+						state->scope.max_depth *= 2;
+						tmp = NULL;
+					}
 				}
 				brainfuck_instruction_loop(instruction);
-				
-				/* TODO clean up this mess */
-				if (!state->scope.scopes[state->scope.depth]->attributes
-						.procedure.head)
-					state->scope.scopes[state->scope.depth]->attributes
-						.procedure.head = instruction;
-				if (state->scope.scopes[state->scope.depth]->attributes
-						.procedure.tail)
-					state->scope.scopes[state->scope.depth]->attributes
-							.procedure.tail->next = instruction;
-				state->scope.scopes[state->scope.depth]->attributes
-					.procedure.tail = instruction;
+				brainfuck_instruction_procedure_add(
+					state->scope.scopes[state->scope.depth], instruction);
 				state->scope.scopes[++state->scope.depth] = instruction;
-				
 				instruction = brainfuck_instruction_alloc();
 				if (!instruction)
 					goto error_nomem;
@@ -407,18 +412,8 @@ void brainfuck_parse_string_state(
 			default:
 				continue;
 		}
-
-		if (!state->scope.scopes[state->scope.depth]->attributes
-				.procedure.head)
-			state->scope.scopes[state->scope.depth]->attributes
-				.procedure.head = instruction;
-		if (state->scope.scopes[state->scope.depth]->attributes.procedure.tail) {
-			state->scope.scopes[state->scope.depth]->attributes.procedure.tail
-				->next = instruction;
-		}
-		state->scope.scopes[state->scope.depth]->attributes.procedure.tail
-			= instruction;
-		
+		brainfuck_instruction_procedure_add(
+			state->scope.scopes[state->scope.depth], instruction);
 		instruction = brainfuck_instruction_alloc();
 		if (!instruction)
 			goto error_nomem;
@@ -555,8 +550,7 @@ void brainfuck_execution_context_init(
 int brainfuck_execution_interpret(
 	const struct BrainfuckScript *script, struct BrainfuckExecutionContext *ctx)
 {
-	assert(script);
-	assert(ctx);
+	assert(script && ctx);
 	unsigned int index = 0;
 	struct BrainfuckInstruction *instruction = script->attributes.procedure
 		.head;
