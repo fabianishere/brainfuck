@@ -562,27 +562,27 @@ int brainfuck_execution_interpret(
 		.head;
 	while (instruction) {
 		switch(instruction->type) {
-			case MUTATE:
-				ctx->memory[ctx->index] += instruction->attributes.dx;
-				break;
-			case MOVE:
-				ctx->index += instruction->attributes.dy;
-				break;
-			case READ:
-				for (index = 0; index < instruction->attributes.k; index++)
-					ctx->memory[ctx->index] = ctx->read();
-				break;
-			case WRITE:
-				for (index = 0; index < instruction->attributes.k; index++)
-					ctx->write(ctx->memory[ctx->index]);
-				break;
-			case PROCEDURE:
+		case MUTATE:
+			ctx->memory[ctx->index] += instruction->attributes.dx;
+			break;
+		case MOVE:
+			ctx->index += instruction->attributes.dy;
+			break;
+		case READ:
+			for (index = 0; index < instruction->attributes.k; index++)
+				ctx->memory[ctx->index] = ctx->read();
+			break;
+		case WRITE:
+			for (index = 0; index < instruction->attributes.k; index++)
+				ctx->write(ctx->memory[ctx->index]);
+			break;
+		case PROCEDURE:
+			brainfuck_execution_interpret(instruction, ctx);
+			break;
+		case LOOP:
+			while(ctx->memory[ctx->index])
 				brainfuck_execution_interpret(instruction, ctx);
-				break;
-			case LOOP:
-				while(ctx->memory[ctx->index])
-					brainfuck_execution_interpret(instruction, ctx);
-				break;
+			break;
 		}
 		instruction = instruction->next;
 	}
