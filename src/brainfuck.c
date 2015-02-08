@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2014 Fabian M.
+ * Copyright (c) 2015 Fabian M.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,71 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <brainfuck.h>
 
-/*
+/**
+ * A {@link BrainfuckInstruction} represents an instruction that can be 
+ * 	executed and is part of a linked list of instructions created by a 
+ *	parser.
+ */
+struct BrainfuckInstruction {
+	
+	/**
+	 * The type of this instruction.
+	 */
+	enum BrainfuckType type;
+
+	/**
+	 * The attributes of this instruction.
+	 */
+	union attributes {
+		
+		/**
+		 * The change in cell value.
+		 */
+		int dx;
+		
+		/**
+		 * The change in index.
+		 */
+		int dy;
+		
+		/**
+		 * The amount of times the instruction should be executed.
+		 */
+		unsigned int k;
+		
+		/**
+		 * Attributes for a PROCEDURE or LOOP instruction.
+		 */
+		struct procedure {
+			
+			/**
+			 * The head of a linked list containing the instructions of this 
+			 *	procedure or loop.
+			 */
+			struct BrainfuckInstruction *head;
+			
+			/**
+			 * The tail of a linked list containing the instructions of this 
+			 *	procedure or loop.
+			 */
+			struct BrainfuckInstruction *tail;
+			
+		} procedure;
+
+	} attributes;
+	
+	/**
+	 * The next instruction in the linked list of instructions.
+	 */
+	struct BrainfuckInstruction *next;
+	
+} BrainfuckInstruction;
+
+/**
  * Allocate a new {@link BrainfuckInstruction} to the heap.
  *
  * @return A pointer to the memory allocated to the heap or 
@@ -38,7 +99,7 @@ struct BrainfuckInstruction * brainfuck_instruction_alloc(void)
 	return malloc(sizeof(struct BrainfuckInstruction));
 }
 
-/* 
+/**
  * Free the given {@link BrainfuckInstruction} from the memory.
  * 
  * @param instruction The instruction to free from the memory.
@@ -46,308 +107,334 @@ struct BrainfuckInstruction * brainfuck_instruction_alloc(void)
 void brainfuck_instruction_free(struct BrainfuckInstruction *instruction)
 {
 	free(instruction);
-	instruction = 0;
 }
 
-/*
- * Create a cell value mutation instruction and returns it.
+/**
+ * Initialise the given instruction as MUTATE instruction.
  *
- * @param delta The difference between the current cell value and the value
- * 	that is going to be set.
- * @return The cell value mutation instruction.
+ * @param instruction The instruction to initialise.
+ * @param dx The change in cell value.
  */
-struct BrainfuckInstruction * brainfuck_instruction_create_value_mutation(
-	int delta)
+void brainfuck_instruction_mutate(
+	struct BrainfuckInstruction *instruction, const int dx)
 {
-	struct BrainfuckInstruction *instruction = 
-			brainfuck_instruction_alloc();
-	if (!instruction)
-		return NULL;
-	instruction->type = VALUE;
-	instruction->attributes.delta = delta;
+	assert(instruction);
+	instruction->type = MUTATE;
+	instruction->attributes.dx = dx;
 	instruction->next = NULL;
-	return instruction;
 }
 
-/*
- * Create an index mutation instruction and returns it.
+/**
+ * Initialise the given instruction as MOVE instruction.
  *
- * @param delta The difference between the current index and the index
- * 	that is going to be set.
- * @return The index mutation instruction.
+ * @param instruction The instruction to initialise.
+ * @param dy the change in index.
  */
-struct BrainfuckInstruction * brainfuck_instruction_create_index_mutation(
-	int delta)
+void brainfuck_instruction_move(
+	struct BrainfuckInstruction *instruction, const int dy)
 {
-	struct BrainfuckInstruction *instruction = 
-			brainfuck_instruction_alloc();
-	if (!instruction)
-		return NULL;
-	instruction->type = INDEX;
-	instruction->attributes.delta = delta;
+	assert(instruction);
+	instruction->type = MOVE;
+	instruction->attributes.dy = dy;
 	instruction->next = NULL;
-	return instruction;
 }
 
-/*
- * Create an output instruction and returns it.
+/**
+ * Initialise the given instruction as READ instruction.
  *
- * @param times The amount of times this instruction will be executed.
- * @return The output instruction.
+ * @param instruction The instruction to initialise.
+ * @param k The amount of times this instruction will be executed.
+ * @return The READ instruction that has been created or <code>NULL</code>
+ *	if the creation failed.
  */
-struct BrainfuckInstruction * brainfuck_instruction_create_output(int times)
+void brainfuck_instruction_read(
+	struct BrainfuckInstruction *instruction, const unsigned int k)
 {
-	struct BrainfuckInstruction *instruction = 
-			brainfuck_instruction_alloc();
-	if (!instruction)
-		return NULL;
-	instruction->type = OUTPUT;
-	instruction->attributes.delta = times;
+	assert(instruction);
+	instruction->type = READ;
+	instruction->attributes.k = k;
 	instruction->next = NULL;
-	return instruction;
 }
 
-/*
- * Create an input instruction and returns it.
+/**
+ * Initialise the given instruction as WRITE instruction.
  *
- * @param times The amount of times this instruction will be executed.
- * @return The input instruction.
+ * @param instruction The instruction to initialise.
+ * @param k The amount of times this instruction will be executed.
+ * @return The READ instruction that has been created or <code>NULL</code>
+ *	if the creation failed.
  */
-struct BrainfuckInstruction * brainfuck_instruction_create_input(int times)
+void brainfuck_instruction_write(
+	struct BrainfuckInstruction *instruction, const unsigned int k)
 {
-	struct BrainfuckInstruction *instruction = 
-			brainfuck_instruction_alloc();
-	if (!instruction)
-		return NULL;
-	instruction->type = INPUT;
-	instruction->attributes.delta = times;
+	assert(instruction);
+	instruction->type = WRITE;
+	instruction->attributes.k = k;
 	instruction->next = NULL;
-	return instruction;
 }
 
-/*
- * Create a loop instruction and return it.
+
+/**
+ * Initialise the given instruction as PROCEDURE instruction.
  *
- * @return The break instruction.
+ * @param instruction The instruction to initialise.
  */
-struct BrainfuckInstruction * brainfuck_instruction_create_loop()
+void brainfuck_instruction_procedure(struct BrainfuckInstruction *instruction)
 {
-	struct BrainfuckInstruction *instruction = 
-			brainfuck_instruction_alloc();
-	if (!instruction)
-		return NULL;
+	assert(instruction);
+	instruction->type = PROCEDURE;
+	instruction->attributes.procedure.head = NULL;
+	instruction->attributes.procedure.tail = NULL;
+	instruction->next = NULL;
+}
+
+/**
+ * Initialise the given instruction as LOOP instruction.
+ *
+ * @param instruction The instruction to initialise.
+ */
+void brainfuck_instruction_loop(struct BrainfuckInstruction *instruction)
+{
+	assert(instruction);
 	instruction->type = LOOP;
-	instruction->attributes.jump = NULL;
+	instruction->attributes.procedure.head = NULL;
+	instruction->attributes.procedure.tail = NULL;
 	instruction->next = NULL;
-	return instruction;
 }
 
-/*
- * Create a break instruction and return it.
- *
- * @param jump The jump of this break instruction.
- * @return The break instruction.
+/**
+ * Free the tail of the given {@link BrainfuckInstruction.}
+ * 
+ * @param instruction The instruction to free the tail from the heap.
  */
-struct BrainfuckInstruction * brainfuck_instruction_create_break(
-	struct BrainfuckInstruction *jump)
+void brainfuck_instruction_free_tail(struct BrainfuckInstruction *instruction)
 {
-	struct BrainfuckInstruction *instruction = 
-			brainfuck_instruction_alloc();
-	if (!instruction)
-		return NULL;
-	instruction->type = BREAK;
-	instruction->attributes.jump = jump;
-	instruction->next = NULL;
-	return instruction;
+	assert(instruction);
+	struct BrainfuckInstruction *ptr = instruction->attributes.procedure.head;
+	struct BrainfuckInstruction *tmp = NULL;
+	while (ptr) {
+		tmp = ptr;
+		ptr = ptr->next;
+		free(tmp);
+	}
 }
 
-/*
- * Allocate a new {@link BrainfuckContext} to the heap.
+/**
+ * Free a procedure (or procedure-based) instruction from the heap.
+ * 
+ * @param instruction The instruction to free from the heap.
+ */
+void brainfuck_instruction_free_procedure(
+	struct BrainfuckInstruction *instruction)
+{
+	assert(instruction);
+	brainfuck_instruction_free_tail(instruction);
+	brainfuck_instruction_free(instruction);
+}
+
+/**
+ * The {@link BrainfuckParserState} struct holds the state of the parser.
+ */
+struct BrainfuckParserState {
+
+	/**
+	 * The {@link BrainfuckScript} of the program currently being parsed.
+	 */
+	struct BrainfuckScript *script;
+		
+	/**
+	 * The scope the parser currently is in.
+	 */
+	struct scope {
+		
+		/**
+		 * The depth of the scope.
+		 */
+		unsigned int depth;
+		
+		/**
+		 * The maximum depth of the scope. If the depth exceeds this value,
+		 *	then the size of the stack containing the scope will be expanded.
+		 */
+		unsigned int max_depth;
+		
+		/**
+		 * The array with all the scopes.
+		 */
+		struct BrainfuckInstruction **scopes;
+		
+	} scope;
+
+} BrainfuckState;
+
+/**
+ * Allocate a new {@link BrainfuckParserState} to the heap.
  *
  * @return A pointer to the memory allocated to the heap or 
  *	<code>NULL</code> if there is no memory available.
  */
-struct BrainfuckContext * brainfuck_context_alloc(void)
+struct BrainfuckParserState * brainfuck_parser_state_alloc(void)
 {
-	return malloc(sizeof(struct BrainfuckContext));
+	return malloc(sizeof(struct BrainfuckParserState));
 }
 
-/* 
- * Free the given {@link BrainfuckContext} from the memory.
+/**
+ * Free the given {@link BrainfuckParserState} from the heap.
  * 
- * @param ctx The context to free from the memory.
+ * @param state The state to free from the heapy.
  */
-void brainfuck_context_free(struct BrainfuckContext *ctx)
+void brainfuck_parser_state_free(struct BrainfuckParserState *state)
 {
-	if (!ctx)
-		return;
-	free(ctx->memory);
-	free(ctx);
-	ctx = 0;
-}
-
-/*
- * Return a new {@link BrainfuckContext} initialised with the default
- * 	values.
- * 
- * @return The default {@link BrainfuckContext}.
- */
-struct BrainfuckContext * brainfuck_context_default(void)
-{
-	struct BrainfuckContext *ctx = brainfuck_context_alloc();
-	
-	if (!ctx)
-		return NULL;
-	
-	ctx->read = &getchar;
-	ctx->write = &putchar;
-	ctx->mem_size = BRAINFUCK_DMEMSIZE;
-	ctx->memory = calloc(ctx->mem_size, sizeof(int));
-	
-	if (!ctx->memory)
-		return NULL;
-	
-	ctx->index = 0;
-	ctx->running = 0;
-	return ctx;
-}
-
-/*
- * Allocate a new {@link BrainfuckState} to the heap.
- *
- * @return A pointer to the memory allocated to the heap or 
- *	<code>NULL</code> if there is no memory available.
- */
-struct BrainfuckState * brainfuck_state_alloc(void)
-{
-	return malloc(sizeof(struct BrainfuckState));
-}
-
-/* 
- * Free the given {@link BrainfuckContext} from the memory.
- * 
- * @param state The state to free from the memory.
- */
-void brainfuck_state_free(struct BrainfuckState *state)
-{
-	if (!state)
-		return;
-	
-	free(state->jumps.array);
+	assert(state);
+	free(state->scope.scopes);
+	state->scope.scopes = NULL;
+	state->scope.max_depth = 0;
+	state->scope.depth = 0;
 	free(state);
-	state = 0;
 }
 
-/*
+/**
  * Parse the given string with the given state.
  *
  * @param string The string to read the script from.
- * @param jumps Pointer to an array of pointers to {@link BrainfuckInstruction}s.
- * @param jumps_size Pointer to the size of the jumps array.
- * @param jumps_top Pointer to the current index of the jumps array.
+ * @param state The state of the parser.
  * @param error A pointer to an integer that will be set to either a success
  *	or an error code.
- * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code>
- *	if the parsing failed.
- * @notice Currently only available internally.
  */
-struct BrainfuckScript * brainfuck_parse_string_state(
-		char *string, struct BrainfuckState *state, int *error)
+void brainfuck_parse_string_state(
+		const char *string, struct BrainfuckParserState *state, int *error)
 {
-	struct BrainfuckInstruction *script = NULL;
-	struct BrainfuckInstruction *top = NULL;
-	struct BrainfuckInstruction *instruction = NULL;
-	struct BrainfuckInstruction *jump = NULL;
-	char character;
-	int delta;
 	int error_holder = BRAINFUCK_EOK;
-
+	int d = 1;
+	unsigned int k = 1;
+	char character; 
+	struct BrainfuckInstruction *instruction = NULL;
+	
 	error = error ? error : &error_holder;
-
-	if (!string || !state) {
-		*error = BRAINFUCK_EPARAM;
-		return NULL;
-	}	
+	assert(state);
+	
+	if (!state->script) {
+		state->script = brainfuck_instruction_alloc();
+		if (!state->script)
+			goto error_nomem;
+		brainfuck_instruction_procedure(state->script);
+	}
+	
+	if (!state->scope.max_depth) { 
+		state->scope.depth = 0;
+		state->scope.max_depth = BRAINFUCK_DINITIALDEPTH;
+		state->scope.scopes = malloc(state->scope.max_depth * 
+			sizeof(struct BrainfuckInstruction *));
+		if (!state->scope.scopes)
+			goto error_nomem;
+		state->scope.scopes[0] = state->script; 
+	}
+	
+	instruction = brainfuck_instruction_alloc();
+	if (!instruction)
+		goto error_nomem;
 	
 	while((character = *string++)) {
-		delta = 1;
+		d = k = 1;
 		switch(character) {
-		case '-':
-			delta = -1;
-		case '+':
-			while ((character = *string++) == '+' 
-					|| character == '-')
-				delta += (character == '+' ? 1 : -1);
-			string--;
-			instruction = brainfuck_instruction_create_value_mutation(delta);
-			break;
-		case '<':
-			delta = -1;
-		case '>':
-			while ((character = *string++) == '>' 
-					|| character == '<')
-				delta += (character == '>' ? 1 : -1);
-			string--;
-			instruction = brainfuck_instruction_create_index_mutation(delta);
-			break;
-		case '.':
-			while ((character = *string++) == '.')
-				delta++;
-			string--;
-			instruction = brainfuck_instruction_create_output(delta);
-			break;
-		case ',':
-			while ((character = *string++) == ',')
-				delta++;
-			string--;
-			instruction = brainfuck_instruction_create_input(delta);
-			break;
-		case '[':
-			if (!state->jumps.array || state->jumps.size <= 0) {
-				state->jumps.size = BRAINFUCK_DINITIALDEPTH;
-				state->jumps.array = malloc(state->jumps.size * sizeof(struct BrainfuckInstruction *));
-			} else if (state->jumps.top + 1 >= state->jumps.size) {
-				state->jumps.size *= 2;
-				state->jumps.array = realloc(state->jumps.array, state->jumps.size * sizeof(struct BrainfuckInstruction *));
-			} else if (4 * state->jumps.top + 4 <= state->jumps.size 
-					&& state->jumps.size > BRAINFUCK_DINITIALDEPTH) {
-				state->jumps.size /= 2;
-				state->jumps.array = realloc(state->jumps.array, state->jumps.size * sizeof(struct BrainfuckInstruction *));
-			}
-			instruction = brainfuck_instruction_create_loop();
-			state->jumps.array[++state->jumps.top] = instruction;
-			break;
-		case ']':
-			if (state->jumps.top < 0) {
-				*error = BRAINFUCK_ESYNTAX;
-				return NULL;
-			}
-			jump = state->jumps.array[state->jumps.top--];
-			if (!jump) {
-				*error = BRAINFUCK_EINTERNAL;
-				return NULL;
-			}
-			instruction = brainfuck_instruction_create_break(jump);
-			jump->attributes.jump = instruction;
-			break;
-		default:
-			continue;
+			case '-':
+				d = -1;
+			case '+':
+				while ((character = *string++) == '+' || character == '-')
+					d += (character == '+' ? 1 : -1);
+				string--;
+				brainfuck_instruction_mutate(instruction, d);
+				break;
+			case '<':
+				d = -1;
+			case '>':
+				while ((character = *string++) == '>' || character == '<')
+					d += (character == '>' ? 1 : -1);
+				string--;
+				brainfuck_instruction_move(instruction, d);
+				break;
+			case ',':
+				while ((character = *string++) == ',' && k++);
+				string--;
+				brainfuck_instruction_read(instruction, k);
+				break;
+			case '.':
+				while ((character = *string++) == '.' && k++);
+				string--;
+				brainfuck_instruction_write(instruction, k);
+				break;
+			case '[':
+				if (state->scope.depth + 1 >= state->scope.max_depth) {
+					state->scope.max_depth *= 2;
+					
+					/* Prevents allocating too much memory */
+					if (state->scope.max_depth > BRAINFUCK_DMAXDEPTH)
+						goto error_nomem;
+					state->scope.scopes = realloc(state->scope.scopes, 
+						state->scope.max_depth * 
+						sizeof(struct BrainfuckInstruction *));
+				} else if (4 * state->scope.depth + 4 <= state->scope.max_depth 
+						&& state->scope.max_depth > BRAINFUCK_DINITIALDEPTH) {
+					state->scope.max_depth /= 2;
+					state->scope.scopes = realloc(state->scope.scopes, 
+						state->scope.max_depth * 
+						sizeof(struct BrainfuckInstruction *));
+				}
+				brainfuck_instruction_loop(instruction);
+				
+				/* TODO clean up this mess */
+				if (!state->scope.scopes[state->scope.depth]->attributes
+						.procedure.head)
+					state->scope.scopes[state->scope.depth]->attributes
+						.procedure.head = instruction;
+				if (state->scope.scopes[state->scope.depth]->attributes
+						.procedure.tail)
+					state->scope.scopes[state->scope.depth]->attributes
+							.procedure.tail->next = instruction;
+				state->scope.scopes[state->scope.depth]->attributes
+					.procedure.tail = instruction;
+				state->scope.scopes[++state->scope.depth] = instruction;
+				
+				instruction = brainfuck_instruction_alloc();
+				if (!instruction)
+					goto error_nomem;
+				continue;
+			case ']':
+				if (state->scope.depth <= 0)
+					goto error_syntax;
+				state->scope.depth--;
+				continue;
+			default:
+				continue;
 		}
-		if (!instruction) {
-			*error = BRAINFUCK_ENOMEM;
-			return NULL;
+
+		if (!state->scope.scopes[state->scope.depth]->attributes
+				.procedure.head)
+			state->scope.scopes[state->scope.depth]->attributes
+				.procedure.head = instruction;
+		if (state->scope.scopes[state->scope.depth]->attributes.procedure.tail) {
+			state->scope.scopes[state->scope.depth]->attributes.procedure.tail
+				->next = instruction;
 		}
-		if (!top && !script) {
-			top = script = instruction;
-		} else {
-			top->next = instruction;
-			top = instruction;
-		}
-	}	
-	return script;
+		state->scope.scopes[state->scope.depth]->attributes.procedure.tail
+			= instruction;
+		
+		instruction = brainfuck_instruction_alloc();
+		if (!instruction)
+			goto error_nomem;
+	}
+	return;
+	error_nomem:
+		*error = BRAINFUCK_ENOMEM;
+		brainfuck_script_free(state->script);
+		return;
+	error_syntax:
+		*error = BRAINFUCK_ESYNTAX;
+		brainfuck_script_free(state->script);
+		return;
 }
 
-/* 
+/**
  * Parse the given string.
  *
  * @param string The string to read the script from.
@@ -356,44 +443,26 @@ struct BrainfuckScript * brainfuck_parse_string_state(
  * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code> 
  *	if the parsing failed.
  */
-struct BrainfuckScript * brainfuck_parse_string(char *string, int *error)
+struct BrainfuckScript * brainfuck_parse_string(const char *string, int *error)
 {
 	int error_holder = BRAINFUCK_EOK;
-	struct BrainfuckState *state = NULL;
-	struct BrainfuckScript *script = NULL;
+	struct BrainfuckParserState state = {NULL, {0, 0, NULL}};
 	
-	error = error ? error :  &error_holder;
-	state = brainfuck_state_alloc();
+	error = error ? error : &error_holder;
+	brainfuck_parse_string_state(string, &state, error);
 
-	if (!state) {
-		*error = BRAINFUCK_ENOMEM;
+	if (*error != BRAINFUCK_EOK)
 		return NULL;
-	}
-
-	state->jumps.array = NULL;
-	state->jumps.size = 0;
-	state->jumps.top = -1;
-
-	script = brainfuck_parse_string_state(string, state, error);
-
-
-	if (*error != BRAINFUCK_EOK) {
-		goto error;
-	} else if (state->jumps.top > 0) {
+	if (state.scope.depth != 0) {
 		*error = BRAINFUCK_ESYNTAX;
-		goto error;
-	}
-	
-	brainfuck_state_free(state);
-	return script;
-
-	/* goto this label on error */
-	error:
-		brainfuck_state_free(state);
 		return NULL;
+	}
+	free(state.scope.scopes);
+	state.scope.scopes = NULL;
+	return state.script;
 }
 
-/*
+/**
  * Parse the given file.
  *
  * @param file The file to read the script from.
@@ -405,110 +474,117 @@ struct BrainfuckScript * brainfuck_parse_string(char *string, int *error)
 struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error)
 {
 	int error_holder = BRAINFUCK_EOK;
-	char buffer[1024];
-	struct BrainfuckScript *script = NULL;
-	struct BrainfuckInstruction *top = NULL;
-	struct BrainfuckInstruction *instruction = NULL;
-	struct BrainfuckState *state = NULL;
-
+	char buffer[BRAINFUCK_DFILEBUFSIZE] = {0};
+	struct BrainfuckParserState state = {NULL, {0, 0, NULL}};
+	
 	error = error ? error : &error_holder;
-
-	if (!file) {
-		*error = BRAINFUCK_EPARAM;
-		return NULL;
-	}
-
-	state = brainfuck_state_alloc();
-
-	if (!state) {
-		*error = BRAINFUCK_ENOMEM;
-		return NULL;
-	}
-
-	state->jumps.array = NULL;
-	state->jumps.size = 0;
-	state->jumps.top = -1;
+	assert(file);
 
 	while (!feof(file)) {
 		memset(&buffer, 0, sizeof(buffer));
 		fread(&buffer, sizeof(buffer), 1, file);
 		if (ferror(file))
 			continue;
-		instruction = brainfuck_parse_string_state(buffer, state,
- 			error);
+		brainfuck_parse_string_state(buffer, &state, error);
 		if (*error != BRAINFUCK_EOK)
-			goto error;
-		script = script ? script : instruction;
-		if (top)
-			top->next = instruction;
-		while (instruction->next)
-			instruction = instruction->next;
-		top = instruction;
+			return NULL;
 	}
-
-	if (state->jumps.top > 0) {
+	if (state.scope.depth != 0) {
 		*error = BRAINFUCK_ESYNTAX;
-		goto error;
-	}
-	
-	brainfuck_state_free(state);
-	return script;	
-
-	/* goto this label on error */
-	error:
-		brainfuck_state_free(state);
 		return NULL;
+	}
+	free(state.scope.scopes);
+	state.scope.scopes = NULL;
+	return state.script;
 }
 
-/*
- * Run the given {@link BrainfuckScript} with the given 
- *	{@link BrainfuckContext}.
+/**
+ * Allocate a new {@link BrainfuckExecutionContext} to the heap.
  *
- * @param script The script to run.
- * @param ctx The execution context that will provide the memory management and
- *	the environment for the execution. 
- * @return a integer with a value of zero or higher if the script executed 
+ * @return A pointer to the memory allocated to the heap or 
+ *	<code>NULL</code> if there is no memory available.
+ */
+struct BrainfuckExecutionContext * brainfuck_execution_context_alloc(void)
+{
+	return malloc(sizeof(struct BrainfuckExecutionContext));
+}
+
+/**
+ * Free the given {@link BrainfuckExecutionContext} from the heap.
+ * 
+ * @param ctx The context to free from the heap.
+ */
+void brainfuck_execution_context_free(struct BrainfuckExecutionContext *ctx)
+{
+	assert(ctx);
+	free(ctx);
+}
+
+/**
+ * Initialise the given {@link BrainfuckExecutionContext}.
+ * 
+ * @param ctx The execution context to initialise.
+ * @param read The read function.
+ * @param write The write function.
+ * @param mem_size The size of the memory block.
+ * @param memory The memory block the program can work with.
+ * @param index The initial index.
+ */
+void brainfuck_execution_context_init(
+	struct BrainfuckExecutionContext *ctx, int (*read)(void), 
+	int (*write)(const int character), const size_t mem_size, 
+	unsigned int *memory, const unsigned long index)
+{
+	assert(ctx);
+	ctx->read = read;
+	ctx->write = write;
+	ctx->mem_size = mem_size;
+	ctx->memory = memory;
+	ctx->index = index;
+}
+
+/**
+ * Interpret the instructions of the given {@link BrainfuckScript} with the
+ *	given {@link BrainfuckExecutionContext}.
+ *
+ * @param script The script to interpret.
+ * @param ctx The execution context that will provide environment.
+ * @return an integer with a value of zero or higher if the script executed 
  *	successfully, a value lower than zero otherwise.
  */
-int brainfuck_run(struct BrainfuckScript *script, 
-	struct BrainfuckContext *ctx)
+int brainfuck_execution_interpret(
+	const struct BrainfuckScript *script, struct BrainfuckExecutionContext *ctx)
 {
-	if (!script || !ctx)
-		return BRAINFUCK_EPARAM;
-	ctx->instruction = script;
-	ctx->running = 1;
-	int index = 0;
-
-	while (ctx->instruction && ctx->running) {
-		switch(ctx->instruction->type) {
-		case VALUE:
-			ctx->memory[ctx->index] += ctx->instruction->attributes.delta;
-			break;
-		case INDEX:
-			ctx->index += ctx->instruction->attributes.delta;
-			break;
-		case INPUT:
-			for (index = 0; index < ctx->instruction->attributes.delta; index++)
-				ctx->memory[ctx->index] = ctx->read();
-			break;
-		case OUTPUT:
-			for (index = 0; index < ctx->instruction->attributes.delta; index++)
-				ctx->write(ctx->memory[ctx->index]);
-			break;
-		case LOOP:
-			if (ctx->memory[ctx->index] || 
-					!ctx->instruction->attributes.jump)
+	assert(script);
+	assert(ctx);
+	unsigned int index = 0;
+	struct BrainfuckInstruction *instruction = script->attributes.procedure
+		.head;
+	while (instruction) {
+		switch(instruction->type) {
+			case MUTATE:
+				ctx->memory[ctx->index] += instruction->attributes.dx;
 				break;
-			ctx->instruction = ctx->instruction->attributes.jump;
-			continue;
-		case BREAK:
-			if (!ctx->memory[ctx->index] || 
-					!ctx->instruction->attributes.jump)
+			case MOVE:
+				ctx->index += instruction->attributes.dy;
 				break;
-			ctx->instruction = ctx->instruction->attributes.jump;
-			continue;
+			case READ:
+				for (index = 0; index < instruction->attributes.k; index++)
+					ctx->memory[ctx->index] = ctx->read();
+				break;
+			case WRITE:
+				for (index = 0; index < instruction->attributes.k; index++)
+					ctx->write(ctx->memory[ctx->index]);
+				break;
+			case PROCEDURE:
+				brainfuck_execution_interpret(instruction, ctx);
+				break;
+			case LOOP:
+				while(ctx->memory[ctx->index])
+					brainfuck_execution_interpret(instruction, ctx);
+				break;
 		}
-		ctx->instruction = ctx->instruction->next;
+		instruction = instruction->next;
 	}
 	return BRAINFUCK_EOK;
 }
