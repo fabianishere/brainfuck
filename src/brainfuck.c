@@ -283,7 +283,7 @@ struct BrainfuckParserState {
 		
 	} scope;
 
-} BrainfuckState;
+} BrainfuckParserState;
 
 /**
  * Allocate a new {@link BrainfuckParserState} to the heap.
