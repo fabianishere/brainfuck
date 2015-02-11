@@ -41,7 +41,7 @@ void print_usage() {
 	fprintf(stderr,	"\t-v --version\t\t\tshow the version information\n");
 	fprintf(stderr,	"\t-h --help\t\t\tshow a help message\n");
 	fprintf(stderr,	"\t-m --memory\t<int>\t\tthe size of the memory block to" \
-		" allocate for the program. (default: %i)\n", BRAINFUCK_DMEMSIZE);
+		" allocate for the program (default: %i elements)\n", BRAINFUCK_DMEMSIZE);
 	fprintf(stderr,	"\t-e --eval\t<string>\trun code directly\n");
 }
 
