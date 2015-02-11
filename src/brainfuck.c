@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -313,6 +312,7 @@ void brainfuck_parser_state_free(struct BrainfuckParserState *state)
 
 /**
  * Parse the given string with the given state.
+ * Use this method to parse multiple parts of the same script.
  *
  * @param string The string to read the script from.
  * @param state The state of the parser.
@@ -383,27 +383,28 @@ void brainfuck_parse_string_state(
 				brainfuck_instruction_write(instruction, k);
 				break;
 			case '[':
-				if (state->scope.depth + 1 >= state->scope.max_depth) {
-					/* Prevents allocating too much memory */
+				if (state->scope.depth + 2 > state->scope.max_depth) {
+					/* Prevent allocating too much memory */
 					if (state->scope.max_depth > BRAINFUCK_DMAXDEPTH)
 						goto error_nomem;
 					tmp = realloc(state->scope.scopes, 
-						state->scope.max_depth * 2 *  
+						2 * state->scope.max_depth *
 						sizeof(struct BrainfuckInstruction *));
+					/* Check if the reallocation is successful */
 					if  (tmp) {
 						state->scope.scopes = tmp;
 						state->scope.max_depth *= 2;
 						tmp = NULL;
 					}
 				}
+				
 				brainfuck_instruction_loop(instruction);
 				brainfuck_instruction_procedure_add(
 					state->scope.scopes[state->scope.depth], instruction);
 				state->scope.scopes[++state->scope.depth] = instruction;
-				instruction = brainfuck_instruction_alloc();
-				if (!instruction)
-					goto error_nomem;
-				continue;
+				
+				/* TODO: find alternative way to do this */
+				goto alloc;
 			case ']':
 				if (state->scope.depth <= 0)
 					goto error_syntax;
@@ -414,11 +415,13 @@ void brainfuck_parse_string_state(
 		}
 		brainfuck_instruction_procedure_add(
 			state->scope.scopes[state->scope.depth], instruction);
-		instruction = brainfuck_instruction_alloc();
-		if (!instruction)
-			goto error_nomem;
+		alloc:
+			instruction = brainfuck_instruction_alloc();
+			if (!instruction)
+				goto error_nomem;
 	}
 	return;
+	
 	error_nomem:
 		*error = BRAINFUCK_ENOMEM;
 		brainfuck_script_free(state->script);
@@ -511,7 +514,6 @@ struct BrainfuckExecutionContext * brainfuck_execution_context_alloc(void)
  */
 void brainfuck_execution_context_free(struct BrainfuckExecutionContext *ctx)
 {
-	assert(ctx);
 	free(ctx);
 }
 

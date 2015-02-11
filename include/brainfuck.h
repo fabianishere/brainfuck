@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 /* Library information */
-#define BRAINFUCK_VERSION "3.0.0"
+#define BRAINFUCK_VERSION "3.0.1"
 
 /* Default values */
 #define BRAINFUCK_DMEMSIZE 30000   	/* Size of the allocated memory block */ 
