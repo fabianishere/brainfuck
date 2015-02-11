@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 /* Library information */
-#define BRAINFUCK_VERSION "3.0.1"
+#define BRAINFUCK_VERSION "3.0.2"
 
 /* Default values */
 #define BRAINFUCK_DMEMSIZE 30000   	/* Size of the allocated memory block */ 
@@ -47,10 +47,11 @@
  */
 enum BrainfuckType {
 	MUTATE,		/* Cell value mutation */
+	CLEAR,		/* Clear the current memory cell ([-] or [+]) */
 	MOVE, 		/* Memory index mutation */
 	READ,		/* Read one character from the input stream into the cell */
 	WRITE,		/* Write cell value to output stream */ 
-	PROCEDURE,	/* Procedure construct */ 
+	PROC,		/* Procedure construct */ 
 	LOOP		/* Loop construct */
 } BrainfuckType;
 
@@ -96,10 +97,17 @@ void brainfuck_instruction_mutate(
 	struct BrainfuckInstruction *instruction, const int dx);
 
 /**
+ * Initialise the given instruction as CLEAR instruction.
+ *
+ * @param instruction The instruction to initialise.
+ */
+void brainfuck_instruction_clear(struct BrainfuckInstruction *instruction);
+
+/**
  * Initialise the given instruction as MOVE instruction.
  *
  * @param instruction The instruction to initialise.
- * @param dy the change in index.
+ * @param dy The change in index.
  */
 void brainfuck_instruction_move(
 	struct BrainfuckInstruction *instruction, const int dy);

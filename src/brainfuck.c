@@ -124,6 +124,18 @@ void brainfuck_instruction_mutate(
 }
 
 /**
+ * Initialise the given instruction as CLEAR instruction.
+ *
+ * @param instruction The instruction to initialise.
+ */
+void brainfuck_instruction_clear(struct BrainfuckInstruction *instruction)
+{
+	assert(instruction);
+	instruction->type = CLEAR;
+	instruction->next = NULL;
+}
+
+/**
  * Initialise the given instruction as MOVE instruction.
  *
  * @param instruction The instruction to initialise.
@@ -181,7 +193,7 @@ void brainfuck_instruction_write(
 void brainfuck_instruction_procedure(struct BrainfuckInstruction *instruction)
 {
 	assert(instruction);
-	instruction->type = PROCEDURE;
+	instruction->type = PROC;
 	instruction->attributes.procedure.head = NULL;
 	instruction->attributes.procedure.tail = NULL;
 	instruction->next = NULL;
@@ -383,6 +395,16 @@ void brainfuck_parse_string_state(
 				brainfuck_instruction_write(instruction, k);
 				break;
 			case '[':
+				/* Detect CLEAR instructions */
+				while ((character = *string++) == '+' || character == '-')
+					k++;
+				if (character == ']') {
+					brainfuck_instruction_clear(instruction);
+					break;
+				}
+				/* Restore index */
+				string -= k;
+				/* Handle as regular loop otherwise */
 				if (state->scope.depth + 2 > state->scope.max_depth) {
 					/* Prevent allocating too much memory */
 					if (state->scope.max_depth > BRAINFUCK_DMAXDEPTH)
@@ -561,6 +583,9 @@ int brainfuck_execution_interpret(
 		case MUTATE:
 			ctx->memory[ctx->index] += instruction->attributes.dx;
 			break;
+		case CLEAR:
+			ctx->memory[ctx->index] = 0;
+			break;
 		case MOVE:
 			ctx->index += instruction->attributes.dy;
 			break;
@@ -572,7 +597,7 @@ int brainfuck_execution_interpret(
 			for (index = 0; index < instruction->attributes.k; index++)
 				ctx->write(ctx->memory[ctx->index]);
 			break;
-		case PROCEDURE:
+		case PROC:
 			brainfuck_execution_interpret(instruction, ctx);
 			break;
 		case LOOP:
