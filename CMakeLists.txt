@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 project(brainfuck C)
 set(BRAINFUCK_VERSION_MAJOR 3)
 set(BRAINFUCK_VERSION_MINOR 0)
-set(BRAINFUCK_VERSION_PATCH 2)
+set(BRAINFUCK_VERSION_PATCH 3)
 	
 option(WITH_CLI 
 	"Build the command line interface for brainfuck." ON)

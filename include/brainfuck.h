@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 /* Library information */
-#define BRAINFUCK_VERSION "3.0.2"
+#define BRAINFUCK_VERSION "3.0.3"
 
 /* Default values */
 #define BRAINFUCK_DMEMSIZE 30000   	/* Size of the allocated memory block */ 
@@ -91,10 +91,10 @@ void brainfuck_instruction_free(struct BrainfuckInstruction *instruction);
  * Initialise the given instruction as MUTATE instruction.
  *
  * @param instruction The instruction to initialise.
- * @param dx The change in cell value.
+ * @param delta The change in cell value.
  */
 void brainfuck_instruction_mutate(
-	struct BrainfuckInstruction *instruction, const int dx);
+	struct BrainfuckInstruction *instruction, const int delta);
 
 /**
  * Initialise the given instruction as CLEAR instruction.
@@ -107,18 +107,16 @@ void brainfuck_instruction_clear(struct BrainfuckInstruction *instruction);
  * Initialise the given instruction as MOVE instruction.
  *
  * @param instruction The instruction to initialise.
- * @param dy The change in index.
+ * @param delta The change in index.
  */
 void brainfuck_instruction_move(
-	struct BrainfuckInstruction *instruction, const int dy);
+	struct BrainfuckInstruction *instruction, const int delta);
 
 /**
  * Initialise the given instruction as READ instruction.
  *
  * @param instruction The instruction to initialise.
  * @param k The amount of times this instruction will be executed.
- * @return The READ instruction that has been created or <code>NULL</code>
- *	if the creation failed.
  */
 void brainfuck_instruction_read(
 	struct BrainfuckInstruction *instruction, const unsigned int k);
@@ -128,8 +126,6 @@ void brainfuck_instruction_read(
  *
  * @param instruction The instruction to initialise.
  * @param k The amount of times this instruction will be executed.
- * @return The READ instruction that has been created or <code>NULL</code>
- *	if the creation failed.
  */
 void brainfuck_instruction_write(
 	struct BrainfuckInstruction *instruction, const unsigned int k);
@@ -185,6 +181,15 @@ struct BrainfuckParserState;
  *	<code>NULL</code> if there is no memory available.
  */
 struct BrainfuckParserState * brainfuck_parser_state_alloc(void);
+
+/**
+ * Initialise a {@link BrainfuckParserState} structure.
+ *
+ * @param state The {@link BrainfuckParserState} structure to initialise.
+ * @return <code>BRAINFUCK_EOK</code> on success, a value lower than zero
+ *	on failure.
+ */
+int brainfuck_parser_state_init(struct BrainfuckParserState *state);
 
 /**
  * Free the given {@link BrainfuckParserState} from the heap.
@@ -303,8 +308,8 @@ void brainfuck_execution_context_init(
  *
  * @param script The script to interpret.
  * @param ctx The execution context that will provide environment.
- * @return a integer with a value of zero or higher if the script executed 
- *	successfully, a value lower than zero otherwise.
+ * @return <code>BRAINFUCK_EOK</code> on success, a value lower than zero
+ *	on failure.
  */
 int brainfuck_execution_interpret(const struct BrainfuckScript *script, 
 	struct BrainfuckExecutionContext *ctx);

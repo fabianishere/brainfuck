@@ -45,14 +45,9 @@ struct BrainfuckInstruction {
 	union attributes {
 		
 		/**
-		 * The change in cell value.
+		 * The change in value.
 		 */
-		int dx;
-		
-		/**
-		 * The change in index.
-		 */
-		int dy;
+		int delta;
 		
 		/**
 		 * The amount of times the instruction should be executed.
@@ -112,14 +107,14 @@ void brainfuck_instruction_free(struct BrainfuckInstruction *instruction)
  * Initialise the given instruction as MUTATE instruction.
  *
  * @param instruction The instruction to initialise.
- * @param dx The change in cell value.
+ * @param delta The change in cell value.
  */
 void brainfuck_instruction_mutate(
-	struct BrainfuckInstruction *instruction, const int dx)
+	struct BrainfuckInstruction *instruction, const int delta)
 {
 	assert(instruction);
 	instruction->type = MUTATE;
-	instruction->attributes.dx = dx;
+	instruction->attributes.delta = delta;
 	instruction->next = NULL;
 }
 
@@ -139,14 +134,14 @@ void brainfuck_instruction_clear(struct BrainfuckInstruction *instruction)
  * Initialise the given instruction as MOVE instruction.
  *
  * @param instruction The instruction to initialise.
- * @param dy the change in index.
+ * @param delta The change in index.
  */
 void brainfuck_instruction_move(
-	struct BrainfuckInstruction *instruction, const int dy)
+	struct BrainfuckInstruction *instruction, const int delta)
 {
 	assert(instruction);
 	instruction->type = MOVE;
-	instruction->attributes.dy = dy;
+	instruction->attributes.delta = delta;
 	instruction->next = NULL;
 }
 
@@ -270,7 +265,7 @@ struct BrainfuckParserState {
 	 * The {@link BrainfuckScript} of the program currently being parsed.
 	 */
 	struct BrainfuckScript *script;
-		
+
 	/**
 	 * The scope the parser currently is in.
 	 */
@@ -308,6 +303,32 @@ struct BrainfuckParserState * brainfuck_parser_state_alloc(void)
 }
 
 /**
+ * Initialise a {@link BrainfuckParserState} structure.
+ *
+ * @param state The {@link BrainfuckParserState} structure to initialise.
+ * @return <code>BRAINFUCK_EOK</code> on success, a value lower than zero
+ *	on failure.
+ */
+int brainfuck_parser_state_init(struct BrainfuckParserState *state)
+{
+	state->script = brainfuck_instruction_alloc();
+	if (!state->script)
+		return BRAINFUCK_ENOMEM;
+	brainfuck_instruction_procedure(state->script);
+	
+	state->scope.depth = 0;
+	state->scope.max_depth = BRAINFUCK_DINITIALDEPTH;
+	state->scope.scopes = malloc(state->scope.max_depth * 
+		sizeof(struct BrainfuckInstruction *));
+	if (!state->scope.scopes) {
+		brainfuck_script_free(state->script);
+		return BRAINFUCK_ENOMEM;
+	}
+	state->scope.scopes[0] = state->script;
+	return BRAINFUCK_EOK;
+}
+
+/**
  * Free the given {@link BrainfuckParserState} from the heap.
  * 
  * @param state The state to free from the heapy.
@@ -335,108 +356,96 @@ void brainfuck_parse_string_state(
 		const char *string, struct BrainfuckParserState *state, int *error)
 {
 	int error_holder = BRAINFUCK_EOK;
-	int d = 1;
-	unsigned int k = 1;
+	int delta = 0;
+	unsigned int k = 0;
 	char character; 
 	struct BrainfuckInstruction *instruction = NULL;
 	struct BrainfuckInstruction **tmp = NULL;
 	
-	error = error ? error : &error_holder;
 	assert(state);
+	error = error ?: &error_holder;
 	
-	if (!state->script) {
-		state->script = brainfuck_instruction_alloc();
-		if (!state->script)
-			goto error_nomem;
-		brainfuck_instruction_procedure(state->script);
-	}
+	/* Initialise the state if it hasn't been initialised yet */
+	if (!state->script)
+		brainfuck_parser_state_init(state);
 	
-	if (!state->scope.max_depth) { 
-		state->scope.depth = 0;
-		state->scope.max_depth = BRAINFUCK_DINITIALDEPTH;
-		state->scope.scopes = malloc(state->scope.max_depth * 
-			sizeof(struct BrainfuckInstruction *));
-		if (!state->scope.scopes)
-			goto error_nomem;
-		state->scope.scopes[0] = state->script; 
-	}
-	
-	instruction = brainfuck_instruction_alloc();
-	if (!instruction)
-		goto error_nomem;
+	/* TODO: find alternative way to do this */
+	goto alloc;
 	
 	while((character = *string++)) {
-		d = k = 1;
+		delta = k = 1;
 		switch(character) {
-			case '-':
-				d = -1;
-			case '+':
-				while ((character = *string++) == '+' || character == '-')
-					d += (character == '+' ? 1 : -1);
-				string--;
-				brainfuck_instruction_mutate(instruction, d);
+		case '-':
+			delta = -1;
+		case '+':
+			while ((character = *string++) == '+' || character == '-')
+				delta += (character == '+' ? 1 : -1);
+			string--;
+			brainfuck_instruction_mutate(instruction, delta);
+			break;
+		case '<':
+			delta = -1;
+		case '>':
+			while ((character = *string++) == '>' || character == '<')
+				delta += (character == '>' ? 1 : -1);
+			brainfuck_instruction_move(instruction, delta);
+			string--;
+			break;
+		case ',':
+			while ((character = *string++) == ',' && k++);
+			string--;
+			brainfuck_instruction_read(instruction, k);
+			break;
+		case '.':
+			while ((character = *string++) == '.' && k++);
+			string--;
+			brainfuck_instruction_write(instruction, k);
+			break;
+		case '[':
+			/* Detect CLEAR instructions */
+			while ((character = *string++) == '+' || character == '-')
+				k++;
+			if (character == ']') {
+				brainfuck_instruction_clear(instruction);
 				break;
-			case '<':
-				d = -1;
-			case '>':
-				while ((character = *string++) == '>' || character == '<')
-					d += (character == '>' ? 1 : -1);
-				string--;
-				brainfuck_instruction_move(instruction, d);
-				break;
-			case ',':
-				while ((character = *string++) == ',' && k++);
-				string--;
-				brainfuck_instruction_read(instruction, k);
-				break;
-			case '.':
-				while ((character = *string++) == '.' && k++);
-				string--;
-				brainfuck_instruction_write(instruction, k);
-				break;
-			case '[':
-				/* Detect CLEAR instructions */
-				while ((character = *string++) == '+' || character == '-')
-					k++;
-				if (character == ']') {
-					brainfuck_instruction_clear(instruction);
-					break;
+			}
+			/* Restore index */
+			string -= k;
+
+			/* Handle as regular loop otherwise */
+			if (state->scope.depth + 2 > state->scope.max_depth) {
+				/* Prevent allocating too much memory */
+				if (state->scope.max_depth > BRAINFUCK_DMAXDEPTH)
+					goto error_nomem;
+				tmp = realloc(state->scope.scopes, 
+					2 * state->scope.max_depth *
+					sizeof(struct BrainfuckInstruction *));
+				/* Check if the reallocation is successful */
+				if  (tmp) {
+					state->scope.scopes = tmp;
+					state->scope.max_depth *= 2;
+					tmp = NULL;
 				}
-				/* Restore index */
-				string -= k;
-				/* Handle as regular loop otherwise */
-				if (state->scope.depth + 2 > state->scope.max_depth) {
-					/* Prevent allocating too much memory */
-					if (state->scope.max_depth > BRAINFUCK_DMAXDEPTH)
-						goto error_nomem;
-					tmp = realloc(state->scope.scopes, 
-						2 * state->scope.max_depth *
-						sizeof(struct BrainfuckInstruction *));
-					/* Check if the reallocation is successful */
-					if  (tmp) {
-						state->scope.scopes = tmp;
-						state->scope.max_depth *= 2;
-						tmp = NULL;
-					}
-				}
-				
-				brainfuck_instruction_loop(instruction);
-				brainfuck_instruction_procedure_add(
-					state->scope.scopes[state->scope.depth], instruction);
-				state->scope.scopes[++state->scope.depth] = instruction;
-				
-				/* TODO: find alternative way to do this */
-				goto alloc;
-			case ']':
-				if (state->scope.depth <= 0)
-					goto error_syntax;
-				state->scope.depth--;
-				continue;
-			default:
-				continue;
+			}
+
+			brainfuck_instruction_loop(instruction);
+			brainfuck_instruction_procedure_add(
+				state->scope.scopes[state->scope.depth], instruction);
+			state->scope.scopes[++state->scope.depth] = instruction;
+
+			/* TODO: find alternative way to do this */
+			goto alloc;
+		case ']':
+			if (state->scope.depth <= 0)
+				goto error_syntax;
+			state->scope.depth--;
+		default:
+			continue;
 		}
 		brainfuck_instruction_procedure_add(
 			state->scope.scopes[state->scope.depth], instruction);
+		
+		/* alloc: allocate a new instruction */
 		alloc:
 			instruction = brainfuck_instruction_alloc();
 			if (!instruction)
@@ -581,13 +590,13 @@ int brainfuck_execution_interpret(
 	while (instruction) {
 		switch(instruction->type) {
 		case MUTATE:
-			ctx->memory[ctx->index] += instruction->attributes.dx;
+			ctx->memory[ctx->index] += instruction->attributes.delta;
 			break;
 		case CLEAR:
 			ctx->memory[ctx->index] = 0;
 			break;
 		case MOVE:
-			ctx->index += instruction->attributes.dy;
+			ctx->index += instruction->attributes.delta;
 			break;
 		case READ:
 			for (index = 0; index < instruction->attributes.k; index++)
