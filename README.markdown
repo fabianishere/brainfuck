@@ -5,9 +5,9 @@ Brainfuck interpreter written in C89.
 ## Getting the source
 Download the source code by running the following code in your command prompt:
 ```sh
-$ git clone -b develop https://github.com/FabianM/brainfuck.git
+$ git clone -b develop https://github.com/fabianm/brainfuck.git
 ```
-or simply [grab](https://github.com/FabianM/brainfuck/archive/develop.zip) a copy of the source code as a Zip file.
+or simply [grab](https://github.com/fabianm/brainfuck/archive/develop.zip) a copy of the source code as a Zip file.
 
 ## Building
 Create the build directory.
