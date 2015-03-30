@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
 		fclose(file);
 	}
 	/* execute code from pipe */
-	if (!isatty(fileno(stdin))) {
+	if (!isatty(STDOUT_FILENO)) {
 		error = run_file(stdin, &ctx);
 		if (error != BRAINFUCK_EOK)
 			fprintf(stderr, "error: program failed with error %i\n", error);
