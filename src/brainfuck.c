@@ -317,7 +317,7 @@ int brainfuck_parser_state_init(struct BrainfuckParserState *state)
 	brainfuck_instruction_procedure(state->script);
 	
 	state->scope.depth = 0;
-	state->scope.max_depth = BRAINFUCK_DINITIALDEPTH;
+	state->scope.max_depth = BRAINFUCK_DDEPTHINITIAL;
 	state->scope.scopes = malloc(state->scope.max_depth * 
 		sizeof(struct BrainfuckInstruction *));
 	if (!state->scope.scopes) {
@@ -369,57 +369,53 @@ void brainfuck_parse_string_state(
 	if (!state->script)
 		brainfuck_parser_state_init(state);
 	
+	/* Allocate the first instruction */
 	/* TODO: find alternative way to do this */
 	goto alloc;
 	
 	while((character = *string++)) {
-		delta = k = 1;
 		switch(character) {
 		case '-':
-			delta = -1;
 		case '+':
+			delta = 0;
+			string--;
 			while ((character = *string++) == '+' || character == '-')
 				delta += (character == '+' ? 1 : -1);
 			string--;
 			brainfuck_instruction_mutate(instruction, delta);
 			break;
 		case '<':
-			delta = -1;
 		case '>':
+			delta = 0;
+			string--;
 			while ((character = *string++) == '>' || character == '<')
 				delta += (character == '>' ? 1 : -1);
 			brainfuck_instruction_move(instruction, delta);
 			string--;
 			break;
 		case ',':
-			while ((character = *string++) == ',' && k++);
+			k = 0;
 			string--;
+			while ((character = *string++) == ',' && k++);
 			brainfuck_instruction_read(instruction, k);
 			break;
 		case '.':
-			while ((character = *string++) == '.' && k++);
+			k = 0;
 			string--;
+			while ((character = *string++) == '.' && k++);
 			brainfuck_instruction_write(instruction, k);
 			break;
 		case '[':
-			/* Detect CLEAR instructions */
-			while ((character = *string++) == '+' || character == '-')
-				k++;
-			if (character == ']') {
-				brainfuck_instruction_clear(instruction);
-				break;
-			}
-			/* Restore index */
-			string -= k;
-
-			/* Handle as regular loop otherwise */
-			if (state->scope.depth + 2 > state->scope.max_depth) {
+			/* Determine if the stack that contains the loops should be grown */
+			if (state->scope.depth + 1 > state->scope.max_depth) {
 				/* Prevent allocating too much memory */
-				if (state->scope.max_depth > BRAINFUCK_DMAXDEPTH)
+				if (state->scope.max_depth > BRAINFUCK_DDEPTHLIMIT)
 					goto error_nomem;
+				
 				tmp = realloc(state->scope.scopes, 
 					2 * state->scope.max_depth *
 					sizeof(struct BrainfuckInstruction *));
+					
 				/* Check if the reallocation is successful */
 				if  (tmp) {
 					state->scope.scopes = tmp;
@@ -427,21 +423,29 @@ void brainfuck_parse_string_state(
 					tmp = NULL;
 				}
 			}
-
 			brainfuck_instruction_loop(instruction);
+			
+			/* Add the current instruction to the current scope */
 			brainfuck_instruction_procedure_add(
 				state->scope.scopes[state->scope.depth], instruction);
+			/* Switch to the new scope */
 			state->scope.scopes[++state->scope.depth] = instruction;
 
+			/* Go straight to the allocation of a new instruction, without
+			 *	adding the current instruction to the script, as we already
+			 *	did that */
 			/* TODO: find alternative way to do this */
 			goto alloc;
 		case ']':
 			if (state->scope.depth <= 0)
 				goto error_syntax;
 			state->scope.depth--;
+			/* Fallthrough */
 		default:
 			continue;
 		}
+		
+		/* Add the current instruction to the current scope */
 		brainfuck_instruction_procedure_add(
 			state->scope.scopes[state->scope.depth], instruction);
 		
