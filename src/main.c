@@ -1,17 +1,25 @@
 /*
- * Copyright 2015 Fabian M.
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2015 Fabian M.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,16 +31,18 @@
 	#define isatty _isatty
 #endif
 
-#include "../include/brainfuck.h"
+#include <brainfuck.h>
 
 /*
  * Print the usage message of this program.
  */
 void print_usage() {
-	fprintf(stderr, "usage: brainfuck [-veh] file...\n");
-	fprintf(stderr,	"\t-v --version\t\trun code directly\n");
-	fprintf(stderr,	"\t-e --eval\t\trun code directly\n");
-	fprintf(stderr,	"\t-h --help\t\tshow a help message\n");
+	fprintf(stderr, "usage: brainfuck [-vhme] file...\n");
+	fprintf(stderr,	"\t-v --version\t\t\tshow the version information\n");
+	fprintf(stderr,	"\t-h --help\t\t\tshow a help message\n");
+	fprintf(stderr,	"\t-m --memory\t<int>\t\tthe size of the memory block to" \
+		" allocate for the program (default: %i elements)\n", BRAINFUCK_DMEMSIZE);
+	fprintf(stderr,	"\t-e --eval\t<string>\trun code directly\n");
 }
 
 /*
@@ -41,76 +51,52 @@ void print_usage() {
 void print_version() {
 	fprintf(stderr, "brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__, 
 		__TIME__);
-	fprintf(stderr, "Copyright (c) 2014 Fabian M.\n");
-	fprintf(stderr, "Distributed under the Apache License Version 2.0.\n");
+	fprintf(stderr, "Copyright (c) 2015 Fabian M.\n");
+	fprintf(stderr, "Distributed under the MIT license.\n");
 }
 
 /*
- * Run the given brainfuck file.
+ * Run the given file containg brainfuck code.
  *
- * @param file The brainfuck file to run.
- * @return EXIT_SUCCESS if no errors are encountered, otherwise EXIT_FAILURE.
+ * @param file The file containing the brainfuck code to run.
+ * @param ctx The execution context.
+ * @return an integer with a value of zero or higher if the script executed 
+ *	successfully, a value lower than zero otherwise.
  */
-int run_file(FILE *file) {
-	BrainfuckState *state = brainfuck_state();
-	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
-	if (file == NULL) {
-		brainfuck_destroy_context(context);
-		brainfuck_destroy_state(state);
-		return EXIT_FAILURE;
-	}
-	brainfuck_add(state, brainfuck_parse_stream(file));
-	brainfuck_execute(state->root, context);
-	brainfuck_destroy_context(context);
-	brainfuck_destroy_state(state);
-	fclose(file);
-	return EXIT_SUCCESS;
+int run_file(FILE *file, struct BrainfuckExecutionContext *ctx) {
+	int error = BRAINFUCK_EOK;
+	struct BrainfuckScript *script = brainfuck_parse_file(file, &error);
+	if (error != BRAINFUCK_EOK)
+		return error;
+	error = brainfuck_execution_interpret(script, ctx);
+	brainfuck_script_free(script);
+	return error;
 }
 
 /*
- * Run the given brainfuck string.
+ * Run the given string containg brainfuck code.
  *
- * @param code The brainfuck string to run.
- * @return EXIT_SUCCESS if no errors are encountered, otherwise EXIT_FAILURE.
+ * @param string The string containing the brainfuck code to run.
+ * @param ctx The execution context.
+ * @return an integer with a value of zero or higher if the script executed 
+ *	successfully, a value lower than zero otherwise.
  */
-int run_string(char *code) {
-	BrainfuckState *state = brainfuck_state();
-	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
-	BrainfuckInstruction *instruction = brainfuck_parse_string(code);
- 	brainfuck_add(state, instruction);
- 	brainfuck_execute(state->root, context);
-	brainfuck_destroy_context(context);
- 	brainfuck_destroy_state(state);
- 	return EXIT_SUCCESS;
-}
-
-/*
- * Run the brainfuck interpreter in interactive mode.
- */
-void run_interactive_console() {
-	printf("brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__,
-		__TIME__);
-#ifdef BRAINFUCK_EXTENSION_DEBUG
-	printf("Use # to inspect tape\n");
-#endif
-	BrainfuckState *state = brainfuck_state();
-	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
-	BrainfuckInstruction *instruction;
-	
-	printf(">> ");
-	while(1) {
-		fflush(stdout);
-		instruction = brainfuck_parse_stream_until(stdin, '\n');
-		brainfuck_add(state, instruction);
-		brainfuck_execute(instruction, context);
-		printf("\n>> ");
-	}
+int run_string(char *code, struct BrainfuckExecutionContext *ctx)
+{
+	int error = BRAINFUCK_EOK;
+	struct BrainfuckScript *script = brainfuck_parse_string(code, &error);
+	if (error != BRAINFUCK_EOK)
+		return error;
+	error = brainfuck_execution_interpret(script, ctx);
+	brainfuck_script_free(script);
+	return error;
 }
 
 /* Command line options */
 static struct option long_options[] = {
 	{"help", no_argument, 0, 'h'},
 	{"eval", required_argument, 0, 'e'},
+	{"memory", required_argument, 0, 'm'},
 	{"version", no_argument, 0, 'v'},
 	{0, 0, 0, 0}
 };
@@ -122,18 +108,23 @@ static struct option long_options[] = {
  * @param argv The array with arguments.
  */
 int main(int argc, char *argv[]) {
-	int c;
-	int i = 1;
+	int character = 0;
+	int index = 0;
 	int option_index = 0;
+	int error = BRAINFUCK_EOK;
+	unsigned int *memory = NULL;
+	char *eval = NULL;
+	size_t mem_size = BRAINFUCK_DMEMSIZE;
+	FILE *file;
+	struct BrainfuckExecutionContext ctx;
 	
 	while (1) {
 		option_index = 0;
-		c = getopt_long (argc, argv, "vhe:",
+		character = getopt_long (argc, argv, "vhm:e:",
 			long_options, &option_index);
-		if (c == -1)
+		if (character == -1)
 			break;
-			
-		switch (c) {
+		switch (character) {
 		case 0:
 			if (long_options[option_index].flag != 0)
 				break;
@@ -144,8 +135,12 @@ int main(int argc, char *argv[]) {
 		case 'v':
 			print_version();
 			return EXIT_SUCCESS;
+		case 'm':
+			mem_size = atoi(optarg);
+			break;
 		case 'e':	
- 			return run_string((char *) optarg);
+			eval = optarg;
+			break;
 		case '?':
 			print_usage();
 			return EXIT_FAILURE;
@@ -153,18 +148,42 @@ int main(int argc, char *argv[]) {
 			abort();
 		}
 	}
-	if (argc > 1) {
-		while (i < argc)
-			if (run_file(fopen(argv[i++], "r")) == EXIT_FAILURE)
-				fprintf(stderr, "error: failed to read file %s\n", argv[i - 1]);
-	} else {
-		// checks if someone is piping code or just calling it the normal way.
-		if (isatty(fileno(stdin))) {
-			run_interactive_console();
-		} else {
-			if (run_file(stdin) == EXIT_FAILURE) 
-				fprintf(stderr, "error: failed to read from stdin\n");
+	memory = calloc(mem_size, sizeof(unsigned int));
+	if (!memory) {
+		fprintf(stderr, "error: failed to allocate program memory" \
+			"(%lu bytes)\n", sizeof(unsigned int) * mem_size);
+		return EXIT_FAILURE;
+	}
+	brainfuck_execution_context_init(&ctx, getchar, putchar,
+		mem_size, memory, 0);
+	
+	/* execute the given string */
+	if (eval) {
+		error = run_string(eval, &ctx);
+		if (error != BRAINFUCK_EOK)
+			fprintf(stderr, "error: program failed with error %i\n", error);
+		memset(memory, 0, mem_size);
+	}
+
+	/* execute files */
+	for (index = optind; index < argc; index++) {
+		file = fopen(argv[index], "r");
+		if (!file) {
+			fprintf(stderr, "error: failed to open file %s\n", argv[index]);
+			continue;
 		}
+		error = run_file(file, &ctx);
+		if (error != BRAINFUCK_EOK)
+			fprintf(stderr, "error: program %s failed with error %i\n", 
+				argv[index], error);
+		memset(memory, 0, mem_size);
+		fclose(file);
+	}
+	/* execute code from pipe */
+	if (!isatty(fileno(stdin))) {
+		error = run_file(stdin, &ctx);
+		if (error != BRAINFUCK_EOK)
+			fprintf(stderr, "error: program failed with error %i\n", error);
 	}
 	return EXIT_SUCCESS;
 }

@@ -1,39 +1,13 @@
-brainfuck
-===========
-Brainfuck interpreter written in C.
-
-## Usage
-    brainfuck [-veh] file...
-	-e --eval		run code directly
-	-v --version	show version information
-	-h --help		show a help message.
-
-The interactive console can be accessed by passing no arguments.    
-
-We also provide a C api:
-
-``` c
-#include <stdio.h>
-#include <brainfuck.h>
-    
-int main() {
-	BrainfuckState *state = brainfuck_state();
-	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
-	BrainfuckInstruction *instruction = brainfuck_parse_string("+++++.");
- 	brainfuck_add(state, instruction);
- 	brainfuck_execute(state->root, context);
-	brainfuck_destroy_context(context);
- 	brainfuck_destroy_state(state);
-	return EXIT_SUCCESS;
-}
-```
+brainfuck 3
+===============
+Brainfuck interpreter written in C89.
 
 ## Getting the source
 Download the source code by running the following code in your command prompt:
 ```sh
-$ git clone https://github.com/FabianM/brainfuck.git
+$ git clone -b develop https://github.com/fabianm/brainfuck.git
 ```
-or simply [grab](https://github.com/FabianM/brainfuck/archive/master.zip) a copy of the source code as a Zip file.
+or simply [grab](https://github.com/fabianm/brainfuck/archive/develop.zip) a copy of the source code as a Zip file.
 
 ## Building
 Create the build directory.
@@ -51,12 +25,32 @@ and finally, build it using the building system you chose (e.g. Make):
 $ make
 ```
 
-## License
-See LICENSE file.
+## Usage
+```sh
+usage: brainfuck [-vhme] file...
+	-v --version			show the version information
+	-h --help			show a help message
+	-m --memory	<int>		the size of the memory block to allocate for the program (default: 30000 elements)
+	-e --eval	<string>	run code directly
+```
+An Application Programming Interface is also provided:
 
-## Contributors
-    Fabian M. https://github.com/fabianm mail.fabianm@gmail.com
-    aliclubb https://github.com/aliclubb
-    diekmann https://github.com/diekmann
-    SevenBits https://github.com/SevenBits
-    Alex Burka https://github.com/durka durka42@gmail.com
+```c
+#include <brainfuck.h>
+
+int main(void)
+{
+	int memory[30000] = {0};
+	int error = BRAINFUCK_EOK;
+	struct BrainfuckContext ctx;
+	struct BrainfuckScript *script = brainfuck_parse_string("+++++++++[>+++++++++++<-].", &error);
+	brainfuck_execution_context_init(&ctx, getchar, putchar,
+		sizeof(int) * 30000, memory, 0);
+	brainfuck_execution_interpret(script);
+	brainfuck_script_free(script)
+}
+```
+
+## License
+The code is released under the MIT license. See the LICENSE file.
+

@@ -1,295 +1,317 @@
 /*
- * Copyright 2015 Fabian M.
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2015 Fabian M.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 #ifndef BRAINFUCK_H
 #define BRAINFUCK_H
 
-#define BRAINFUCK_VERSION "2.6.4"
-#define BRAINFUCK_CELL_TYPE int
-#define BRAINFUCK_TAPE_SIZE 30000
+#include <stdio.h>
 
-#define BRAINFUCK_TOKEN_PLUS '+'
-#define BRAINFUCK_TOKEN_MINUS '-'
-#define BRAINFUCK_TOKEN_PREVIOUS '<'
-#define BRAINFUCK_TOKEN_NEXT '>'
-#define BRAINFUCK_TOKEN_OUTPUT '.'
-#define BRAINFUCK_TOKEN_INPUT ','
-#define BRAINFUCK_TOKEN_LOOP_START '['
-#define BRAINFUCK_TOKEN_LOOP_END ']'
-#ifdef BRAINFUCK_EXTENSION_DEBUG
-#	define BRAINFUCK_TOKEN_BREAK '#'
-#else
-#	define BRAINFUCK_TOKEN_BREAK -10
-#endif
+/* Library information */
+#define BRAINFUCK_VERSION "3.0.3"
 
-/*
- * Represents a brainfuck instruction.
+/* Default values */
+#define BRAINFUCK_DMEMSIZE 30000   	/* Size of the allocated memory block */ 
+#define BRAINFUCK_DDEPTHINITIAL 10 	/* Initial scope depth */
+#define BRAINFUCK_DDEPTHLIMIT 8     /* Maximum scope depth */
+#define BRAINFUCK_DFILEBUFSIZE 1024	/* Size of the file buffer */
+
+/* Error codes */
+#define BRAINFUCK_EOK 1     	/* Everything is OK */
+#define BRAINFUCK_ENOMEM -5 	/* Out of memory */
+#define BRAINFUCK_ESYNTAX -6	/* Syntax error */
+#define BRAINFUCK_EBOUNDS -7	/* Index is out of bounds */
+
+/**
+ * The {@link BrainfuckType} enum contains the legal types 
+ *	{@link BrainfuckInstruction}s can have.
  */
-typedef struct BrainfuckInstruction {
-	/*
-	 * The difference between the value of the byte at the currect pointer and 
-	 *   the value we want.
-	 */
-	unsigned long difference;
-	/*
-	 * The type of this instruction.
-	 */
-	char type;
-	/*
-	 * The next instruction in the linked list.
-	 */
-	struct BrainfuckInstruction *next;
-	/*
- 	 * The previous instruction in the linked list.
- 	 */
-	struct BrainfuckInstruction *previous;
-	/*
-	 * The first instruction of a loop if this instruction is a loop. Otherwise
-	 * 	<code>NULL</code>
-	 */
-	struct BrainfuckInstruction *loop;
-} BrainfuckInstruction;
+enum BrainfuckType {
+	MUTATE,		/* Cell value mutation */
+	CLEAR,		/* Clear the current memory cell ([-] or [+]) */
+	MOVE, 		/* Memory index mutation */
+	READ,		/* Read one character from the input stream into the cell */
+	WRITE,		/* Write cell value to output stream */ 
+	PROC,		/* Procedure construct */ 
+	LOOP		/* Loop construct */
+} BrainfuckType;
 
-/*
- * The state structure contains the head and the root of the linked list containing
- * 	the instructions of the program.
+/**
+ * A {@link BrainfuckInstrcution} represents an instruction that can be 
+ * 	executed and is part of a linked list of instructions created by a 
+ *	parser.
  */
-typedef struct BrainfuckState {
-	/*
-	 * The root instruction of the instruction linked list.
-	 */
-	struct BrainfuckInstruction *root;
-	/*
- 	 * The head instruction of the instruction linked list.
- 	 */
-	struct BrainfuckInstruction *head;
-} BrainfuckState;
+struct BrainfuckInstruction;
 
-/*
- * The callback that will be invoked when the BRAINFUCK_TOKEN_OUTPUT token is found.
+/**
+ * Allocate a new {@link BrainfuckInstruction} to the heap.
+ *
+ * @return A pointer to the memory allocated to the heap or 
+ *	<code>NULL</code> if there is no memory available.
+ */
+struct BrainfuckInstruction * brainfuck_instruction_alloc(void);
+
+/** 
+ * Free the given {@link BrainfuckInstruction} from the heap.
  * 
- * @param chr The value of the current cell.
+ * @param instruction The instruction to free from the heap.
  */
-typedef int (*BrainfuckOutputHandler) (int chr);
+void brainfuck_instruction_free(struct BrainfuckInstruction *instruction);
 
-/*
- * The callback that will be invoked when the BRAINFUCK_TOKEN_INPUT token is found.
+/**
+ * A {@link BrainfuckScript} should be a {@link BrainfuckInstruction} with type
+ *	PROCEDURE, that contains the instructions of the script.
  * 
- * @return The character that is read.
+ * @see BrainfuckInstruction
  */
-typedef int (*BrainfuckInputHandler) (void);
+#define BrainfuckScript BrainfuckInstruction
+#define brainfuck_script_free brainfuck_instruction_procedure_free
+#define brainfuck_script_add brainfuck_instruction_procedure_add
 
-/*
- * This structure is used as a layer between a brainfuck program and
- * 	the outside. It allows control over input, output and memory.
+/**
+ * Initialise the given instruction as MUTATE instruction.
+ *
+ * @param instruction The instruction to initialise.
+ * @param delta The change in cell value.
  */
-typedef struct BrainfuckExecutionContext {
+void brainfuck_instruction_mutate(
+	struct BrainfuckInstruction *instruction, const int delta);
+
+/**
+ * Initialise the given instruction as CLEAR instruction.
+ *
+ * @param instruction The instruction to initialise.
+ */
+void brainfuck_instruction_clear(struct BrainfuckInstruction *instruction);
+
+/**
+ * Initialise the given instruction as MOVE instruction.
+ *
+ * @param instruction The instruction to initialise.
+ * @param delta The change in index.
+ */
+void brainfuck_instruction_move(
+	struct BrainfuckInstruction *instruction, const int delta);
+
+/**
+ * Initialise the given instruction as READ instruction.
+ *
+ * @param instruction The instruction to initialise.
+ * @param k The amount of times this instruction will be executed.
+ */
+void brainfuck_instruction_read(
+	struct BrainfuckInstruction *instruction, const unsigned int k);
+
+/**
+ * Initialise the given instruction as WRITE instruction.
+ *
+ * @param instruction The instruction to initialise.
+ * @param k The amount of times this instruction will be executed.
+ */
+void brainfuck_instruction_write(
+	struct BrainfuckInstruction *instruction, const unsigned int k);
+
+/**
+ * Initialise the given instruction as PROCEDURE instruction.
+ *
+ * @param instruction The instruction to initialise.
+ */
+void brainfuck_instruction_procedure(struct BrainfuckInstruction *instruction);
+
+/**
+ * Add the given instruction to the given procedure.
+ * 
+ * @param procedure The procedure to add the instruction to.
+ * @param instruction The instruction to add to the procedure.
+ */
+void brainfuck_instruction_procedure_add(struct BrainfuckInstruction *procedure,
+	struct BrainfuckInstruction *instruction);
+
+/**
+ * Free a procedure (or procedure-based) instruction from the heap.
+ * 
+ * @param instruction The instruction to free from the heap.
+ */
+void brainfuck_instruction_procedure_free(
+	struct BrainfuckInstruction *instruction);
+
+/**
+ * Free the tail of the given {@link BrainfuckInstruction}.
+ * 
+ * @param instruction The instruction to free the tail from the heap.
+ */
+void brainfuck_instruction_procedure_free_tail(
+	struct BrainfuckInstruction *instruction);
+
+/**
+ * Initialise the given instruction as LOOP instruction.
+ *
+ * @param instruction The instruction to initialise.
+ */
+void brainfuck_instruction_loop(struct BrainfuckInstruction *instruction);
+
+/**
+ * The {@link BrainfuckParserState} struct holds the state of the parser.
+ */
+struct BrainfuckParserState;
+
+/**
+ * Allocate a new {@link BrainfuckParserState} to the heap.
+ *
+ * @return A pointer to the memory allocated to the heap or 
+ *	<code>NULL</code> if there is no memory available.
+ */
+struct BrainfuckParserState * brainfuck_parser_state_alloc(void);
+
+/**
+ * Initialise a {@link BrainfuckParserState} structure.
+ *
+ * @param state The {@link BrainfuckParserState} structure to initialise.
+ * @return <code>BRAINFUCK_EOK</code> on success, a value lower than zero
+ *	on failure.
+ */
+int brainfuck_parser_state_init(struct BrainfuckParserState *state);
+
+/**
+ * Free the given {@link BrainfuckParserState} from the heap.
+ * 
+ * @param state The state to free from the heapy.
+ */
+void brainfuck_parser_state_free(struct BrainfuckParserState *state);
+
+/**
+ * Parse the given string with the given state.
+ *
+ * @param string The string to read the script from.
+ * @param state The state of the parser.
+ * @param error A pointer to an integer that will be set to either a success
+ *	or an error code.
+ */
+void brainfuck_parse_string_state(
+		const char *string, struct BrainfuckParserState *state, int *error);
+
+/**
+ * Parse the given string.
+ *
+ * @param string The string to read the script from.
+ * @param error A pointer to an integer that will be set to either a 
+ * 	success or an error code.
+ * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code> 
+ *	if the parsing failed.
+ */
+struct BrainfuckScript * brainfuck_parse_string(const char *string, int *error);
+
+/**
+ * Parse the given file.
+ *
+ * @param file The file to read the script from.
+ * @param error A pointer to an integer that will be set to either a success
+ *	or an error code.
+ * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code>
+ *	if the parsing failed.
+ */
+struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error);
+
+/**
+ * A {@link BrainfuckExecutionContext} structure is passed to the execution
+ *	engine and provides communication for the execution engine with the 
+ *  environment, for example providing the input and output and 
+ *	memory management.
+ */
+struct BrainfuckExecutionContext {
+	
 	/*
-	 * The callback that will be invoked when the BRAINFUCK_TOKEN_OUTPUT token is found.
+	 * Pointer to a function which can read from the environment's input.
+	 *
+	 * @return The character that was read from the environment's input.
 	 */
-	BrainfuckOutputHandler output_handler;
+	int (*read)(void);
+
 	/*
-	 * The callback that will be invoked when the BRAINFUCK_TOKEN_INPUT token is found.
-	 */
-	BrainfuckInputHandler input_handler;
+ 	 * Pointer to a function which can write to the environment's output.
+ 	 * 
+ 	 * @param character The character to write to the environment's output.
+  	 * @return On success, the written character is returned. If a writing 
+ 	 * 	error occurs, BRAINFUCK_EOF is returned.
+ 	 */
+	int (*write)(const int character);
+	
 	/*
-	 * An array containing the memory cells the program can use.
+	 * The size of the allocated memory block.
 	 */
-	char *tape;
+	size_t mem_size;
+	
 	/*
-	 * Index into <code>tape</code>. Modified during execution.
+	 * Pointer to the allocated memory the program can work with.
 	 */
-	int tape_index;
+	unsigned int *memory;
+	
 	/*
-	 * size of the tape in umber of cells.
+	 * The current index in the memory.
 	 */
-	size_t tape_size;
-	/*
-	 * A flag that, if set to true, indicates that execution should stop.
-	 */
-	int shouldStop;
+	unsigned long index;
+	
 } BrainfuckExecutionContext;
 
-/*
- * Creates a new state.
- */
-BrainfuckState * brainfuck_state();
-
-/*
- * Creates a new context.
+/**
+ * Allocate a new {@link BrainfuckExecutionContext} to the heap.
  *
- * @param size The size of the tape.
+ * @return A pointer to the memory allocated to the heap or 
+ *	<code>NULL</code> if there is no memory available.
  */
-BrainfuckExecutionContext * brainfuck_context(int);
+struct BrainfuckExecutionContext * brainfuck_execution_context_alloc(void);
 
-/*
- * Removes the given instruction from the linked list.
+/**
+ * Free the given {@link BrainfuckExecutionContext} from the heap.
  * 
- * @param state The state
- * @param instruction The instruction to remove.
- * @return The instruction that is removed.
+ * @param ctx The context to free from the heapy.
  */
-BrainfuckInstruction * brainfuck_remove(struct BrainfuckState *, struct BrainfuckInstruction *);
+void brainfuck_execution_context_free(struct BrainfuckExecutionContext *ctx);
 
-/*
- * Adds an instruction to the instruction list.
- *
- * @param state The state.
- * @param instruction The instruction to add.
- * @return The instruction that is given.
- */
-BrainfuckInstruction * brainfuck_add(struct BrainfuckState *state, struct BrainfuckInstruction *);
-
-/*
- * Adds an instruction to the front of the instruction list.
- *
- * @param state The state.
- * @param instruction The instruction to add.
- * @return The instruction that is given.
- */
-BrainfuckInstruction * brainfuck_add_first(struct BrainfuckState *state, struct BrainfuckInstruction *);
-
-/*
- * Adds an instruction to the instruction list.
- *
- * @param state The state.
- * @param before The instruction you want to add another instruction before.
- * @param instruction The instruction to add.
- * @return The instruction that is given.
- */
-BrainfuckInstruction * brainfuck_insert_before(struct BrainfuckState *, struct BrainfuckInstruction *, 
-	struct BrainfuckInstruction *);
-
-/*
- * Adds an instruction to the instruction list.
- *
- * @param state The state.
- * @param after The instruction you want to add another instruction after.
- * @param instruction The instruction to add.
- * @return The instruction that is given.
- */
-BrainfuckInstruction * brainfuck_insert_after(struct BrainfuckState *, struct BrainfuckInstruction *, 
-	struct BrainfuckInstruction *);
-
-/*
- * Reads a character, converts it to an instruction and repeats until the EOF character
- * 	occurs and will then return a linked list containing all instructions.
- *
- * @param stream The stream to read from.
- * @param The head of the linked list containing the instructions.
- */
-BrainfuckInstruction * brainfuck_parse_stream(FILE *);
-
-/*
- * Reads a character, converts it to an instruction and repeats until the given character
- * 	occurs and will then return a linked list containing all instructions.
- *
- * @param stream The stream to read from.
- * @param until If this character is found in the stream, we will quit reading and return.
- * @param The head of the linked list containing the instructions.
- */
-BrainfuckInstruction * brainfuck_parse_stream_until(FILE *, int);
-
-/*
- * Reads a character, converts it to an instruction and repeats until the string ends
- *	and will then return a linked list containing all instructions.
- *
- * @param str The string to read from.
- * @param The head of the linked list containing the instructions.
- */
-BrainfuckInstruction * brainfuck_parse_string(char *);
-
-/*
- * Reads a character, converts it to an instruction and repeats until the string ends
- *	and will then return a linked list containing all instructions.
- *
- * @param str The string to read from.
- * @param begin The index you want to start parsing at.
- * @param end The index you want to stop parsing at.
- *	When <code>-1</code> is given, it will stop at the end of the string.
- * @param The head of the linked list containing the instructions.
- */
-BrainfuckInstruction * brainfuck_parse_substring(char *, int, int);
-
-/*
- * Reads a character, converts it to an instruction and repeats until the string ends
- *	and will then return a linked list containing all instructions.
- * This method is special because it uses the begin index as counter, so this variable
- * 	will increase.
- *
- * @param str The string to read from.
- * @param ptr The pointer to the integer holding the index you want to start parsing at.
- *	Since this will be used as counter, the value of the pointer will be increased.
- * @param end The index you want to stop parsing at.
- *	When <code>-1</code> is given, it will stop at the end of the string.
- * @param The head of the linked list containing the instructions.
- */
-BrainfuckInstruction * brainfuck_parse_substring_incremental(char *, int *, int);
-
-/*
- * Converts the given character to an instruction.
- *
- * @param c The character to convert.
- * @param The character that's converted into an instruction.
- */
-BrainfuckInstruction * brainfuck_parse_character(char);
-
-/*
- * Destroys the given instruction.
+/**
+ * Initialise the given {@link BrainfuckExecutionContext}.
  * 
- * @param instruction The instruction to destroy.
+ * @param ctx The execution context to initialise.
+ * @param read The read function.
+ * @param write The write function.
+ * @param mem_size The size of the memory block.
+ * @param memory The memory block the program can work with.
+ * @param index The initial index.
  */
-void brainfuck_destroy_instruction(struct BrainfuckInstruction *);
+void brainfuck_execution_context_init(
+	struct BrainfuckExecutionContext *ctx, int (*read)(void), 
+	int (*write)(const int character), const size_t mem_size, 
+	unsigned int *memory, const unsigned long index);
 
-/*
- * Destroys a linked list containing instructions.
- * 
- * @param head The start of the instruction list.
- */
-void brainfuck_destroy_instructions(struct BrainfuckInstruction *);
-
-/*
- * Destroys a state.
- * 
- * @param state The state to destroy
- */
-void brainfuck_destroy_state(struct BrainfuckState *);
-
-/*
- * Destroys a context.
- * 
- * @param context The context to destroy
- */
-void brainfuck_destroy_context(struct BrainfuckExecutionContext *);
-
-/*
- * Executes the given linked list containing instructions.
+/**
+ * Interpret the instructions of the given {@link BrainfuckScript} with the
+ *	given {@link BrainfuckExecutionContext}.
  *
- * @param root The start of the linked list of instructions you want
- * 	to execute.
- * @param context The context of this execution that contains the tape and
- *	other execution related variables.
+ * @param script The script to interpret.
+ * @param ctx The execution context that will provide environment.
+ * @return <code>BRAINFUCK_EOK</code> on success, a value lower than zero
+ *	on failure.
  */
-void brainfuck_execute(struct BrainfuckInstruction *, struct BrainfuckExecutionContext *);
-
-/*
- * Stops the currently running program referenced by the given execution context.
- *
- * @param context The context of this execution that contains the tape and
- *	other execution related variables.
- */
-void brainfuck_execution_stop(BrainfuckExecutionContext *);
+int brainfuck_execution_interpret(const struct BrainfuckScript *script, 
+	struct BrainfuckExecutionContext *ctx);
 
 #endif /* BRAINFUCK_H */
