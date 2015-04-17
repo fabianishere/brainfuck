@@ -28,9 +28,8 @@
 #include <brainfuck.h>
 
 /**
- * A {@link BrainfuckInstruction} represents an instruction that can be 
- * 	executed and is part of a linked list of instructions created by a 
- *	parser.
+ * A {@link BrainfuckInstruction} represents a single operation that can be
+ *	executed by the interpreter.
  */
 struct BrainfuckInstruction {
 	

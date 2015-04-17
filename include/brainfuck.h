@@ -32,7 +32,7 @@
 /* Default values */
 #define BRAINFUCK_DMEMSIZE 30000   	/* Size of the allocated memory block */ 
 #define BRAINFUCK_DDEPTHINITIAL 10 	/* Initial scope depth */
-#define BRAINFUCK_DDEPTHLIMIT 8     /* Maximum scope depth */
+#define BRAINFUCK_DDEPTHLIMIT 8    	/* Maximum scope depth */
 #define BRAINFUCK_DFILEBUFSIZE 1024	/* Size of the file buffer */
 
 /* Error codes */
@@ -42,23 +42,22 @@
 #define BRAINFUCK_EBOUNDS -7	/* Index is out of bounds */
 
 /**
- * The {@link BrainfuckType} enum contains the legal types 
- *	{@link BrainfuckInstruction}s can have.
+ * The {@link BrainfuckType} enum provides the instruction types accepted by
+ *	the interpreter.
  */
 enum BrainfuckType {
-	MUTATE,		/* Cell value mutation */
-	CLEAR,		/* Clear the current memory cell ([-] or [+]) */
-	MOVE, 		/* Memory index mutation */
-	READ,		/* Read one character from the input stream into the cell */
-	WRITE,		/* Write cell value to output stream */ 
-	PROC,		/* Procedure construct */ 
-	LOOP		/* Loop construct */
+	MUTATE,	/* Cell value mutation */
+	CLEAR, 	/* Clear the current memory cell ([-] or [+]) */
+	MOVE,  	/* Memory index mutation */
+	READ,  	/* Read one character from the input stream into the cell */
+	WRITE, 	/* Write cell value to output stream */ 
+	PROC,  	/* Procedure construct */ 
+	LOOP,  	/* Loop construct */
 } BrainfuckType;
 
 /**
- * A {@link BrainfuckInstrcution} represents an instruction that can be 
- * 	executed and is part of a linked list of instructions created by a 
- *	parser.
+ * A {@link BrainfuckInstruction} represents a single operation that can be
+ *	executed by the interpreter.
  */
 struct BrainfuckInstruction;
 
@@ -78,8 +77,8 @@ struct BrainfuckInstruction * brainfuck_instruction_alloc(void);
 void brainfuck_instruction_free(struct BrainfuckInstruction *instruction);
 
 /**
- * A {@link BrainfuckScript} should be a {@link BrainfuckInstruction} with type
- *	PROCEDURE, that contains the instructions of the script.
+ * A {@link BrainfuckScript} is an instruction with the type
+ *	PROCEDURE and containing the instructions of the script.
  * 
  * @see BrainfuckInstruction
  */
@@ -138,7 +137,8 @@ void brainfuck_instruction_write(
 void brainfuck_instruction_procedure(struct BrainfuckInstruction *instruction);
 
 /**
- * Add the given instruction to the given procedure.
+ * Add the given instruction to the given procedure (or procedure-based) 
+ * 	instruction.
  * 
  * @param procedure The procedure to add the instruction to.
  * @param instruction The instruction to add to the procedure.
@@ -251,7 +251,7 @@ struct BrainfuckExecutionContext {
  	 * 
  	 * @param character The character to write to the environment's output.
   	 * @return On success, the written character is returned. If a writing 
- 	 * 	error occurs, BRAINFUCK_EOF is returned.
+ 	 * 	error occurs, EOF is returned.
  	 */
 	int (*write)(const int character);
 	
@@ -303,7 +303,7 @@ void brainfuck_execution_context_init(
 	unsigned int *memory, const unsigned long index);
 
 /**
- * Interpret the instructions of the given {@link BrainfuckScript} with the
+ * Interpret the instructions of the given {@link BrainfuckScript} using the
  *	given {@link BrainfuckExecutionContext}.
  *
  * @param script The script to interpret.
