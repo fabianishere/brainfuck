@@ -31,8 +31,8 @@
 
 /* Default values */
 #define BRAINFUCK_DMEMSIZE 30000   	/* Size of the allocated memory block */ 
-#define BRAINFUCK_DINITIALDEPTH 10 	/* Initial scope depth */
-#define BRAINFUCK_DMAXDEPTH 8      	/* Maximum scope depth */
+#define BRAINFUCK_DDEPTHINITIAL 10 	/* Initial scope depth */
+#define BRAINFUCK_DDEPTHLIMIT 8     /* Maximum scope depth */
 #define BRAINFUCK_DFILEBUFSIZE 1024	/* Size of the file buffer */
 
 /* Error codes */

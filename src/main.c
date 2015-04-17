@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
 	
 	while (1) {
 		option_index = 0;
-		character = getopt_long (argc, argv, "vhme:",
+		character = getopt_long (argc, argv, "vhm:e:",
 			long_options, &option_index);
 		if (character == -1)
 			break;
@@ -168,8 +168,10 @@ int main(int argc, char *argv[]) {
 	/* execute files */
 	for (index = optind; index < argc; index++) {
 		file = fopen(argv[index], "r");
-		if (!file)
+		if (!file) {
 			fprintf(stderr, "error: failed to open file %s\n", argv[index]);
+			continue;
+		}
 		error = run_file(file, &ctx);
 		if (error != BRAINFUCK_EOK)
 			fprintf(stderr, "error: program %s failed with error %i\n", 
