@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
 	
 	while (1) {
 		option_index = 0;
-		character = getopt_long (argc, argv, "vhme:",
+		character = getopt_long (argc, argv, "vhm:e:",
 			long_options, &option_index);
 		if (character == -1)
 			break;
