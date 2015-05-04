@@ -28,8 +28,7 @@
 #include <brainfuck.h>
 
 /**
- * A {@link BrainfuckInstruction} represents a single operation that can be
- *	executed by the interpreter.
+ * A {@link BrainfuckInstruction} represents a single instruction of a program.  
  */
 struct BrainfuckInstruction {
 	
@@ -39,9 +38,10 @@ struct BrainfuckInstruction {
 	enum BrainfuckType type;
 
 	/**
-	 * The attributes of this instruction.
+	 * The argument of this instruction, whose type depends on the 
+ 	 *	instruction's type, which is used at execution time.
 	 */
-	union attributes {
+	union argument {
 		
 		/**
 		 * The change in value.
@@ -54,7 +54,7 @@ struct BrainfuckInstruction {
 		unsigned int k;
 		
 		/**
-		 * Attributes for a PROCEDURE or LOOP instruction.
+		 * The arguments for a PROCEDURE or LOOP instruction.
 		 */
 		struct procedure {
 			
@@ -72,7 +72,7 @@ struct BrainfuckInstruction {
 			
 		} procedure;
 
-	} attributes;
+	} argument;
 	
 	/**
 	 * The next instruction in the linked list of instructions.
@@ -113,7 +113,7 @@ void brainfuck_instruction_mutate(
 {
 	assert(instruction);
 	instruction->type = MUTATE;
-	instruction->attributes.delta = delta;
+	instruction->argument.delta = delta;
 	instruction->next = NULL;
 }
 
@@ -140,7 +140,7 @@ void brainfuck_instruction_move(
 {
 	assert(instruction);
 	instruction->type = MOVE;
-	instruction->attributes.delta = delta;
+	instruction->argument.delta = delta;
 	instruction->next = NULL;
 }
 
@@ -157,7 +157,7 @@ void brainfuck_instruction_read(
 {
 	assert(instruction);
 	instruction->type = READ;
-	instruction->attributes.k = k;
+	instruction->argument.k = k;
 	instruction->next = NULL;
 }
 
@@ -174,7 +174,7 @@ void brainfuck_instruction_write(
 {
 	assert(instruction);
 	instruction->type = WRITE;
-	instruction->attributes.k = k;
+	instruction->argument.k = k;
 	instruction->next = NULL;
 }
 
@@ -188,8 +188,8 @@ void brainfuck_instruction_procedure(struct BrainfuckInstruction *instruction)
 {
 	assert(instruction);
 	instruction->type = PROC;
-	instruction->attributes.procedure.head = NULL;
-	instruction->attributes.procedure.tail = NULL;
+	instruction->argument.procedure.head = NULL;
+	instruction->argument.procedure.tail = NULL;
 	instruction->next = NULL;
 }
 
@@ -203,11 +203,11 @@ void brainfuck_instruction_procedure_add(struct BrainfuckInstruction *procedure,
 	struct BrainfuckInstruction *instruction)
 {
 	assert(procedure && instruction);
-	if (!procedure->attributes.procedure.head)
-		procedure->attributes.procedure.head = instruction;
-	if (procedure->attributes.procedure.tail)
-		procedure->attributes.procedure.tail->next = instruction;
-	procedure->attributes.procedure.tail = instruction;
+	if (!procedure->argument.procedure.head)
+		procedure->argument.procedure.head = instruction;
+	if (procedure->argument.procedure.tail)
+		procedure->argument.procedure.tail->next = instruction;
+	procedure->argument.procedure.tail = instruction;
 }
 
 /**
@@ -232,7 +232,7 @@ void brainfuck_instruction_procedure_free_tail(
 	struct BrainfuckInstruction *instruction)
 {
 	assert(instruction);
-	struct BrainfuckInstruction *ptr = instruction->attributes.procedure.head;
+	struct BrainfuckInstruction *ptr = instruction->argument.procedure.head;
 	struct BrainfuckInstruction *tmp = NULL;
 	while (ptr) {
 		tmp = ptr;
@@ -250,8 +250,8 @@ void brainfuck_instruction_loop(struct BrainfuckInstruction *instruction)
 {
 	assert(instruction);
 	instruction->type = LOOP;
-	instruction->attributes.procedure.head = NULL;
-	instruction->attributes.procedure.tail = NULL;
+	instruction->argument.procedure.head = NULL;
+	instruction->argument.procedure.tail = NULL;
 	instruction->next = NULL;
 }
 
@@ -410,7 +410,9 @@ void brainfuck_parse_string_state(
 				/* Prevent allocating too much memory */
 				if (state->scope.max_depth > BRAINFUCK_DDEPTHLIMIT)
 					goto error_nomem;
-				
+
+				/* Reallocate the array with pointers to BrainfuckInstruction
+ 				 * instances */
 				tmp = realloc(state->scope.scopes, 
 					2 * state->scope.max_depth *
 					sizeof(struct BrainfuckInstruction *));
@@ -588,25 +590,25 @@ int brainfuck_execution_interpret(
 {
 	assert(script && ctx);
 	unsigned int index = 0;
-	struct BrainfuckInstruction *instruction = script->attributes.procedure
+	struct BrainfuckInstruction *instruction = script->argument.procedure
 		.head;
 	while (instruction) {
 		switch(instruction->type) {
 		case MUTATE:
-			ctx->memory[ctx->index] += instruction->attributes.delta;
+			ctx->memory[ctx->index] += instruction->argument.delta;
 			break;
 		case CLEAR:
 			ctx->memory[ctx->index] = 0;
 			break;
 		case MOVE:
-			ctx->index += instruction->attributes.delta;
+			ctx->index += instruction->argument.delta;
 			break;
 		case READ:
-			for (index = 0; index < instruction->attributes.k; index++)
+			for (index = 0; index < instruction->argument.k; index++)
 				ctx->memory[ctx->index] = ctx->read();
 			break;
 		case WRITE:
-			for (index = 0; index < instruction->attributes.k; index++)
+			for (index = 0; index < instruction->argument.k; index++)
 				ctx->write(ctx->memory[ctx->index]);
 			break;
 		case PROC:
