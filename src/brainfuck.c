@@ -484,9 +484,9 @@ struct BrainfuckScript * brainfuck_parse_string(const char *string, int *error)
 	
 	error = error ? error : &error_holder;
 	brainfuck_parse_string_state(string, &state, error);
-
 	if (*error != BRAINFUCK_EOK)
 		return NULL;
+	/* Determine whether the script contains an unclosed scope (bracket) */
 	if (state.scope.depth != 0) {
 		*error = BRAINFUCK_ESYNTAX;
 		return NULL;
@@ -513,7 +513,6 @@ struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error)
 	
 	error = error ? error : &error_holder;
 	assert(file);
-
 	while (!feof(file)) {
 		memset(&buffer, 0, sizeof(buffer));
 		fread(&buffer, sizeof(buffer), 1, file);
@@ -523,6 +522,7 @@ struct BrainfuckScript * brainfuck_parse_file(FILE *file, int *error)
 		if (*error != BRAINFUCK_EOK)
 			return NULL;
 	}
+	/* Determine whether the script contains an unclosed scope (bracket) */
 	if (state.scope.depth != 0) {
 		*error = BRAINFUCK_ESYNTAX;
 		return NULL;
