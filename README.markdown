@@ -29,25 +29,37 @@ $ make
 ```sh
 usage: brainfuck [-vhme] file...
 	-v --version			show the version information
-	-h --help			show a help message
+	-h --help				show a help message
 	-m --memory	<int>		the size of the memory block to allocate for the program (default: 30000 elements)
 	-e --eval	<string>	run code directly
 ```
 An Application Programming Interface is also provided:
 
 ```c
+#include <stdio.h>
 #include <brainfuck.h>
 
 int main(void)
 {
-	int memory[30000] = {0};
-	int error = BRAINFUCK_EOK;
+	/* Declaration */
 	struct BrainfuckContext ctx;
-	struct BrainfuckScript *script = brainfuck_parse_string("+++++++++[>+++++++++++<-].", &error);
-	brainfuck_execution_context_init(&ctx, getchar, putchar,
-		sizeof(int) * 30000, memory, 0);
-	brainfuck_execution_interpret(script);
-	brainfuck_script_free(script)
+	struct BrainfuckScript *script;
+	
+	/* Initialization */
+	ctx.read= = &getchar;
+	ctx.write = &putchar;
+	ctx.mem_size = sizeof(int) * 30000;
+	ctx.memory = malloc(sizeof(int) * 30000);
+	
+	/* Parsing */
+	script = brainfuck_parser_parse_string("+++++++++[>+++++++++++<-].", NULL);
+	
+	/* Execution */
+	brainfuck_engine_free(script);
+	
+	/* Cleaning */
+	free(ctx.memory);
+	brainfuck_script_free(script);
 }
 ```
 
