@@ -46,7 +46,7 @@ int main(void)
 	struct BrainfuckScript *script;
 	
 	/* Initialization */
-	ctx.read= = &getchar;
+	ctx.read = &getchar;
 	ctx.write = &putchar;
 	ctx.mem_size = sizeof(int) * 30000;
 	ctx.memory = malloc(sizeof(int) * 30000);
