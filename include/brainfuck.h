@@ -266,11 +266,11 @@ int brainfuck_parser_context_init(struct BrainfuckParserContext *ctx);
 /**
  * Validate a script and detect syntax errors in the given script.
  *
- * @param script The script to check for syntax errors.
- * @return <code>1</code> if the given script does not contain syntax errors,
- * 	<code>0</code> otherwise.
+ * @param ctx The context of the parser.
+ * @return <code>true</code> if the given script does not contain syntax errors,
+ * 	<code>false</code> otherwise.
  */
-int brainfuck_parser_validate(struct BrainfuckScript *script);
+int brainfuck_parser_validate(struct BrainfuckParserContext *ctx);
 
 /**
  * Parse the given string as a segment of a script.
