@@ -24,12 +24,15 @@ if(WITH_CLI)
 endif()
 
 if(WITH_DOCUMENTATION)
-  FIND_PACKAGE(Doxygen)
-  if (NOT DOXYGEN_FOUND)
-    message(FATAL_ERROR
-      "Doxygen is needed to build the documentation. Please install it correctly")
-  endif()
-  add_custom_target (Docs ALL
-                     COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile
-                     SOURCES Doxyfile)
+	FIND_PACKAGE(Doxygen)
+	if (NOT DOXYGEN_FOUND)
+		message(FATAL_ERROR
+		"Doxygen is needed to build the documentation. Please install it correctly")
+	endif()
+	add_custom_target (Docs ALL
+		COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_SOURCE_DIR}/Doxyfile
+		SOURCES ${PROJECT_SOURCE_DIR}/Doxyfile
+		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+	)
+					 
 endif()
