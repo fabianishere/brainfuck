@@ -58,7 +58,8 @@
  *	should implement.
  */
 enum BrainfuckOperation {
-	OP_CLEAR,     	/**< Set a tape cell to zero */
+	OP_NOP,      	/**< No operation */ 
+	OP_CLEAR,    	/**< Set a tape cell to zero */
 	OP_READ,     	/**< Read one character from an input stream into a cell */
 	OP_WRITE,    	/**< Write a cell value to an output stream */ 
 	OP_PROCEDURE,	/**< Procedure */ 
@@ -79,7 +80,7 @@ struct BrainfuckInstruction {
 	 * This structure represents the changes in memory and index relative to their
 	 * 	old values.
 	 */
-	struct offset {
+	struct BrainfuckInstructionDelta {
 		/**
 		 * The index offset.
 		 */
@@ -99,13 +100,13 @@ struct BrainfuckInstruction {
 		 * The maximum index of the memory offset.
 		 */ 
 		int mem_max;
-	} offset;
+	} delta;
 	
 	/**
 	 * The argument of this instruction, whose type depends on the operation
 	 *	of the instruction.
 	 */
-	union argument {
+	union BrainfuckInstructionArgument {
 		/**
 		 * The number of times the instruction should be executed.
 		 */
@@ -115,7 +116,7 @@ struct BrainfuckInstruction {
 		 * The arguments for a {@link BrainfuckOperation#OP_PROCEDURE}-based 
 		 *	instruction.
 		 */
-		struct procedure {
+		struct BrainfuckInstructionProcedureArgument {
 			/**
 			 * The head of a linked list containing the instructions of the
 			 *	procedure.
@@ -275,9 +276,10 @@ int brainfuck_parser_validate(struct BrainfuckParserContext *ctx);
 /**
  * Parse the given string as a segment of a script.
  *
- * It is not gauranteed that syntax errors will be detected, since the parser
- *	only partially parses the script and therefore cannot detect all syntax 
- *	errors.
+ * It is not gauranteed that all syntax errors will be detected, since the 
+ *	parser can only partially parse the script and therefore cannot detect 
+ *	syntax errors like unclosed brackets.
+ * Use {@link brainfuck_parser_validate} to validate a script after parsing.
  *
  * @param string The string to parse.
  * @param ctx The context of the parser.
