@@ -54,81 +54,49 @@
  * @{
  */
 /**
- * This enum defines the operations a proper implementation of this interface 
- *	should implement.
- */
-enum BrainfuckOperation {
-	OP_NOP,      	/**< No operation */ 
-	OP_CLEAR,    	/**< Set a tape cell to zero */
-	OP_READ,     	/**< Read one character from an input stream into a cell */
-	OP_WRITE,    	/**< Write a cell value to an output stream */ 
-	OP_PROCEDURE,	/**< Procedure */ 
-	OP_LOOP,     	/**< Loop */
-};
-
-/**
  * This structure represents a single operation that could be executed. It 
  *	contains the opcode of the operation and the arguments.
  */
 struct BrainfuckInstruction {
 	/**
-	 * The operation of the instruction.
+	 * This enum defines the instruction set that should be implemented by a
+	 *	proper implementation of this specification.
 	 */
-	enum BrainfuckOperation operation;
-	
-	/**
-	 * This structure represents the changes in memory and index relative to their
-	 * 	old values.
-	 */
-	struct BrainfuckInstructionDelta {
-		/**
-		 * The index offset.
-		 */
-		int index;
-	
-		/**
-		 * The memory offset.
-		 */
-		int *mem;
-	
-		/**
-		 * The minimium index of the memory offset.
-		 */
-		int mem_min;
-	
-		/**
-		 * The maximum index of the memory offset.
-		 */ 
-		int mem_max;
-	} delta;
+	enum BrainfuckType {
+		/* Data Manipulation */
+		INC,	/**< Increase cell value */
+		MOV,	/**< Move in the memory */
+		CLR,	/**< Clear cell value */
+		/* IO */
+		IN, 	/**< Read one byte from a stream and write to cell */
+		OUT,	/**< Read one byte from cell and write to a stream */
+		/* Control Flow */
+		JMP,	/**< Unconditional jump */ 
+		JZ, 	/**< Conditional jump: if zero */
+		/* Util */
+		NOP,	/**< No operation */
+	} type;
 	
 	/**
 	 * The argument of this instruction, whose type depends on the operation
 	 *	of the instruction.
 	 */
-	union BrainfuckInstructionArgument {
+	union BrainfuckArgument {
 		/**
-		 * The number of times the instruction should be executed.
+		 * The change in cell value.
+		 */
+		int delta;
+
+		/**
+		 * The number of times an instruction should be executed.
 		 */
 		unsigned int n;
-	
+
 		/**
-		 * The arguments for a {@link BrainfuckOperation#OP_PROCEDURE}-based 
-		 *	instruction.
+		 * The instruction to jump to in case of a {@link BrainfuckType#JUMP}
+		 *	based instruction.
 		 */
-		struct BrainfuckInstructionProcedureArgument {
-			/**
-			 * The head of a linked list containing the instructions of the
-			 *	procedure.
-			 */
-			struct BrainfuckInstruction *head;
-		
-			/**
-			 * The tail of a linked list containing the instructions of the
-			 *	procedure.
-			 */
-			struct BrainfuckInstruction *tail;
-		} procedure;
+		struct BrainfuckInstruction *jump;
 	} argument;
 
 	/**
@@ -150,60 +118,23 @@ struct BrainfuckInstruction * brainfuck_instruction_alloc(void);
  * 
  * @param instruction The instruction to deallocate.
  */
-void brainfuck_instruction_free(struct BrainfuckInstruction *instruction);
+void brainfuck_instruction_dealloc(struct BrainfuckInstruction *instruction);
 
 /**
- * A collection of instructions represented as a 
- *	{@link BrainfuckOperation#OP_PROCEDURE} instruction.
+ * A {@link BrainfuckScript} structure should be the first instruction in a 
+ *	linked list of instructions.
  * 
  * @see BrainfuckInstruction
  */
 #define BrainfuckScript BrainfuckInstruction
 
-/**
+/** 
  * Deallocate the given script.
- *
- * The structure and all instructions of this procedure should be 
- *	deallocated by this function.
- *
+ * 
  * @param script The script to deallocate.
- * @see brainfuck_instruction_procedure_free
+ * @see brainfuck_instruction_dealloc
  */
-#define brainfuck_script_free brainfuck_instruction_procedure_free
-
-/**
- * Add the given instruction to the given script.
- * 
- * @param script The script to add the instruction to.
- * @param instruction The instruction to add to the script.
- * @see brainfuck_instruction_procedure_add
- */
-#define brainfuck_script_add brainfuck_instruction_procedure_add
-
-/**
- * Add the given instruction to the given procedure instruction.
- * 
- * @param procedure The procedure to add the instruction to.
- * @param instruction The instruction to add to the procedure.
- */
-void brainfuck_instruction_procedure_add(struct BrainfuckInstruction *procedure,
-	struct BrainfuckInstruction *instruction);
-
-/**
- * Deallocate a procedure-based instruction.
- * 
- * @param instruction The instruction to deallocate.
- */
-void brainfuck_instruction_procedure_free(
-	struct BrainfuckInstruction *instruction);
-
-/**
- * Deallocate the tail of a procedure-based instruction.
- * 
- * @param instruction The instruction to deallocate the tail of.
- */
-void brainfuck_instruction_procedure_free_tail(
-	struct BrainfuckInstruction *instruction);
+#define brainfuck_script_dealloc brainfuck_instruction_dealloc
 /** @} */
 
 /**
@@ -219,25 +150,29 @@ void brainfuck_instruction_procedure_free_tail(
  */
 struct BrainfuckParserContext {
 	/**
-	 * The {@link BrainfuckScript} structure that contains the segments that
-	 *	have been parsed already.
+	 * The first {@link BrainfuckInstruction} parsed within the context.
 	 */
-	struct BrainfuckScript *script;
-
-	/**
-	 * A stack that contains the active scopes of the script.
-	 */
-	struct BrainfuckInstruction **scope;
+	struct BrainfuckInstruction *head;
 	
 	/**
-	 * The index of the scope stack.
-	 */
-	unsigned int scope_index;
+ 	* The last {@link BrainfuckInstruction} parsed within the context.
+ 	*/
+	struct BrainfuckInstruction *tail;
 	
 	/**
-	 * The size of the scope stack.
+	 * A stack that contains addresses to jump to for loop instructions.
 	 */
-	size_t scope_size;
+	struct BrainfuckInstruction **loop;
+	
+	/**
+	 * The index of the loop stack.
+	 */
+	unsigned int loop_index;
+	
+	/**
+	 * The size of the loop stack.
+	 */
+	size_t loop_size;
 };
 
 /**
@@ -253,7 +188,7 @@ struct BrainfuckParserContext * brainfuck_parser_context_alloc(void);
  * 
  * @param ctx The context to deallocate.
  */
-void brainfuck_parser_context_free(struct BrainfuckParserContext *ctx);
+void brainfuck_parser_context_dealloc(struct BrainfuckParserContext *ctx);
 
 /**
  * Initialize a {@link BrainfuckParserContext} structure.
@@ -343,17 +278,7 @@ struct BrainfuckEngineContext {
 	/** 
 	 * The memory a script should operate on.
 	 */
-	unsigned int *mem;
-	
-	/**
-	 * The index in the memory.
-	 */
-	unsigned int mem_index;
-	
-	/**
-	 * The size of the memory.
-	 */
-	size_t mem_size;
+	unsigned int *memory;
 };
 
 /**
@@ -375,7 +300,7 @@ struct BrainfuckEngineContext * brainfuck_engine_context_alloc(void);
  * 
  * @param ctx The context to deallocate.
  */
-void brainfuck_engine_context_free(struct BrainfuckEngineContext *ctx);
+void brainfuck_engine_context_dealloc(struct BrainfuckEngineContext *ctx);
 
 /**
  * Run the given script.
