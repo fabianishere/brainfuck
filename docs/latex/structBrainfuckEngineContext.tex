@@ -1,0 +1,77 @@
+\hypertarget{structBrainfuckEngineContext}{}\section{Brainfuck\+Engine\+Context Struct Reference}
+\label{structBrainfuckEngineContext}\index{Brainfuck\+Engine\+Context@{Brainfuck\+Engine\+Context}}
+
+
+This structure represents the context in which a script should run.  
+
+
+
+
+{\ttfamily \#include $<$brainfuck.\+h$>$}
+
+\subsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+int($\ast$ \hyperlink{structBrainfuckEngineContext_a6b4909f710378c98e9b984afc78b9099}{read} )(void)
+\begin{DoxyCompactList}\small\item\em Read a character from an input stream. \end{DoxyCompactList}\item 
+int($\ast$ \hyperlink{structBrainfuckEngineContext_a8495230add7edb7d8f87bd1ef9771239}{write} )(const int character)
+\begin{DoxyCompactList}\small\item\em Write a character to an output stream. \end{DoxyCompactList}\item 
+\hypertarget{structBrainfuckEngineContext_a74ddd0ca5cb164878cfc152e88ad909c}{}unsigned int $\ast$ \hyperlink{structBrainfuckEngineContext_a74ddd0ca5cb164878cfc152e88ad909c}{memory}\label{structBrainfuckEngineContext_a74ddd0ca5cb164878cfc152e88ad909c}
+
+\begin{DoxyCompactList}\small\item\em The memory a script should operate on. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This structure represents the context in which a script should run. 
+
+Definition at line 261 of file brainfuck.\+h.
+
+
+
+\subsection{Field Documentation}
+\hypertarget{structBrainfuckEngineContext_a6b4909f710378c98e9b984afc78b9099}{}\index{Brainfuck\+Engine\+Context@{Brainfuck\+Engine\+Context}!read@{read}}
+\index{read@{read}!Brainfuck\+Engine\+Context@{Brainfuck\+Engine\+Context}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}int($\ast$ Brainfuck\+Engine\+Context\+::read) (void)}\label{structBrainfuckEngineContext_a6b4909f710378c98e9b984afc78b9099}
+
+
+Read a character from an input stream. 
+
+\begin{DoxyReturn}{Returns}
+The integer that was read from the input stream. 
+\end{DoxyReturn}
+
+
+Definition at line 267 of file brainfuck.\+h.
+
+
+
+Referenced by brainfuck\+\_\+engine\+\_\+run().
+
+\hypertarget{structBrainfuckEngineContext_a8495230add7edb7d8f87bd1ef9771239}{}\index{Brainfuck\+Engine\+Context@{Brainfuck\+Engine\+Context}!write@{write}}
+\index{write@{write}!Brainfuck\+Engine\+Context@{Brainfuck\+Engine\+Context}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}int($\ast$ Brainfuck\+Engine\+Context\+::write) (const int character)}\label{structBrainfuckEngineContext_a8495230add7edb7d8f87bd1ef9771239}
+
+
+Write a character to an output stream. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em character} & An integer to write to the output stream. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+On success, the written character is returned. If a writing error occurs, E\+O\+F is returned. 
+\end{DoxyReturn}
+
+
+Definition at line 276 of file brainfuck.\+h.
+
+
+
+Referenced by brainfuck\+\_\+engine\+\_\+run().
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/brainfuck.\+h\end{DoxyCompactItemize}
