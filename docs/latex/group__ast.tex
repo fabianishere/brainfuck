@@ -1,0 +1,164 @@
+\hypertarget{group__ast}{}\section{Abstract Syntax Tree}
+\label{group__ast}\index{Abstract Syntax Tree@{Abstract Syntax Tree}}
+
+
+The abstract syntax tree that should be utilized by a proper implementation.  
+
+
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction}
+\begin{DoxyCompactList}\small\item\em This structure represents a single operation that could be executed. \end{DoxyCompactList}\item 
+union \hyperlink{unionBrainfuckInstruction_1_1BrainfuckArgument}{Brainfuck\+Instruction\+::\+Brainfuck\+Argument}
+\begin{DoxyCompactList}\small\item\em The argument of this instruction, whose type depends on the operation of the instruction. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{group__ast_ga9084bd8dcac602fdcbf7ca845b1e1b20}{Brainfuck\+Script}~\hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction}
+\begin{DoxyCompactList}\small\item\em A \hyperlink{group__ast_ga9084bd8dcac602fdcbf7ca845b1e1b20}{Brainfuck\+Script} structure should be the first instruction in a linked list of instructions. \end{DoxyCompactList}\item 
+\#define \hyperlink{group__ast_ga17fff4afb8ab8bd26f41724878a9997b}{brainfuck\+\_\+script\+\_\+dealloc}~\hyperlink{group__ast_ga2028b09c7f2692fb7fe2cee732919b2d}{brainfuck\+\_\+instruction\+\_\+dealloc}
+\begin{DoxyCompactList}\small\item\em Deallocate the given script. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{group__ast_ga536105595916938ef76e66bb1cdf7b2b}{Brainfuck\+Instruction\+::\+Brainfuck\+Type} \{ \\*
+\hyperlink{group__ast_gga536105595916938ef76e66bb1cdf7b2bad430fd56820303a90e73ceb42ee688c3}{Brainfuck\+Instruction\+::\+I\+N\+C}, 
+\hyperlink{group__ast_gga536105595916938ef76e66bb1cdf7b2bac72dd0f54c974ce534e9b4416f4c8da6}{Brainfuck\+Instruction\+::\+M\+O\+V}, 
+\hyperlink{group__ast_gga536105595916938ef76e66bb1cdf7b2bac1fb5c131100a52e04b9b2a0b000529d}{Brainfuck\+Instruction\+::\+C\+L\+R}, 
+\hyperlink{group__ast_gga536105595916938ef76e66bb1cdf7b2baf95611cfc6305a83b391a18c19408d73}{Brainfuck\+Instruction\+::\+I\+N}, 
+\\*
+\hyperlink{group__ast_gga536105595916938ef76e66bb1cdf7b2bac2a4e58f27685769e6f5785073520725}{Brainfuck\+Instruction\+::\+O\+U\+T}, 
+\hyperlink{group__ast_gga536105595916938ef76e66bb1cdf7b2ba5a4e446f0609b6e81c63cbaa2ad98e1d}{Brainfuck\+Instruction\+::\+J\+M\+P}, 
+\hyperlink{group__ast_gga536105595916938ef76e66bb1cdf7b2ba46c8adfb23d44852d6e1a04d96cb1d66}{Brainfuck\+Instruction\+::\+J\+Z}, 
+\hyperlink{group__ast_gga536105595916938ef76e66bb1cdf7b2ba02f03773b12443d2e4b834d140e5eb8f}{Brainfuck\+Instruction\+::\+N\+O\+P}
+ \}
+\begin{DoxyCompactList}\small\item\em This enum defines the instruction set that should be implemented by a proper implementation of this specification. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction} $\ast$ \hyperlink{group__ast_gab59880c464bbe2b086edc539b8b4a182}{brainfuck\+\_\+instruction\+\_\+alloc} (void)
+\begin{DoxyCompactList}\small\item\em Allocate a \hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction} structure. \end{DoxyCompactList}\item 
+void \hyperlink{group__ast_ga2028b09c7f2692fb7fe2cee732919b2d}{brainfuck\+\_\+instruction\+\_\+dealloc} (struct \hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction} $\ast$instruction)
+\begin{DoxyCompactList}\small\item\em Deallocate the given instruction. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+The abstract syntax tree that should be utilized by a proper implementation. 
+
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{group__ast_ga17fff4afb8ab8bd26f41724878a9997b}{}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!brainfuck\+\_\+script\+\_\+dealloc@{brainfuck\+\_\+script\+\_\+dealloc}}
+\index{brainfuck\+\_\+script\+\_\+dealloc@{brainfuck\+\_\+script\+\_\+dealloc}!Abstract Syntax Tree@{Abstract Syntax Tree}}
+\subsubsection[{brainfuck\+\_\+script\+\_\+dealloc}]{\setlength{\rightskip}{0pt plus 5cm}\#define brainfuck\+\_\+script\+\_\+dealloc~{\bf brainfuck\+\_\+instruction\+\_\+dealloc}}\label{group__ast_ga17fff4afb8ab8bd26f41724878a9997b}
+
+
+Deallocate the given script. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em script} & The script to deallocate. \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{group__ast_ga2028b09c7f2692fb7fe2cee732919b2d}{brainfuck\+\_\+instruction\+\_\+dealloc} 
+\end{DoxySeeAlso}
+
+
+Definition at line 137 of file brainfuck.\+h.
+
+\hypertarget{group__ast_ga9084bd8dcac602fdcbf7ca845b1e1b20}{}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!Brainfuck\+Script@{Brainfuck\+Script}}
+\index{Brainfuck\+Script@{Brainfuck\+Script}!Abstract Syntax Tree@{Abstract Syntax Tree}}
+\subsubsection[{Brainfuck\+Script}]{\setlength{\rightskip}{0pt plus 5cm}\#define Brainfuck\+Script~{\bf Brainfuck\+Instruction}}\label{group__ast_ga9084bd8dcac602fdcbf7ca845b1e1b20}
+
+
+A \hyperlink{group__ast_ga9084bd8dcac602fdcbf7ca845b1e1b20}{Brainfuck\+Script} structure should be the first instruction in a linked list of instructions. 
+
+\begin{DoxySeeAlso}{See also}
+\hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction} 
+\end{DoxySeeAlso}
+
+
+Definition at line 129 of file brainfuck.\+h.
+
+
+
+\subsection{Enumeration Type Documentation}
+\hypertarget{group__ast_ga536105595916938ef76e66bb1cdf7b2b}{}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!Brainfuck\+Type@{Brainfuck\+Type}}
+\index{Brainfuck\+Type@{Brainfuck\+Type}!Abstract Syntax Tree@{Abstract Syntax Tree}}
+\subsubsection[{Brainfuck\+Type}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf Brainfuck\+Instruction\+::\+Brainfuck\+Type}}\label{group__ast_ga536105595916938ef76e66bb1cdf7b2b}
+
+
+This enum defines the instruction set that should be implemented by a proper implementation of this specification. 
+
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{I\+N\+C@{I\+N\+C}!Abstract Syntax Tree@{Abstract Syntax Tree}}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!I\+N\+C@{I\+N\+C}}\item[{\em 
+\hypertarget{group__ast_gga536105595916938ef76e66bb1cdf7b2bad430fd56820303a90e73ceb42ee688c3}{}I\+N\+C\label{group__ast_gga536105595916938ef76e66bb1cdf7b2bad430fd56820303a90e73ceb42ee688c3}
+}]Increase cell value. \index{M\+O\+V@{M\+O\+V}!Abstract Syntax Tree@{Abstract Syntax Tree}}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!M\+O\+V@{M\+O\+V}}\item[{\em 
+\hypertarget{group__ast_gga536105595916938ef76e66bb1cdf7b2bac72dd0f54c974ce534e9b4416f4c8da6}{}M\+O\+V\label{group__ast_gga536105595916938ef76e66bb1cdf7b2bac72dd0f54c974ce534e9b4416f4c8da6}
+}]Move in the memory. \index{C\+L\+R@{C\+L\+R}!Abstract Syntax Tree@{Abstract Syntax Tree}}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!C\+L\+R@{C\+L\+R}}\item[{\em 
+\hypertarget{group__ast_gga536105595916938ef76e66bb1cdf7b2bac1fb5c131100a52e04b9b2a0b000529d}{}C\+L\+R\label{group__ast_gga536105595916938ef76e66bb1cdf7b2bac1fb5c131100a52e04b9b2a0b000529d}
+}]Clear cell value. \index{I\+N@{I\+N}!Abstract Syntax Tree@{Abstract Syntax Tree}}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!I\+N@{I\+N}}\item[{\em 
+\hypertarget{group__ast_gga536105595916938ef76e66bb1cdf7b2baf95611cfc6305a83b391a18c19408d73}{}I\+N\label{group__ast_gga536105595916938ef76e66bb1cdf7b2baf95611cfc6305a83b391a18c19408d73}
+}]Read one byte from a stream and write to cell. \index{O\+U\+T@{O\+U\+T}!Abstract Syntax Tree@{Abstract Syntax Tree}}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!O\+U\+T@{O\+U\+T}}\item[{\em 
+\hypertarget{group__ast_gga536105595916938ef76e66bb1cdf7b2bac2a4e58f27685769e6f5785073520725}{}O\+U\+T\label{group__ast_gga536105595916938ef76e66bb1cdf7b2bac2a4e58f27685769e6f5785073520725}
+}]Read one byte from cell and write to a stream. \index{J\+M\+P@{J\+M\+P}!Abstract Syntax Tree@{Abstract Syntax Tree}}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!J\+M\+P@{J\+M\+P}}\item[{\em 
+\hypertarget{group__ast_gga536105595916938ef76e66bb1cdf7b2ba5a4e446f0609b6e81c63cbaa2ad98e1d}{}J\+M\+P\label{group__ast_gga536105595916938ef76e66bb1cdf7b2ba5a4e446f0609b6e81c63cbaa2ad98e1d}
+}]Unconditional jump. \index{J\+Z@{J\+Z}!Abstract Syntax Tree@{Abstract Syntax Tree}}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!J\+Z@{J\+Z}}\item[{\em 
+\hypertarget{group__ast_gga536105595916938ef76e66bb1cdf7b2ba46c8adfb23d44852d6e1a04d96cb1d66}{}J\+Z\label{group__ast_gga536105595916938ef76e66bb1cdf7b2ba46c8adfb23d44852d6e1a04d96cb1d66}
+}]Conditional jump\+: if zero. \index{N\+O\+P@{N\+O\+P}!Abstract Syntax Tree@{Abstract Syntax Tree}}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!N\+O\+P@{N\+O\+P}}\item[{\em 
+\hypertarget{group__ast_gga536105595916938ef76e66bb1cdf7b2ba02f03773b12443d2e4b834d140e5eb8f}{}N\+O\+P\label{group__ast_gga536105595916938ef76e66bb1cdf7b2ba02f03773b12443d2e4b834d140e5eb8f}
+}]No operation. \end{description}
+\end{Desc}
+
+
+Definition at line 65 of file brainfuck.\+h.
+
+
+
+\subsection{Function Documentation}
+\hypertarget{group__ast_gab59880c464bbe2b086edc539b8b4a182}{}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!brainfuck\+\_\+instruction\+\_\+alloc@{brainfuck\+\_\+instruction\+\_\+alloc}}
+\index{brainfuck\+\_\+instruction\+\_\+alloc@{brainfuck\+\_\+instruction\+\_\+alloc}!Abstract Syntax Tree@{Abstract Syntax Tree}}
+\subsubsection[{brainfuck\+\_\+instruction\+\_\+alloc}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf Brainfuck\+Instruction}$\ast$ brainfuck\+\_\+instruction\+\_\+alloc (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}\label{group__ast_gab59880c464bbe2b086edc539b8b4a182}
+
+
+Allocate a \hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction} structure. 
+
+\begin{DoxyReturn}{Returns}
+A pointer to the allocated structure or {\ttfamily N\+U\+L\+L} if the allocation failed. 
+\end{DoxyReturn}
+
+
+Definition at line 41 of file brainfuck.\+c.
+
+
+
+Referenced by brainfuck\+\_\+parser\+\_\+parse\+\_\+string\+\_\+partial().
+
+\hypertarget{group__ast_ga2028b09c7f2692fb7fe2cee732919b2d}{}\index{Abstract Syntax Tree@{Abstract Syntax Tree}!brainfuck\+\_\+instruction\+\_\+dealloc@{brainfuck\+\_\+instruction\+\_\+dealloc}}
+\index{brainfuck\+\_\+instruction\+\_\+dealloc@{brainfuck\+\_\+instruction\+\_\+dealloc}!Abstract Syntax Tree@{Abstract Syntax Tree}}
+\subsubsection[{brainfuck\+\_\+instruction\+\_\+dealloc}]{\setlength{\rightskip}{0pt plus 5cm}void brainfuck\+\_\+instruction\+\_\+dealloc (
+\begin{DoxyParamCaption}
+\item[{struct {\bf Brainfuck\+Instruction} $\ast$}]{instruction}
+\end{DoxyParamCaption}
+)}\label{group__ast_ga2028b09c7f2692fb7fe2cee732919b2d}
+
+
+Deallocate the given instruction. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em instruction} & The instruction to deallocate. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 46 of file brainfuck.\+c.
+
