@@ -60,3 +60,4 @@ See LICENSE file.
     diekmann https://github.com/diekmann
     SevenBits https://github.com/SevenBits
     Alex Burka https://github.com/durka durka42@gmail.com
+	outis https://github.com/outis
