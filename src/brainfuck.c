@@ -41,7 +41,7 @@ BrainfuckExecutionContext * brainfuck_context(int size) {
 	if (size < 0)
 		size = BRAINFUCK_TAPE_SIZE;
 		
-	char* tape = malloc(sizeof(BRAINFUCK_CELL_TYPE) * size);
+	unsigned char* tape = malloc(sizeof(char) * size);
 	
 	BrainfuckExecutionContext *context = (BrainfuckExecutionContext *) 
 			malloc(sizeof(BrainfuckExecutionContext));

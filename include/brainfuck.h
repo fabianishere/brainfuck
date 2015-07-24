@@ -106,7 +106,7 @@ typedef struct BrainfuckExecutionContext {
 	/*
 	 * An array containing the memory cells the program can use.
 	 */
-	unsigned int *tape;
+	unsigned char *tape;
 	/*
 	 * Index into <code>tape</code>. Modified during execution.
 	 */
