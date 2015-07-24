@@ -470,26 +470,26 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 	if (root == NULL || context == NULL)
 		return;
 	BrainfuckInstruction *instruction = root;
-	unsigned long index;
+	int index;
 	while (instruction != NULL && instruction->type != BRAINFUCK_TOKEN_LOOP_END) {
 		switch (instruction->type) {
 		case BRAINFUCK_TOKEN_PLUS:
-			context->tape[context->tape_index] += (unsigned char) instruction->difference; // may overflow
+			context->tape[context->tape_index] += instruction->difference;
 			break;
 		case BRAINFUCK_TOKEN_MINUS:
-			context->tape[context->tape_index] -= (unsigned char) instruction->difference; // may underflow
+			context->tape[context->tape_index] -= instruction->difference;
 			break;
 		case BRAINFUCK_TOKEN_NEXT:
-			if (instruction->difference >= INT_MAX - context->tape_size || 
-					(((unsigned long)context->tape_index) + instruction->difference) >= context->tape_size) {
+			if ((unsigned long) instruction->difference >= INT_MAX - context->tape_size || 
+					(unsigned long) context->tape_index + instruction->difference >= context->tape_size) {
 				fprintf(stderr, "error: tape memory out of bounds (overrun)\nexceeded the tape size of %zd cells\n", context->tape_size);
 				exit(EXIT_FAILURE);
 			}
 			context->tape_index += instruction->difference;
 			break;
 		case BRAINFUCK_TOKEN_PREVIOUS:
-			if (instruction->difference >= INT_MAX - context->tape_size || 
-					((long)context->tape_index) - (long)instruction->difference < 0) {
+			if ((unsigned long) instruction->difference >= INT_MAX - context->tape_size || 
+					context->tape_index - instruction->difference < 0) {
 				fprintf(stderr, "error: tape memory out of bounds (underrun)\nundershot the tape size of %zd cells\n", context->tape_size);
 				exit(EXIT_FAILURE);
 			}
@@ -513,14 +513,14 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 			int high = low + 21;
 			if (high >= (int) context->tape_size) 
 				high = context->tape_size-1;
-			for (index = low; index < (unsigned long) high; index++)
-				printf("%lu\t", index);
+			for (index = low; index < high; index++)
+				printf("%i\t", index);
 			printf("\n");
-			for (index = low; index < (unsigned long) high; index++)
+			for (index = low; index < high; index++)
 				printf("%d\t", context->tape[index]);
 			printf("\n");
-			for (index = low; index < (unsigned long) high; index++)
-				if (index == (unsigned long) context->tape_index)
+			for (index = low; index < high; index++)
+				if (index == context->tape_index)
 					printf("^\t");
 			else
 				printf(" \t");

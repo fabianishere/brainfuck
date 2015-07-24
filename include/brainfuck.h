@@ -17,7 +17,6 @@
 #define BRAINFUCK_H
 
 #define BRAINFUCK_VERSION "2.6.4"
-#define BRAINFUCK_CELL_TYPE int
 #define BRAINFUCK_TAPE_SIZE 30000
 
 #define BRAINFUCK_TOKEN_PLUS '+'
@@ -42,7 +41,7 @@ typedef struct BrainfuckInstruction {
 	 * The difference between the value of the byte at the currect pointer and 
 	 *   the value we want.
 	 */
-	unsigned long difference;
+	int difference;
 	/*
 	 * The type of this instruction.
 	 */
@@ -107,7 +106,7 @@ typedef struct BrainfuckExecutionContext {
 	/*
 	 * An array containing the memory cells the program can use.
 	 */
-	char *tape;
+	unsigned int *tape;
 	/*
 	 * Index into <code>tape</code>. Modified during execution.
 	 */
