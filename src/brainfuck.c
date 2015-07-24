@@ -170,11 +170,11 @@ BrainfuckInstruction * brainfuck_insert_after(BrainfuckState *state, BrainfuckIn
 			BrainfuckInstruction *instruction) {
 		if (state == NULL || after == NULL || instruction == NULL)
 			return NULL;
-		after->next = instruction;
-		instruction->previous = after;
-			
 		BrainfuckInstruction *next = after->next;
 		BrainfuckInstruction *iter = instruction;
+
+		after->next = instruction;
+		instruction->previous = after;
 		while (iter != NULL) {
 			if (iter->next == NULL)
 				break;
