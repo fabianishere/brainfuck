@@ -28,6 +28,9 @@ int main() {
 }
 ```
 
+## Examples
+Look in the `examples` directory for a large amount of brainfuck examples.
+
 ## Getting the source
 Download the source code by running the following code in your command prompt:
 ```sh
