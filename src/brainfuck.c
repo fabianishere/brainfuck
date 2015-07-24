@@ -362,8 +362,8 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 				break;
 			case BRAINFUCK_TOKEN_LOOP_END:
 				return root;
-            case BRAINFUCK_TOKEN_BREAK:
-                break;
+			case BRAINFUCK_TOKEN_BREAK:
+				break;
 			default:
 				continue;
 			}
