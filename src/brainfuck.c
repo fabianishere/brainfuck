@@ -34,8 +34,9 @@
 #include <brainfuck.h>
 
 /* Definitions */
-#define BRAINFUCK_LOOP_DEPTH 8
+#define BRAINFUCK_LOOP_DEPTH 16
 #define BRAINFUCK_BUFFER_SIZE 1024
+#define BRAINFUCK_ARRAY_SIZE 1024
 
 /* Implementation */
 struct BrainfuckInstruction * brainfuck_instruction_alloc(void)
@@ -48,6 +49,84 @@ void brainfuck_instruction_dealloc(struct BrainfuckInstruction *instruction)
 	free(instruction);
 }
 
+struct BrainfuckScript * brainfuck_script_alloc(void)
+{
+	return malloc(sizeof(struct BrainfuckScript));
+}
+
+
+void brainfuck_script_dealloc(struct BrainfuckScript *script)
+{
+	assert(script);
+	if (script->next)
+		brainfuck_script_dealloc(script->next);
+	free(script->array);
+	free(script);
+}
+
+
+int brainfuck_script_init(struct BrainfuckScript *script, 
+	struct BrainfuckScript *previous, size_t size)
+{
+	assert(script);
+	
+	script->previous = previous;
+	script->size = size;
+	script->index = 0;
+	script->array = malloc(sizeof(struct BrainfuckInstruction) * size);
+	
+	return script->array ? BRAINFUCK_EOK : BRAINFUCK_ENOMEM;
+}
+
+void brainfuck_script_dump(const struct BrainfuckScript *script, FILE *file)
+{
+	register int i;
+	register struct BrainfuckInstruction instruction;
+	
+	assert(script);
+	assert(file);
+	
+	while (script) {
+		for (i = 0; i < script->index; i++) {
+			instruction = script->array[i];
+			switch(instruction.type) {
+			case INC:
+				fprintf(file, "inc %i; ", instruction.argument.offset);
+				break;
+			case DEC:
+				fprintf(file, "dec %i; ", instruction.argument.offset);
+				break;
+			case MOVL:
+				fprintf(file, "movl %i; ", instruction.argument.offset);
+				break;
+			case MOVR:
+				fprintf(file, "movr %i; ", instruction.argument.offset);
+				break;
+			case CLR:
+				fprintf(file, "clr; ");
+				break;
+			case IN:
+				fprintf(file, "in %i; ", instruction.argument.n);
+				break;
+			case OUT:
+				fprintf(file, "out %i; ", instruction.argument.n);
+				break;
+			case JZ:
+				fprintf(file, "jz %i; ", instruction.argument.offset);
+				break;
+			case JMP:
+				fprintf(file, "jmp %i; ", instruction.argument.offset);
+				break;
+			case NOP:
+				fprintf(file, "nop; ");
+				break;
+			}
+		}
+		script = script->next;
+	}
+	printf("\n");
+}
+
 struct BrainfuckParserContext * brainfuck_parser_context_alloc(void)
 {
 	return malloc(sizeof(struct BrainfuckParserContext));
@@ -56,7 +135,7 @@ struct BrainfuckParserContext * brainfuck_parser_context_alloc(void)
 void brainfuck_parser_context_dealloc(struct BrainfuckParserContext *ctx)
 {
 	assert(ctx);
-	free(ctx->loop);
+	free(ctx->offsets.array);
 	free(ctx);
 }
 
@@ -64,19 +143,19 @@ int brainfuck_parser_context_init(struct BrainfuckParserContext *ctx)
 {
 	assert(ctx);
 	
-	ctx->loop = malloc(sizeof(struct BrainfuckInstruction *) 
+	ctx->offsets.array = malloc(sizeof(struct BrainfuckInstruction *) 
 		* BRAINFUCK_LOOP_DEPTH);
-	if (!ctx->loop)
+	if (!ctx->offsets.array)
 		return BRAINFUCK_ENOMEM;
-	ctx->loop_size = BRAINFUCK_LOOP_DEPTH;
-	ctx->loop_index = 0;
+	ctx->offsets.size = BRAINFUCK_LOOP_DEPTH;
+	ctx->offsets.index = 0;
 	return BRAINFUCK_EOK;
 }
 
 
-int brainfuck_parser_validate(struct BrainfuckParserContext *ctx)
+int brainfuck_parser_validate(const struct BrainfuckParserContext *ctx)
 {
-	return ctx->loop_index == 0;
+	return ctx->offsets.index == 0;
 }
 
 
@@ -85,53 +164,74 @@ void brainfuck_parser_parse_string_partial(const char *string,
 {
 	char ch;
 	int error_holder;
-	int i;
+	int delta;
+	int offset = 0;
 	unsigned int n;
+	int index;
+	size_t size;
 	struct BrainfuckInstruction *instruction;
+	struct BrainfuckInstruction *tmp;
 	
 	assert(ctx);
 	
 	error = error ? error : &error_holder;
 	*error = BRAINFUCK_EOK;
-	instruction = ctx->tail;
 	
-	/* Initialise the context if it hasn't been initialised yet */
-	if (!ctx->loop && brainfuck_parser_context_init(ctx) != BRAINFUCK_EOK)
+	/* Initialize the context if it hasn't been initialized yet */
+	if (!ctx->offsets.array && brainfuck_parser_context_init(ctx) != BRAINFUCK_EOK)
 		goto error_nomem;
-
+	
+	/* Initialize script if it hasn't been initialized yet */
+	if (!ctx->tail) {
+		ctx->tail = brainfuck_script_alloc();
+		if (!ctx->tail || brainfuck_script_init(ctx->tail, NULL, BRAINFUCK_ARRAY_SIZE) != BRAINFUCK_EOK)
+			goto error_nomem;
+		ctx->head = ctx->tail;
+	}
+	index = ctx->tail->index;
+	size = ctx->tail->size;
+	instruction = &ctx->tail->array[index];
+	offset = ctx->offsets.current;
 	while((ch = *string++)) {
 		switch(ch) {
 		case '+':
 		case '-':
-			i = 0;
+			delta = 0;
 			string--;
 			while ((ch = *string++) == '+' || ch == '-')
-					i += (ch == '+' ? 1 : -1);
+					delta += (ch == '+' ? 1 : -1);
 			string--;
-			if (i == 0)
-				break;
-			instruction = brainfuck_instruction_alloc();
-			instruction->type = INC;
-			instruction->argument.delta = i;
+			if (delta == 0) {
+				continue;
+			} else if (delta > 0) {
+				instruction->type = INC;
+				instruction->argument.offset = delta;
+			} else {
+				instruction->type = DEC;
+				instruction->argument.offset = -delta;
+			}
 			break;
 		case '>':
 		case '<':
-			i = 0;
+			delta = 0;
 			string--;
 			while ((ch = *string++) == '>' || ch == '<')
-					i += (ch == '>' ? 1 : -1);
+					delta += (ch == '>' ? 1 : -1);
 			string--;
-			if (i == 0)
-				break;
-			instruction = brainfuck_instruction_alloc();
-			instruction->type = MOV;
-			instruction->argument.delta = i;
+			if (delta == 0) {
+				continue;
+			} else if (delta > 0) {
+				instruction->type = MOVR;
+				instruction->argument.offset = delta;
+			} else {
+				instruction->type = MOVL;
+				instruction->argument.offset = -delta;
+			}
 			break;
 		case ',':
 			n = 0;
 			string--;
 			while ((ch = *string++) == ',' && n++);
-			instruction = brainfuck_instruction_alloc();
 			instruction->type = IN;
 			instruction->argument.n = n;
 			break;
@@ -139,35 +239,44 @@ void brainfuck_parser_parse_string_partial(const char *string,
 			n = 0;
 			string--;
 			while ((ch = *string++) == '.' && n++);
-			instruction = brainfuck_instruction_alloc();
 			instruction->type = OUT;
 			instruction->argument.n = n;
 			break;
 		case '[':
-			instruction = brainfuck_instruction_alloc();
+			if ((size_t) ctx->offsets.index >= ctx->offsets.size)
+				goto error_nomem;
 			instruction->type = JZ;
-			instruction->argument.jump = NULL;
-			ctx->loop[ctx->loop_index++] = instruction;
+			instruction->argument.offset = offset;
+			ctx->offsets.array[ctx->offsets.index++] = instruction;
+			offset = 0;
 			break;
 		case ']':
-			if (ctx->loop_index <= 0)
+			if (ctx->offsets.index <= 0)
 				goto error_syntax;
-			
-			instruction = brainfuck_instruction_alloc();
 			instruction->type = JMP;
-			instruction->argument.jump = ctx->loop[--ctx->loop_index];
-			instruction->argument.jump->argument.jump = instruction;
+			instruction->argument.offset = -offset;
+			tmp = ctx->offsets.array[--ctx->offsets.index];
+			offset += tmp->argument.offset;
+			tmp->argument.offset = -instruction->argument.offset + 1;
 			break;
 		default:
 			continue;
 		}
-		
-		if (!ctx->head)
-			ctx->head = instruction;
-		else
-			ctx->tail->next = instruction;
-		ctx->tail = instruction;
+		instruction += (index++, offset++, 1);
+		if ((size_t) index < size)
+			continue;
+		ctx->tail->next = brainfuck_script_alloc();
+		if (!ctx->tail->next ||
+				brainfuck_script_init(ctx->tail->next, ctx->tail, BRAINFUCK_ARRAY_SIZE) != BRAINFUCK_EOK)
+			goto error_nomem;
+		ctx->tail->index = index;
+		ctx->tail = ctx->tail->next;
+		index = ctx->tail->index;
+		size = ctx->tail->size;
+		instruction = &ctx->tail->array[index];
 	}
+	ctx->tail->index = index;
+	ctx->offsets.current = offset;
 	return;
 	
 	error_nomem:
@@ -182,28 +291,35 @@ struct BrainfuckScript * brainfuck_parser_parse_string(const char *string,
 	int *error)
 {
 	int error_holder;
-	struct BrainfuckParserContext ctx = {NULL, NULL, NULL, 0, 0};
+	struct BrainfuckParserContext ctx = {NULL, NULL, {0, 0, 0, NULL}};
 	
 	error = error ? error : &error_holder;
 	*error = BRAINFUCK_EOK;
 	
 	brainfuck_parser_parse_string_partial(string, &ctx, error);
-	if (*error != BRAINFUCK_EOK)
-		return NULL;
+	if (*error != BRAINFUCK_EOK) 
+		goto error;
 	
 	if (!brainfuck_parser_validate(&ctx)) {
 		*error = BRAINFUCK_ESYNTAX;
-		return NULL;
+		goto error;
 	}
-	free(ctx.loop);
+	
+	free(ctx.offsets.array);
 	return ctx.head;
+	
+	error:
+		free(ctx.offsets.array);
+		if (ctx.head)
+			brainfuck_script_dealloc(ctx.head);
+		return NULL;
 }
 
 struct BrainfuckScript * brainfuck_parser_parse_file(FILE *file, int *error)
 {
 	int error_holder = BRAINFUCK_EOK;
 	char buffer[BRAINFUCK_BUFFER_SIZE] = {0};
-	struct BrainfuckParserContext ctx = {NULL, NULL, NULL, 0, 0};
+	struct BrainfuckParserContext ctx = {NULL, NULL, {0, 0, 0, NULL}};
 	
 	error = error ? error : &error_holder;
 	*error = BRAINFUCK_EOK;
@@ -216,16 +332,64 @@ struct BrainfuckScript * brainfuck_parser_parse_file(FILE *file, int *error)
 			continue;
 		brainfuck_parser_parse_string_partial(buffer, &ctx, error);
 		if (*error != BRAINFUCK_EOK)
-			return NULL;
+			goto error;
 	}
 
 	if (!brainfuck_parser_validate(&ctx)) {		
 		*error = BRAINFUCK_ESYNTAX;
-		return NULL;
+		goto error;
 	}
-	free(ctx.loop);
+	free(ctx.offsets.array);
 	return ctx.head;
+	
+	error:
+		free(ctx.offsets.array);
+		if (ctx.head)
+			brainfuck_script_dealloc(ctx.head);
+		return NULL;
 }
+
+static struct BrainfuckInstruction * next(const struct BrainfuckScript *script, int index) {
+	assert(script);
+	
+	while (index < 0 || index >= script->index) {
+		if (index >= script->index) {
+			index -= script->index;
+			script = script->next;
+			if (!script)
+				return NULL;
+		} else if (index < 0) {
+			script = script->previous;
+			if (!script)
+				return NULL;
+			index += script->index;
+		}
+	}
+	return script->array + index;
+}
+
+int brainfuck_pass_clear(const struct BrainfuckScript *script)
+{
+	struct BrainfuckInstruction *instruction;
+	struct BrainfuckInstruction *a;
+	struct BrainfuckInstruction *b;
+	int i = 0;
+	while((instruction = next(script, i++))) {
+		if (instruction->type != JZ)
+			continue;
+		a = next(script, i++);
+		if (!a || !(a->type == INC ||a->type == DEC))
+			continue;
+		b = next(script, i++);
+		if (!b || !(b->type == JMP))
+			continue;
+		instruction->type = CLR;
+		a->type = NOP;
+		b->type = NOP;
+	}
+	return BRAINFUCK_EOK;
+}
+
 
 struct BrainfuckEngineContext * brainfuck_engine_context_alloc(void)
 {
@@ -240,39 +404,82 @@ void brainfuck_engine_context_dealloc(struct BrainfuckEngineContext *ctx)
 int brainfuck_engine_run(const struct BrainfuckScript *script, 
 	struct BrainfuckEngineContext *ctx)
 {
+	unsigned int i;
+	register int j;
+	register unsigned int k;
+	int size; 
+	struct BrainfuckInstruction *instructions;
+	register unsigned char *memory = ctx->memory;
+	register int index = 0;
+	struct BrainfuckInstruction instruction;
+	union BrainfuckArgument argument;
+	
+	
 	assert(script);
 	assert(ctx);
 	
-	unsigned int k;
-	
 	while (script) {
-		switch(script->type) {
-		case INC:
-			*ctx->memory += script->argument.delta;
-			break;
-		case MOV:
-			ctx->memory += script->argument.delta;
-			break;
-		case CLR:
-			*ctx->memory = 0;
-			break;
-		case IN:
-			for (k = 0; k < script->argument.n; k++)
-				*ctx->memory = ctx->read();
-			break;
-		case OUT:
-			for (k = 0; k < script->argument.n; k++)
-				ctx->write(*ctx->memory);
-			break;
-		case JMP:
-			script = script->argument.jump;
-			continue;
-		case JZ:
-			if (!*ctx->memory)
-				script = script->argument.jump;
-			break;
-		case NOP:
-			break;
+		size = script->index;
+		instructions = script->array;
+		for (i = 0; i < (unsigned int) size; i++) {
+			instruction = instructions[i];
+			argument = instruction.argument;
+			switch(instruction.type) {
+			case INC:
+				/*printf("inc %p %i => 0x%08x\n", memory, instruction.argument.offset, *memory + instruction.argument.offset);*/
+				memory[index] += argument.offset;
+				break;
+			case DEC:
+				/*printf("dec %p %i => 0x%08x\n", memory, instruction.argument.offset, *memory + instruction.argument.offset);*/
+				memory[index] -= argument.offset;
+				break;
+			case MOVL:
+				/*printf("movl %p %i => %p\n", memory, instruction.argument.offset, memory + instruction.argument.offset);*/
+				index -= argument.offset;
+				break;
+			case MOVR:
+				/*printf("mov %p %i => %p\n", memory, instruction.argument.offset, memory + instruction.argument.offset);*/
+				index += argument.offset;
+				break;
+			case CLR:
+				/*printf("clr\n");*/
+				memory[index] = 0;
+				break;
+			case IN:
+				for (k = 0; k < argument.n; k++)
+					memory[index] = ctx->read();
+				/*printf("in %p => 0x%08x\n", memory, *memory);*/
+				break;
+			case OUT:
+				/*printf("out %p => 0x%08x\n", memory, *memory);*/
+				for (k = 0; k < argument.n; k++)
+					ctx->write(memory[index]);
+				break;
+			case JZ:
+				/*printf("jz %i\n", instruction.argument.offset);*/
+				if (memory[index])
+					break;
+				/*Fallthrough */
+			case JMP:
+				/*printf("jmp %i\n", instruction.argument.offset);*/
+				j = i + argument.offset - 1;
+				while (j < 0 || j >= size) {
+					if (j < 0) {
+						script = script->previous;
+						size = script->index;
+						j += size;
+					} else {
+						j -= size;
+						script = script->next;
+						size = script->index;
+					}
+					instructions = script->array;
+				}
+				i = j;
+				break;
+			case NOP:
+				break;
+			}
 		}
 		script = script->next;
 	}

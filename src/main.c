@@ -40,31 +40,35 @@ int main()
 	struct BrainfuckScript *script;
 	struct BrainfuckEngineContext ctx;
 	int error;
-	unsigned int *memory;
 	FILE *file;
 	
 	/* Initialization */
 	ctx.read = &getchar;
 	ctx.write = &putchar;
-	ctx.memory = memory = calloc(30000, sizeof(unsigned int));
+	ctx.memory = calloc(30000, sizeof(unsigned char));
 	file = fopen("../examples/hanoi.bf", "r");
 	
 	/* Parsing */
 	script = brainfuck_parser_parse_file(file, &error);
+	/*script = brainfuck_parser_parse_string("+[]", &error);*/
 	
 	if (error != BRAINFUCK_EOK) {
 		fprintf(stderr, "error: parser exited with code %i.\n", error);
+		fclose(file);
 		free(ctx.memory);
-		brainfuck_script_dealloc(script);
 		return 1;
 	}
 	
+	/* Passes */
+	brainfuck_pass_clear(script);
+	
 	/* Execution */
 	error = brainfuck_engine_run(script, &ctx);
-	
+	/*brainfuck_script_dump(script, stdout);*/
+
 	/* Cleaning */
 	fclose(file);
-	free(memory);
+	free(ctx.memory);
 	brainfuck_script_dealloc(script);
 	
 	/* Exit */
