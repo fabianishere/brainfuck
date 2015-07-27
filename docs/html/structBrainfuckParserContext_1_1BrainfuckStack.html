@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.9.1"/>
-<title>brainfuck: BrainfuckInstruction::BrainfuckArgument Union Reference</title>
+<title>brainfuck: BrainfuckParserContext::BrainfuckStack Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -61,38 +61,42 @@
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('unionBrainfuckInstruction_1_1BrainfuckArgument.html','');});
+$(document).ready(function(){initNavTree('structBrainfuckParserContext_1_1BrainfuckStack.html','');});
 </script>
 <div id="doc-content">
 <div class="header">
   <div class="summary">
 <a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
-<div class="title">BrainfuckInstruction::BrainfuckArgument Union Reference<div class="ingroups"><a class="el" href="group__ast.html">Abstract Syntax Tree</a></div></div>  </div>
+<div class="title">BrainfuckParserContext::BrainfuckStack Struct Reference<div class="ingroups"><a class="el" href="group__parser.html">Parser</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>The argument of this instruction, whose type depends on the operation of the instruction.  
- <a href="unionBrainfuckInstruction_1_1BrainfuckArgument.html#details">More...</a></p>
+<p>A stack containing the jump offsets.  
+ <a href="structBrainfuckParserContext_1_1BrainfuckStack.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="brainfuck_8h_source.html">brainfuck.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:a1ad226cf42a4b11b0f2abeab6d387b4d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1ad226cf42a4b11b0f2abeab6d387b4d"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionBrainfuckInstruction_1_1BrainfuckArgument.html#a1ad226cf42a4b11b0f2abeab6d387b4d">offset</a></td></tr>
-<tr class="memdesc:a1ad226cf42a4b11b0f2abeab6d387b4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The offset in cell value or instruction address. <br /></td></tr>
-<tr class="separator:a1ad226cf42a4b11b0f2abeab6d387b4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a97c071d0fe8fa7003a14e3d80882228a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a97c071d0fe8fa7003a14e3d80882228a"></a>
-unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionBrainfuckInstruction_1_1BrainfuckArgument.html#a97c071d0fe8fa7003a14e3d80882228a">n</a></td></tr>
-<tr class="memdesc:a97c071d0fe8fa7003a14e3d80882228a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of times an instruction should be executed. <br /></td></tr>
-<tr class="separator:a97c071d0fe8fa7003a14e3d80882228a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c64b1de6469a32b57d7e55bb790ea51"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6c64b1de6469a32b57d7e55bb790ea51"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBrainfuckParserContext_1_1BrainfuckStack.html#a6c64b1de6469a32b57d7e55bb790ea51">index</a></td></tr>
+<tr class="memdesc:a6c64b1de6469a32b57d7e55bb790ea51"><td class="mdescLeft">&#160;</td><td class="mdescRight">The index of the stack. <br /></td></tr>
+<tr class="separator:a6c64b1de6469a32b57d7e55bb790ea51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3b67a3b0a778fbfc657cf5cedec603b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa3b67a3b0a778fbfc657cf5cedec603b"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBrainfuckParserContext_1_1BrainfuckStack.html#aa3b67a3b0a778fbfc657cf5cedec603b">size</a></td></tr>
+<tr class="memdesc:aa3b67a3b0a778fbfc657cf5cedec603b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The size of the stack. <br /></td></tr>
+<tr class="separator:aa3b67a3b0a778fbfc657cf5cedec603b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a519718e0d415dc20cf5e071a8364d9f6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a519718e0d415dc20cf5e071a8364d9f6"></a>
+struct <a class="el" href="structBrainfuckInstruction.html">BrainfuckInstruction</a> **&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBrainfuckParserContext_1_1BrainfuckStack.html#a519718e0d415dc20cf5e071a8364d9f6">array</a></td></tr>
+<tr class="memdesc:a519718e0d415dc20cf5e071a8364d9f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">The underlying array of this stack. <br /></td></tr>
+<tr class="separator:a519718e0d415dc20cf5e071a8364d9f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The argument of this instruction, whose type depends on the operation of the instruction. </p>
+<div class="textblock"><p>A stack containing the jump offsets. </p>
 
-<p>Definition at line <a class="el" href="brainfuck_8h_source.html#l00086">86</a> of file <a class="el" href="brainfuck_8h_source.html">brainfuck.h</a>.</p>
-</div><hr/>The documentation for this union was generated from the following file:<ul>
+<p>Definition at line <a class="el" href="brainfuck_8h_source.html#l00208">208</a> of file <a class="el" href="brainfuck_8h_source.html">brainfuck.h</a>.</p>
+</div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>include/<a class="el" href="brainfuck_8h_source.html">brainfuck.h</a></li>
 </ul>
 </div><!-- contents -->
@@ -100,8 +104,8 @@ unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="structBrainfuckInstruction.html">BrainfuckInstruction</a></li><li class="navelem"><a class="el" href="unionBrainfuckInstruction_1_1BrainfuckArgument.html">BrainfuckArgument</a></li>
-    <li class="footer">Generated on Mon Jul 27 2015 17:26:25 for brainfuck by
+    <li class="navelem"><a class="el" href="structBrainfuckParserContext.html">BrainfuckParserContext</a></li><li class="navelem"><a class="el" href="structBrainfuckParserContext_1_1BrainfuckStack.html">BrainfuckStack</a></li>
+    <li class="footer">Generated on Sun Jul 26 2015 21:25:15 for brainfuck by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

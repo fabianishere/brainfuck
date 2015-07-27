@@ -66,6 +66,7 @@ $(document).ready(function(){initNavTree('structBrainfuckParserContext.html','')
 <div id="doc-content">
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Data Structures</a> &#124;
 <a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
 <div class="title">BrainfuckParserContext Struct Reference<div class="ingroups"><a class="el" href="group__parser.html">Parser</a></div></div>  </div>
@@ -77,34 +78,31 @@ $(document).ready(function(){initNavTree('structBrainfuckParserContext.html','')
 
 <p><code>#include &lt;<a class="el" href="brainfuck_8h_source.html">brainfuck.h</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBrainfuckParserContext_1_1BrainfuckOffsetStack.html">BrainfuckOffsetStack</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A stack containing the jump offsets.  <a href="structBrainfuckParserContext_1_1BrainfuckOffsetStack.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:a07a4631a3667e742c9cd93b60f2d0450"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a07a4631a3667e742c9cd93b60f2d0450"></a>
-struct <a class="el" href="structBrainfuckInstruction.html">BrainfuckInstruction</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBrainfuckParserContext.html#a07a4631a3667e742c9cd93b60f2d0450">head</a></td></tr>
-<tr class="memdesc:a07a4631a3667e742c9cd93b60f2d0450"><td class="mdescLeft">&#160;</td><td class="mdescRight">The first <a class="el" href="structBrainfuckInstruction.html">BrainfuckInstruction</a> parsed within the context. <br /></td></tr>
-<tr class="separator:a07a4631a3667e742c9cd93b60f2d0450"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d4d1fbe933d9994b3cdf8a3467c7a6e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5d4d1fbe933d9994b3cdf8a3467c7a6e"></a>
-struct <a class="el" href="structBrainfuckInstruction.html">BrainfuckInstruction</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBrainfuckParserContext.html#a5d4d1fbe933d9994b3cdf8a3467c7a6e">tail</a></td></tr>
-<tr class="memdesc:a5d4d1fbe933d9994b3cdf8a3467c7a6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last <a class="el" href="structBrainfuckInstruction.html">BrainfuckInstruction</a> parsed within the context. <br /></td></tr>
-<tr class="separator:a5d4d1fbe933d9994b3cdf8a3467c7a6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a948e713cb85e2a9fb300ddb79f437515"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a948e713cb85e2a9fb300ddb79f437515"></a>
-struct <a class="el" href="structBrainfuckInstruction.html">BrainfuckInstruction</a> **&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBrainfuckParserContext.html#a948e713cb85e2a9fb300ddb79f437515">loop</a></td></tr>
-<tr class="memdesc:a948e713cb85e2a9fb300ddb79f437515"><td class="mdescLeft">&#160;</td><td class="mdescRight">A stack that contains addresses to jump to for loop instructions. <br /></td></tr>
-<tr class="separator:a948e713cb85e2a9fb300ddb79f437515"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7cf7098e3c4aee0f7ad04e4af1ec5e38"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7cf7098e3c4aee0f7ad04e4af1ec5e38"></a>
-unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBrainfuckParserContext.html#a7cf7098e3c4aee0f7ad04e4af1ec5e38">loop_index</a></td></tr>
-<tr class="memdesc:a7cf7098e3c4aee0f7ad04e4af1ec5e38"><td class="mdescLeft">&#160;</td><td class="mdescRight">The index of the loop stack. <br /></td></tr>
-<tr class="separator:a7cf7098e3c4aee0f7ad04e4af1ec5e38"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6f9d032c72e40e19ed1be58193564c81"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6f9d032c72e40e19ed1be58193564c81"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBrainfuckParserContext.html#a6f9d032c72e40e19ed1be58193564c81">loop_size</a></td></tr>
-<tr class="memdesc:a6f9d032c72e40e19ed1be58193564c81"><td class="mdescLeft">&#160;</td><td class="mdescRight">The size of the loop stack. <br /></td></tr>
-<tr class="separator:a6f9d032c72e40e19ed1be58193564c81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0108dd71ddc1ca32b4668432e6090e5c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0108dd71ddc1ca32b4668432e6090e5c"></a>
+struct <a class="el" href="structBrainfuckScript.html">BrainfuckScript</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBrainfuckParserContext.html#a0108dd71ddc1ca32b4668432e6090e5c">head</a></td></tr>
+<tr class="memdesc:a0108dd71ddc1ca32b4668432e6090e5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The first <a class="el" href="structBrainfuckScript.html">BrainfuckScript</a> parsed within the context. <br /></td></tr>
+<tr class="separator:a0108dd71ddc1ca32b4668432e6090e5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf600a9fd16a2a9b6c6ff542f86f0f54"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adf600a9fd16a2a9b6c6ff542f86f0f54"></a>
+struct <a class="el" href="structBrainfuckScript.html">BrainfuckScript</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structBrainfuckParserContext.html#adf600a9fd16a2a9b6c6ff542f86f0f54">tail</a></td></tr>
+<tr class="memdesc:adf600a9fd16a2a9b6c6ff542f86f0f54"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last <a class="el" href="structBrainfuckScript.html">BrainfuckScript</a> parsed within the context. <br /></td></tr>
+<tr class="separator:adf600a9fd16a2a9b6c6ff542f86f0f54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1d597063e204cae166b23df1b8e052f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af1d597063e204cae166b23df1b8e052f"></a>
+struct <a class="el" href="structBrainfuckParserContext_1_1BrainfuckOffsetStack.html">BrainfuckParserContext::BrainfuckOffsetStack</a>&#160;</td><td class="memItemRight" valign="bottom"><b>offsets</b></td></tr>
+<tr class="separator:af1d597063e204cae166b23df1b8e052f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This structure contains the state of the parser. </p>
 <p>By capturing the state of the parser, it is possible to parse a script in segments. </p>
 
-<p>Definition at line <a class="el" href="brainfuck_8h_source.html#l00151">151</a> of file <a class="el" href="brainfuck_8h_source.html">brainfuck.h</a>.</p>
+<p>Definition at line <a class="el" href="brainfuck_8h_source.html#l00196">196</a> of file <a class="el" href="brainfuck_8h_source.html">brainfuck.h</a>.</p>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>include/<a class="el" href="brainfuck_8h_source.html">brainfuck.h</a></li>
 </ul>
@@ -114,7 +112,7 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="structBrainfuckParserContext.html">BrainfuckParserContext</a></li>
-    <li class="footer">Generated on Tue Jul 14 2015 16:49:47 for brainfuck by
+    <li class="footer">Generated on Mon Jul 27 2015 17:26:25 for brainfuck by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

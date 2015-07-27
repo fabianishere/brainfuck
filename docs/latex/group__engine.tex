@@ -2,7 +2,7 @@
 \label{group__engine}\index{Engine@{Engine}}
 
 
-The engine interface that should be implemented by a proper implementation.  
+An interface of an engine that is able to run a \hyperlink{structBrainfuckScript}{Brainfuck\+Script}.  
 
 
 \subsection*{Data Structures}
@@ -17,12 +17,12 @@ struct \hyperlink{structBrainfuckEngineContext}{Brainfuck\+Engine\+Context} $\as
 \begin{DoxyCompactList}\small\item\em Allocate a \hyperlink{structBrainfuckEngineContext}{Brainfuck\+Engine\+Context} structure. \end{DoxyCompactList}\item 
 void \hyperlink{group__engine_gacf18fa3a3ca4bb658af020d3830536d9}{brainfuck\+\_\+engine\+\_\+context\+\_\+dealloc} (struct \hyperlink{structBrainfuckEngineContext}{Brainfuck\+Engine\+Context} $\ast$ctx)
 \begin{DoxyCompactList}\small\item\em Free the engine context. \end{DoxyCompactList}\item 
-int \hyperlink{group__engine_ga3f091c103cba588d968c6b0312a4b20a}{brainfuck\+\_\+engine\+\_\+run} (const struct \hyperlink{group__ast_ga9084bd8dcac602fdcbf7ca845b1e1b20}{Brainfuck\+Script} $\ast$script, struct \hyperlink{structBrainfuckEngineContext}{Brainfuck\+Engine\+Context} $\ast$ctx)
+int \hyperlink{group__engine_ga3f091c103cba588d968c6b0312a4b20a}{brainfuck\+\_\+engine\+\_\+run} (const struct \hyperlink{structBrainfuckScript}{Brainfuck\+Script} $\ast$script, struct \hyperlink{structBrainfuckEngineContext}{Brainfuck\+Engine\+Context} $\ast$ctx)
 \begin{DoxyCompactList}\small\item\em Run the given script. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
-The engine interface that should be implemented by a proper implementation. 
+An interface of an engine that is able to run a \hyperlink{structBrainfuckScript}{Brainfuck\+Script}. 
 
 
 
@@ -45,7 +45,7 @@ A pointer to the allocated structure or {\ttfamily N\+U\+L\+L} if the allocation
 \end{DoxyReturn}
 
 
-Definition at line 230 of file brainfuck.\+c.
+Definition at line 394 of file brainfuck.\+c.
 
 \hypertarget{group__engine_gacf18fa3a3ca4bb658af020d3830536d9}{}\index{Engine@{Engine}!brainfuck\+\_\+engine\+\_\+context\+\_\+dealloc@{brainfuck\+\_\+engine\+\_\+context\+\_\+dealloc}}
 \index{brainfuck\+\_\+engine\+\_\+context\+\_\+dealloc@{brainfuck\+\_\+engine\+\_\+context\+\_\+dealloc}!Engine@{Engine}}
@@ -58,7 +58,7 @@ Definition at line 230 of file brainfuck.\+c.
 
 Free the engine context. 
 
-The \hyperlink{structBrainfuckEngineContext_a74ddd0ca5cb164878cfc152e88ad909c}{Brainfuck\+Engine\+Context\#memory} field should not be deallocated by this function, as this should be done by the consumer of the library.
+The \hyperlink{structBrainfuckEngineContext_a7bf6001cbe5b1c2cf1635753f3cc5e54}{Brainfuck\+Engine\+Context\#memory} field should not be deallocated by this function, as this should be done by the consumer of the library.
 
 
 \begin{DoxyParams}{Parameters}
@@ -67,7 +67,7 @@ The \hyperlink{structBrainfuckEngineContext_a74ddd0ca5cb164878cfc152e88ad909c}{B
 \end{DoxyParams}
 
 
-Definition at line 235 of file brainfuck.\+c.
+Definition at line 399 of file brainfuck.\+c.
 
 \hypertarget{group__engine_ga3f091c103cba588d968c6b0312a4b20a}{}\index{Engine@{Engine}!brainfuck\+\_\+engine\+\_\+run@{brainfuck\+\_\+engine\+\_\+run}}
 \index{brainfuck\+\_\+engine\+\_\+run@{brainfuck\+\_\+engine\+\_\+run}!Engine@{Engine}}
@@ -93,9 +93,9 @@ Run the given script.
 \end{DoxyReturn}
 
 
-Definition at line 240 of file brainfuck.\+c.
+Definition at line 404 of file brainfuck.\+c.
 
 
 
-References B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+O\+K, Brainfuck\+Engine\+Context\+::memory, Brainfuck\+Engine\+Context\+::read, and Brainfuck\+Engine\+Context\+::write.
+References Brainfuck\+Script\+::array, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+O\+K, Brainfuck\+Script\+::index, Brainfuck\+Engine\+Context\+::memory, Brainfuck\+Script\+::next, Brainfuck\+Instruction\+::\+Brainfuck\+Argument\+::offset, Brainfuck\+Script\+::previous, Brainfuck\+Engine\+Context\+::read, and Brainfuck\+Engine\+Context\+::write.
 

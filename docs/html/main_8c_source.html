@@ -107,53 +107,58 @@ $(document).ready(function(){initNavTree('main_8c_source.html','');});
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="keywordtype">int</span> main()</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;{</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        <span class="comment">/* Declaration */</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="keyword">struct </span><a class="code" href="group__ast.html#ga9084bd8dcac602fdcbf7ca845b1e1b20">BrainfuckScript</a> *script;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="keyword">struct </span><a class="code" href="structBrainfuckScript.html">BrainfuckScript</a> *script;</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        <span class="keyword">struct </span><a class="code" href="structBrainfuckEngineContext.html">BrainfuckEngineContext</a> ctx;</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <span class="keywordtype">int</span> error;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *<a class="code" href="structBrainfuckEngineContext.html#a74ddd0ca5cb164878cfc152e88ad909c">memory</a>;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        FILE *file;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        </div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="comment">/* Initialization */</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        ctx.read = &amp;getchar;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        ctx.write = &amp;putchar;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        ctx.memory = memory = calloc(30000, <span class="keyword">sizeof</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>));</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        file = fopen(<span class="stringliteral">&quot;../examples/hanoi.bf&quot;</span>, <span class="stringliteral">&quot;r&quot;</span>);</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        </div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        <span class="comment">/* Parsing */</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        script = <a class="code" href="group__parser.html#ga052b7ce6c74157abc36e498406d48689">brainfuck_parser_parse_file</a>(file, &amp;error);</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        FILE *file;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        </div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <span class="comment">/* Initialization */</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        ctx.<a class="code" href="structBrainfuckEngineContext.html#a6b4909f710378c98e9b984afc78b9099">read</a> = &amp;getchar;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        ctx.write = &amp;putchar;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        ctx.memory = calloc(30000, <span class="keyword">sizeof</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>));</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        file = fopen(<span class="stringliteral">&quot;../examples/hanoi.bf&quot;</span>, <span class="stringliteral">&quot;r&quot;</span>);</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        </div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="comment">/* Parsing */</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        script = <a class="code" href="group__parser.html#ga052b7ce6c74157abc36e498406d48689">brainfuck_parser_parse_file</a>(file, &amp;error);</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="comment">/*script = brainfuck_parser_parse_string(&quot;+[]&quot;, &amp;error);*/</span></div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        </div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="keywordflow">if</span> (error != <a class="code" href="group__definitions.html#ga8bfac4ba16ff2a9367ec92a3b9786599">BRAINFUCK_EOK</a>) {</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                fprintf(stderr, <span class="stringliteral">&quot;error: parser exited with code %i.\n&quot;</span>, error);</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                free(ctx.memory);</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                <a class="code" href="group__ast.html#ga17fff4afb8ab8bd26f41724878a9997b">brainfuck_script_dealloc</a>(script);</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                fclose(file);</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                free(ctx.memory);</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                <span class="keywordflow">return</span> 1;</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        }</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        </div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="comment">/* Execution */</span></div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        error = <a class="code" href="group__engine.html#ga3f091c103cba588d968c6b0312a4b20a">brainfuck_engine_run</a>(script, &amp;ctx);</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="comment">/* Passes */</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <a class="code" href="group__pass.html#ga2ed0d2c5639c2e104094069ad1dc60e7">brainfuck_pass_clear</a>(script);</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="comment">/* Cleaning */</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        fclose(file);</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        free(memory);</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <a class="code" href="group__ast.html#ga17fff4afb8ab8bd26f41724878a9997b">brainfuck_script_dealloc</a>(script);</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="comment">/* Exit */</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="keywordflow">return</span> error != <a class="code" href="group__definitions.html#ga8bfac4ba16ff2a9367ec92a3b9786599">BRAINFUCK_EOK</a>;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}</div>
-<div class="ttc" id="group__parser_html_ga052b7ce6c74157abc36e498406d48689"><div class="ttname"><a href="group__parser.html#ga052b7ce6c74157abc36e498406d48689">brainfuck_parser_parse_file</a></div><div class="ttdeci">struct BrainfuckScript * brainfuck_parser_parse_file(FILE *file, int *error)</div><div class="ttdoc">Parse the given file. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8c_source.html#l00202">brainfuck.c:202</a></div></div>
-<div class="ttc" id="group__ast_html_ga9084bd8dcac602fdcbf7ca845b1e1b20"><div class="ttname"><a href="group__ast.html#ga9084bd8dcac602fdcbf7ca845b1e1b20">BrainfuckScript</a></div><div class="ttdeci">#define BrainfuckScript</div><div class="ttdoc">A BrainfuckScript structure should be the first instruction in a linked list of instructions. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8h_source.html#l00129">brainfuck.h:129</a></div></div>
-<div class="ttc" id="group__ast_html_ga17fff4afb8ab8bd26f41724878a9997b"><div class="ttname"><a href="group__ast.html#ga17fff4afb8ab8bd26f41724878a9997b">brainfuck_script_dealloc</a></div><div class="ttdeci">#define brainfuck_script_dealloc</div><div class="ttdoc">Deallocate the given script. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8h_source.html#l00137">brainfuck.h:137</a></div></div>
-<div class="ttc" id="structBrainfuckEngineContext_html"><div class="ttname"><a href="structBrainfuckEngineContext.html">BrainfuckEngineContext</a></div><div class="ttdoc">This structure represents the context in which a script should run. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8h_source.html#l00261">brainfuck.h:261</a></div></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="comment">/* Execution */</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        error = <a class="code" href="group__engine.html#ga3f091c103cba588d968c6b0312a4b20a">brainfuck_engine_run</a>(script, &amp;ctx);</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <span class="comment">/*brainfuck_script_dump(script, stdout);*/</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="comment">/* Cleaning */</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        fclose(file);</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        free(ctx.memory);</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <a class="code" href="group__ast.html#ga83e4299ef98ee621ec8806b8fe89dde8">brainfuck_script_dealloc</a>(script);</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <span class="comment">/* Exit */</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="keywordflow">return</span> error != <a class="code" href="group__definitions.html#ga8bfac4ba16ff2a9367ec92a3b9786599">BRAINFUCK_EOK</a>;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;}</div>
+<div class="ttc" id="structBrainfuckEngineContext_html_a6b4909f710378c98e9b984afc78b9099"><div class="ttname"><a href="structBrainfuckEngineContext.html#a6b4909f710378c98e9b984afc78b9099">BrainfuckEngineContext::read</a></div><div class="ttdeci">int(* read)(void)</div><div class="ttdoc">Read a character from an input stream. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8h_source.html#l00346">brainfuck.h:346</a></div></div>
+<div class="ttc" id="group__parser_html_ga052b7ce6c74157abc36e498406d48689"><div class="ttname"><a href="group__parser.html#ga052b7ce6c74157abc36e498406d48689">brainfuck_parser_parse_file</a></div><div class="ttdeci">struct BrainfuckScript * brainfuck_parser_parse_file(FILE *file, int *error)</div><div class="ttdoc">Parse the given file. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8c_source.html#l00318">brainfuck.c:318</a></div></div>
+<div class="ttc" id="structBrainfuckScript_html"><div class="ttname"><a href="structBrainfuckScript.html">BrainfuckScript</a></div><div class="ttdoc">A BrainfuckScript is a collection of BrainfuckInstruction structures. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8h_source.html#l00120">brainfuck.h:120</a></div></div>
+<div class="ttc" id="structBrainfuckEngineContext_html"><div class="ttname"><a href="structBrainfuckEngineContext.html">BrainfuckEngineContext</a></div><div class="ttdoc">This structure represents the context in which a script should run. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8h_source.html#l00335">brainfuck.h:335</a></div></div>
 <div class="ttc" id="group__definitions_html_ga8bfac4ba16ff2a9367ec92a3b9786599"><div class="ttname"><a href="group__definitions.html#ga8bfac4ba16ff2a9367ec92a3b9786599">BRAINFUCK_EOK</a></div><div class="ttdeci">#define BRAINFUCK_EOK</div><div class="ttdoc">Indicates everything is OK. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8h_source.html#l00044">brainfuck.h:44</a></div></div>
-<div class="ttc" id="group__engine_html_ga3f091c103cba588d968c6b0312a4b20a"><div class="ttname"><a href="group__engine.html#ga3f091c103cba588d968c6b0312a4b20a">brainfuck_engine_run</a></div><div class="ttdeci">int brainfuck_engine_run(const struct BrainfuckScript *script, struct BrainfuckEngineContext *ctx)</div><div class="ttdoc">Run the given script. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8c_source.html#l00240">brainfuck.c:240</a></div></div>
-<div class="ttc" id="structBrainfuckEngineContext_html_a74ddd0ca5cb164878cfc152e88ad909c"><div class="ttname"><a href="structBrainfuckEngineContext.html#a74ddd0ca5cb164878cfc152e88ad909c">BrainfuckEngineContext::memory</a></div><div class="ttdeci">unsigned int * memory</div><div class="ttdoc">The memory a script should operate on. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8h_source.html#l00281">brainfuck.h:281</a></div></div>
+<div class="ttc" id="group__engine_html_ga3f091c103cba588d968c6b0312a4b20a"><div class="ttname"><a href="group__engine.html#ga3f091c103cba588d968c6b0312a4b20a">brainfuck_engine_run</a></div><div class="ttdeci">int brainfuck_engine_run(const struct BrainfuckScript *script, struct BrainfuckEngineContext *ctx)</div><div class="ttdoc">Run the given script. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8c_source.html#l00404">brainfuck.c:404</a></div></div>
+<div class="ttc" id="group__pass_html_ga2ed0d2c5639c2e104094069ad1dc60e7"><div class="ttname"><a href="group__pass.html#ga2ed0d2c5639c2e104094069ad1dc60e7">brainfuck_pass_clear</a></div><div class="ttdeci">int brainfuck_pass_clear(const struct BrainfuckScript *script)</div><div class="ttdoc">Apply a &#39;clear&#39; optimization to the given script by transformating a common clear operation ([-] or [...</div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8c_source.html#l00371">brainfuck.c:371</a></div></div>
+<div class="ttc" id="group__ast_html_ga83e4299ef98ee621ec8806b8fe89dde8"><div class="ttname"><a href="group__ast.html#ga83e4299ef98ee621ec8806b8fe89dde8">brainfuck_script_dealloc</a></div><div class="ttdeci">void brainfuck_script_dealloc(struct BrainfuckScript *script)</div><div class="ttdoc">Deallocate the given script including the structures referenced by the next field. </div><div class="ttdef"><b>Definition:</b> <a href="brainfuck_8c_source.html#l00058">brainfuck.c:58</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>main.c</b></li>
-    <li class="footer">Generated on Tue Jul 14 2015 16:49:47 for brainfuck by
+    <li class="footer">Generated on Mon Jul 27 2015 17:26:25 for brainfuck by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

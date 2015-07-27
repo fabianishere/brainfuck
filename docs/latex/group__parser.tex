@@ -2,14 +2,16 @@
 \label{group__parser}\index{Parser@{Parser}}
 
 
-The parser interface that should be implemented by a proper implementation.  
+A parser interface for the brainfuck language.  
 
 
 \subsection*{Data Structures}
 \begin{DoxyCompactItemize}
 \item 
 struct \hyperlink{structBrainfuckParserContext}{Brainfuck\+Parser\+Context}
-\begin{DoxyCompactList}\small\item\em This structure contains the state of the parser. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em This structure contains the state of the parser. \end{DoxyCompactList}\item 
+struct \hyperlink{structBrainfuckParserContext_1_1BrainfuckOffsetStack}{Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack}
+\begin{DoxyCompactList}\small\item\em A stack containing the jump offsets. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -19,18 +21,18 @@ void \hyperlink{group__parser_ga562074cdae7765d92eb4609bf564512b}{brainfuck\+\_\
 \begin{DoxyCompactList}\small\item\em Deallocate the given \hyperlink{structBrainfuckParserContext}{Brainfuck\+Parser\+Context} structure. \end{DoxyCompactList}\item 
 int \hyperlink{group__parser_gaf20f40db8fd5915b6175ba8a0d16c5e0}{brainfuck\+\_\+parser\+\_\+context\+\_\+init} (struct \hyperlink{structBrainfuckParserContext}{Brainfuck\+Parser\+Context} $\ast$ctx)
 \begin{DoxyCompactList}\small\item\em Initialize a \hyperlink{structBrainfuckParserContext}{Brainfuck\+Parser\+Context} structure. \end{DoxyCompactList}\item 
-int \hyperlink{group__parser_ga70017cd77e93ffa16c09b7e9d26ad0a6}{brainfuck\+\_\+parser\+\_\+validate} (struct \hyperlink{structBrainfuckParserContext}{Brainfuck\+Parser\+Context} $\ast$ctx)
+int \hyperlink{group__parser_gad5e9a2747a62b6ad48df440a251ac655}{brainfuck\+\_\+parser\+\_\+validate} (const struct \hyperlink{structBrainfuckParserContext}{Brainfuck\+Parser\+Context} $\ast$ctx)
 \begin{DoxyCompactList}\small\item\em Validate a script and detect syntax errors in the given script. \end{DoxyCompactList}\item 
 void \hyperlink{group__parser_ga8ae33803127e1c48ad3cddecaf381a77}{brainfuck\+\_\+parser\+\_\+parse\+\_\+string\+\_\+partial} (const char $\ast$string, struct \hyperlink{structBrainfuckParserContext}{Brainfuck\+Parser\+Context} $\ast$ctx, int $\ast$error)
 \begin{DoxyCompactList}\small\item\em Parse the given string as a segment of a script. \end{DoxyCompactList}\item 
-struct \hyperlink{group__ast_ga9084bd8dcac602fdcbf7ca845b1e1b20}{Brainfuck\+Script} $\ast$ \hyperlink{group__parser_ga35152ab01cbcb3e72e78d54e2e82edfe}{brainfuck\+\_\+parser\+\_\+parse\+\_\+string} (const char $\ast$string, int $\ast$error)
+struct \hyperlink{structBrainfuckScript}{Brainfuck\+Script} $\ast$ \hyperlink{group__parser_ga35152ab01cbcb3e72e78d54e2e82edfe}{brainfuck\+\_\+parser\+\_\+parse\+\_\+string} (const char $\ast$string, int $\ast$error)
 \begin{DoxyCompactList}\small\item\em Parse the given string. \end{DoxyCompactList}\item 
-struct \hyperlink{group__ast_ga9084bd8dcac602fdcbf7ca845b1e1b20}{Brainfuck\+Script} $\ast$ \hyperlink{group__parser_ga052b7ce6c74157abc36e498406d48689}{brainfuck\+\_\+parser\+\_\+parse\+\_\+file} (F\+I\+L\+E $\ast$file, int $\ast$error)
+struct \hyperlink{structBrainfuckScript}{Brainfuck\+Script} $\ast$ \hyperlink{group__parser_ga052b7ce6c74157abc36e498406d48689}{brainfuck\+\_\+parser\+\_\+parse\+\_\+file} (F\+I\+L\+E $\ast$file, int $\ast$error)
 \begin{DoxyCompactList}\small\item\em Parse the given file. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
-The parser interface that should be implemented by a proper implementation. 
+A parser interface for the brainfuck language. 
 
 
 
@@ -51,7 +53,7 @@ A pointer to allocated structure or {\ttfamily N\+U\+L\+L} if the allocation fai
 \end{DoxyReturn}
 
 
-Definition at line 51 of file brainfuck.\+c.
+Definition at line 130 of file brainfuck.\+c.
 
 \hypertarget{group__parser_ga562074cdae7765d92eb4609bf564512b}{}\index{Parser@{Parser}!brainfuck\+\_\+parser\+\_\+context\+\_\+dealloc@{brainfuck\+\_\+parser\+\_\+context\+\_\+dealloc}}
 \index{brainfuck\+\_\+parser\+\_\+context\+\_\+dealloc@{brainfuck\+\_\+parser\+\_\+context\+\_\+dealloc}!Parser@{Parser}}
@@ -71,11 +73,11 @@ Deallocate the given \hyperlink{structBrainfuckParserContext}{Brainfuck\+Parser\
 \end{DoxyParams}
 
 
-Definition at line 56 of file brainfuck.\+c.
+Definition at line 135 of file brainfuck.\+c.
 
 
 
-References Brainfuck\+Parser\+Context\+::loop.
+References Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack\+::array.
 
 \hypertarget{group__parser_gaf20f40db8fd5915b6175ba8a0d16c5e0}{}\index{Parser@{Parser}!brainfuck\+\_\+parser\+\_\+context\+\_\+init@{brainfuck\+\_\+parser\+\_\+context\+\_\+init}}
 \index{brainfuck\+\_\+parser\+\_\+context\+\_\+init@{brainfuck\+\_\+parser\+\_\+context\+\_\+init}!Parser@{Parser}}
@@ -98,11 +100,11 @@ Initialize a \hyperlink{structBrainfuckParserContext}{Brainfuck\+Parser\+Context
 \end{DoxyReturn}
 
 
-Definition at line 63 of file brainfuck.\+c.
+Definition at line 142 of file brainfuck.\+c.
 
 
 
-References B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+N\+O\+M\+E\+M, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+O\+K, Brainfuck\+Parser\+Context\+::loop, Brainfuck\+Parser\+Context\+::loop\+\_\+index, and Brainfuck\+Parser\+Context\+::loop\+\_\+size.
+References Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack\+::array, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+N\+O\+M\+E\+M, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+O\+K, Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack\+::index, and Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack\+::size.
 
 
 
@@ -128,15 +130,15 @@ Parse the given file.
 \hline
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
-A pointer to a \hyperlink{group__ast_ga9084bd8dcac602fdcbf7ca845b1e1b20}{Brainfuck\+Script} instance or {\ttfamily N\+U\+L\+L} if the parsing failed. 
+A pointer to a \hyperlink{structBrainfuckScript}{Brainfuck\+Script} instance or {\ttfamily N\+U\+L\+L} if the parsing failed. 
 \end{DoxyReturn}
 
 
-Definition at line 202 of file brainfuck.\+c.
+Definition at line 318 of file brainfuck.\+c.
 
 
 
-References B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+O\+K, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+S\+Y\+N\+T\+A\+X, brainfuck\+\_\+parser\+\_\+parse\+\_\+string\+\_\+partial(), brainfuck\+\_\+parser\+\_\+validate(), Brainfuck\+Parser\+Context\+::head, and Brainfuck\+Parser\+Context\+::loop.
+References Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack\+::array, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+O\+K, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+S\+Y\+N\+T\+A\+X, brainfuck\+\_\+parser\+\_\+parse\+\_\+string\+\_\+partial(), brainfuck\+\_\+parser\+\_\+validate(), brainfuck\+\_\+script\+\_\+dealloc(), and Brainfuck\+Parser\+Context\+::head.
 
 \hypertarget{group__parser_ga35152ab01cbcb3e72e78d54e2e82edfe}{}\index{Parser@{Parser}!brainfuck\+\_\+parser\+\_\+parse\+\_\+string@{brainfuck\+\_\+parser\+\_\+parse\+\_\+string}}
 \index{brainfuck\+\_\+parser\+\_\+parse\+\_\+string@{brainfuck\+\_\+parser\+\_\+parse\+\_\+string}!Parser@{Parser}}
@@ -158,15 +160,15 @@ Parse the given string.
 \hline
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
-A pointer to a \hyperlink{group__ast_ga9084bd8dcac602fdcbf7ca845b1e1b20}{Brainfuck\+Script} instance or {\ttfamily N\+U\+L\+L} if the parsing failed. 
+A pointer to a \hyperlink{structBrainfuckScript}{Brainfuck\+Script} instance or {\ttfamily N\+U\+L\+L} if the parsing failed. 
 \end{DoxyReturn}
 
 
-Definition at line 181 of file brainfuck.\+c.
+Definition at line 290 of file brainfuck.\+c.
 
 
 
-References B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+O\+K, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+S\+Y\+N\+T\+A\+X, brainfuck\+\_\+parser\+\_\+parse\+\_\+string\+\_\+partial(), brainfuck\+\_\+parser\+\_\+validate(), Brainfuck\+Parser\+Context\+::head, and Brainfuck\+Parser\+Context\+::loop.
+References Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack\+::array, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+O\+K, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+S\+Y\+N\+T\+A\+X, brainfuck\+\_\+parser\+\_\+parse\+\_\+string\+\_\+partial(), brainfuck\+\_\+parser\+\_\+validate(), brainfuck\+\_\+script\+\_\+dealloc(), and Brainfuck\+Parser\+Context\+::head.
 
 \hypertarget{group__parser_ga8ae33803127e1c48ad3cddecaf381a77}{}\index{Parser@{Parser}!brainfuck\+\_\+parser\+\_\+parse\+\_\+string\+\_\+partial@{brainfuck\+\_\+parser\+\_\+parse\+\_\+string\+\_\+partial}}
 \index{brainfuck\+\_\+parser\+\_\+parse\+\_\+string\+\_\+partial@{brainfuck\+\_\+parser\+\_\+parse\+\_\+string\+\_\+partial}!Parser@{Parser}}
@@ -181,7 +183,7 @@ References B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+O\+K, B\+R\+A\+I\+N\+F\+U\+C\+K\+
 
 Parse the given string as a segment of a script. 
 
-It is not gauranteed that all syntax errors will be detected, since the parser can only partially parse the script and therefore cannot detect syntax errors like unclosed brackets. Use \hyperlink{group__parser_ga70017cd77e93ffa16c09b7e9d26ad0a6}{brainfuck\+\_\+parser\+\_\+validate} to validate a script after parsing.
+It is not gauranteed that all syntax errors will be detected, since the parser can only partially parse the script and therefore cannot detect syntax errors like unclosed brackets. Use \hyperlink{group__parser_gad5e9a2747a62b6ad48df440a251ac655}{brainfuck\+\_\+parser\+\_\+validate} to validate a script after parsing.
 
 
 \begin{DoxyParams}{Parameters}
@@ -194,23 +196,23 @@ It is not gauranteed that all syntax errors will be detected, since the parser c
 \end{DoxyParams}
 
 
-Definition at line 83 of file brainfuck.\+c.
+Definition at line 162 of file brainfuck.\+c.
 
 
 
-References B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+N\+O\+M\+E\+M, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+O\+K, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+S\+Y\+N\+T\+A\+X, brainfuck\+\_\+instruction\+\_\+alloc(), brainfuck\+\_\+parser\+\_\+context\+\_\+init(), Brainfuck\+Instruction\+::\+Brainfuck\+Argument\+::delta, Brainfuck\+Parser\+Context\+::head, Brainfuck\+Instruction\+::\+I\+N, Brainfuck\+Instruction\+::\+I\+N\+C, Brainfuck\+Instruction\+::\+J\+M\+P, Brainfuck\+Instruction\+::\+Brainfuck\+Argument\+::jump, Brainfuck\+Instruction\+::\+J\+Z, Brainfuck\+Parser\+Context\+::loop, Brainfuck\+Parser\+Context\+::loop\+\_\+index, Brainfuck\+Instruction\+::\+M\+O\+V, Brainfuck\+Instruction\+::\+Brainfuck\+Argument\+::n, Brainfuck\+Instruction\+::next, Brainfuck\+Instruction\+::\+O\+U\+T, and Brainfuck\+Parser\+Context\+::tail.
+References Brainfuck\+Script\+::array, Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack\+::array, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+N\+O\+M\+E\+M, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+O\+K, B\+R\+A\+I\+N\+F\+U\+C\+K\+\_\+\+E\+S\+Y\+N\+T\+A\+X, brainfuck\+\_\+parser\+\_\+context\+\_\+init(), brainfuck\+\_\+script\+\_\+alloc(), brainfuck\+\_\+script\+\_\+init(), Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack\+::current, Brainfuck\+Instruction\+::\+D\+E\+C, Brainfuck\+Parser\+Context\+::head, Brainfuck\+Instruction\+::\+I\+N, Brainfuck\+Instruction\+::\+I\+N\+C, Brainfuck\+Script\+::index, Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack\+::index, Brainfuck\+Instruction\+::\+J\+M\+P, Brainfuck\+Instruction\+::\+J\+Z, Brainfuck\+Instruction\+::\+M\+O\+V\+L, Brainfuck\+Instruction\+::\+M\+O\+V\+R, Brainfuck\+Instruction\+::\+Brainfuck\+Argument\+::n, Brainfuck\+Script\+::next, Brainfuck\+Instruction\+::\+Brainfuck\+Argument\+::offset, Brainfuck\+Instruction\+::\+O\+U\+T, Brainfuck\+Script\+::size, Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack\+::size, and Brainfuck\+Parser\+Context\+::tail.
 
 
 
 Referenced by brainfuck\+\_\+parser\+\_\+parse\+\_\+file(), and brainfuck\+\_\+parser\+\_\+parse\+\_\+string().
 
-\hypertarget{group__parser_ga70017cd77e93ffa16c09b7e9d26ad0a6}{}\index{Parser@{Parser}!brainfuck\+\_\+parser\+\_\+validate@{brainfuck\+\_\+parser\+\_\+validate}}
+\hypertarget{group__parser_gad5e9a2747a62b6ad48df440a251ac655}{}\index{Parser@{Parser}!brainfuck\+\_\+parser\+\_\+validate@{brainfuck\+\_\+parser\+\_\+validate}}
 \index{brainfuck\+\_\+parser\+\_\+validate@{brainfuck\+\_\+parser\+\_\+validate}!Parser@{Parser}}
 \subsubsection[{brainfuck\+\_\+parser\+\_\+validate}]{\setlength{\rightskip}{0pt plus 5cm}int brainfuck\+\_\+parser\+\_\+validate (
 \begin{DoxyParamCaption}
-\item[{struct {\bf Brainfuck\+Parser\+Context} $\ast$}]{ctx}
+\item[{const struct {\bf Brainfuck\+Parser\+Context} $\ast$}]{ctx}
 \end{DoxyParamCaption}
-)}\label{group__parser_ga70017cd77e93ffa16c09b7e9d26ad0a6}
+)}\label{group__parser_gad5e9a2747a62b6ad48df440a251ac655}
 
 
 Validate a script and detect syntax errors in the given script. 
@@ -225,11 +227,11 @@ Validate a script and detect syntax errors in the given script.
 \end{DoxyReturn}
 
 
-Definition at line 77 of file brainfuck.\+c.
+Definition at line 156 of file brainfuck.\+c.
 
 
 
-References Brainfuck\+Parser\+Context\+::loop\+\_\+index.
+References Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack\+::index.
 
 
 

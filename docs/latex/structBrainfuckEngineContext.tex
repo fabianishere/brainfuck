@@ -12,19 +12,19 @@ This structure represents the context in which a script should run.
 \subsection*{Data Fields}
 \begin{DoxyCompactItemize}
 \item 
+\hypertarget{structBrainfuckEngineContext_a7bf6001cbe5b1c2cf1635753f3cc5e54}{}unsigned char $\ast$ \hyperlink{structBrainfuckEngineContext_a7bf6001cbe5b1c2cf1635753f3cc5e54}{memory}\label{structBrainfuckEngineContext_a7bf6001cbe5b1c2cf1635753f3cc5e54}
+
+\begin{DoxyCompactList}\small\item\em The memory a script should operate on. \end{DoxyCompactList}\item 
 int($\ast$ \hyperlink{structBrainfuckEngineContext_a6b4909f710378c98e9b984afc78b9099}{read} )(void)
 \begin{DoxyCompactList}\small\item\em Read a character from an input stream. \end{DoxyCompactList}\item 
 int($\ast$ \hyperlink{structBrainfuckEngineContext_a8495230add7edb7d8f87bd1ef9771239}{write} )(const int character)
-\begin{DoxyCompactList}\small\item\em Write a character to an output stream. \end{DoxyCompactList}\item 
-\hypertarget{structBrainfuckEngineContext_a74ddd0ca5cb164878cfc152e88ad909c}{}unsigned int $\ast$ \hyperlink{structBrainfuckEngineContext_a74ddd0ca5cb164878cfc152e88ad909c}{memory}\label{structBrainfuckEngineContext_a74ddd0ca5cb164878cfc152e88ad909c}
-
-\begin{DoxyCompactList}\small\item\em The memory a script should operate on. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Write a character to an output stream. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
 This structure represents the context in which a script should run. 
 
-Definition at line 261 of file brainfuck.\+h.
+Definition at line 335 of file brainfuck.\+h.
 
 
 
@@ -41,7 +41,7 @@ The integer that was read from the input stream.
 \end{DoxyReturn}
 
 
-Definition at line 267 of file brainfuck.\+h.
+Definition at line 346 of file brainfuck.\+h.
 
 
 
@@ -64,7 +64,7 @@ On success, the written character is returned. If a writing error occurs, E\+O\+
 \end{DoxyReturn}
 
 
-Definition at line 276 of file brainfuck.\+h.
+Definition at line 355 of file brainfuck.\+h.
 
 
 

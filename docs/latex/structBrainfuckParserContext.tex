@@ -9,24 +9,23 @@ This structure contains the state of the parser.
 
 {\ttfamily \#include $<$brainfuck.\+h$>$}
 
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structBrainfuckParserContext_1_1BrainfuckOffsetStack}{Brainfuck\+Offset\+Stack}
+\begin{DoxyCompactList}\small\item\em A stack containing the jump offsets. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Data Fields}
 \begin{DoxyCompactItemize}
 \item 
-\hypertarget{structBrainfuckParserContext_a07a4631a3667e742c9cd93b60f2d0450}{}struct \hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction} $\ast$ \hyperlink{structBrainfuckParserContext_a07a4631a3667e742c9cd93b60f2d0450}{head}\label{structBrainfuckParserContext_a07a4631a3667e742c9cd93b60f2d0450}
+\hypertarget{structBrainfuckParserContext_a0108dd71ddc1ca32b4668432e6090e5c}{}struct \hyperlink{structBrainfuckScript}{Brainfuck\+Script} $\ast$ \hyperlink{structBrainfuckParserContext_a0108dd71ddc1ca32b4668432e6090e5c}{head}\label{structBrainfuckParserContext_a0108dd71ddc1ca32b4668432e6090e5c}
 
-\begin{DoxyCompactList}\small\item\em The first \hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction} parsed within the context. \end{DoxyCompactList}\item 
-\hypertarget{structBrainfuckParserContext_a5d4d1fbe933d9994b3cdf8a3467c7a6e}{}struct \hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction} $\ast$ \hyperlink{structBrainfuckParserContext_a5d4d1fbe933d9994b3cdf8a3467c7a6e}{tail}\label{structBrainfuckParserContext_a5d4d1fbe933d9994b3cdf8a3467c7a6e}
+\begin{DoxyCompactList}\small\item\em The first \hyperlink{structBrainfuckScript}{Brainfuck\+Script} parsed within the context. \end{DoxyCompactList}\item 
+\hypertarget{structBrainfuckParserContext_adf600a9fd16a2a9b6c6ff542f86f0f54}{}struct \hyperlink{structBrainfuckScript}{Brainfuck\+Script} $\ast$ \hyperlink{structBrainfuckParserContext_adf600a9fd16a2a9b6c6ff542f86f0f54}{tail}\label{structBrainfuckParserContext_adf600a9fd16a2a9b6c6ff542f86f0f54}
 
-\begin{DoxyCompactList}\small\item\em The last \hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction} parsed within the context. \end{DoxyCompactList}\item 
-\hypertarget{structBrainfuckParserContext_a948e713cb85e2a9fb300ddb79f437515}{}struct \hyperlink{structBrainfuckInstruction}{Brainfuck\+Instruction} $\ast$$\ast$ \hyperlink{structBrainfuckParserContext_a948e713cb85e2a9fb300ddb79f437515}{loop}\label{structBrainfuckParserContext_a948e713cb85e2a9fb300ddb79f437515}
+\begin{DoxyCompactList}\small\item\em The last \hyperlink{structBrainfuckScript}{Brainfuck\+Script} parsed within the context. \end{DoxyCompactList}\item 
+\hypertarget{structBrainfuckParserContext_af1d597063e204cae166b23df1b8e052f}{}struct \hyperlink{structBrainfuckParserContext_1_1BrainfuckOffsetStack}{Brainfuck\+Parser\+Context\+::\+Brainfuck\+Offset\+Stack} {\bfseries offsets}\label{structBrainfuckParserContext_af1d597063e204cae166b23df1b8e052f}
 
-\begin{DoxyCompactList}\small\item\em A stack that contains addresses to jump to for loop instructions. \end{DoxyCompactList}\item 
-\hypertarget{structBrainfuckParserContext_a7cf7098e3c4aee0f7ad04e4af1ec5e38}{}unsigned int \hyperlink{structBrainfuckParserContext_a7cf7098e3c4aee0f7ad04e4af1ec5e38}{loop\+\_\+index}\label{structBrainfuckParserContext_a7cf7098e3c4aee0f7ad04e4af1ec5e38}
-
-\begin{DoxyCompactList}\small\item\em The index of the loop stack. \end{DoxyCompactList}\item 
-\hypertarget{structBrainfuckParserContext_a6f9d032c72e40e19ed1be58193564c81}{}size\+\_\+t \hyperlink{structBrainfuckParserContext_a6f9d032c72e40e19ed1be58193564c81}{loop\+\_\+size}\label{structBrainfuckParserContext_a6f9d032c72e40e19ed1be58193564c81}
-
-\begin{DoxyCompactList}\small\item\em The size of the loop stack. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
@@ -34,7 +33,7 @@ This structure contains the state of the parser.
 
 By capturing the state of the parser, it is possible to parse a script in segments. 
 
-Definition at line 151 of file brainfuck.\+h.
+Definition at line 196 of file brainfuck.\+h.
 
 
 
