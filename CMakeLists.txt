@@ -11,7 +11,7 @@ option(WITH_DOCUMENTATION
 	"Use Doxygen to create API documentation of this library." ON)
 
 add_definitions("-W -Werror -Wall -Wextra -Wformat-security")
-add_definitions("-std=c89 -O2")
+add_definitions("-std=c89 -g -O2")
 add_definitions("-fno-exceptions")
 
 include_directories(include/)
