@@ -41,8 +41,8 @@
 #define BRAINFUCK_VERSION "3.0.0" /**< Version of the specification */
 
 /* Error codes */
-#define BRAINFUCK_EOK 1     	/**< Indicates everything is OK */
-#define BRAINFUCK_ENOMEM -5 	/**< Indicates there is no memory available */
+#define BRAINFUCK_EOK      1	/**< Indicates everything is OK */
+#define BRAINFUCK_ENOMEM  -5	/**< Indicates there is no memory available */
 #define BRAINFUCK_ESYNTAX -6	/**< Indiactes a syntax error */
 #define BRAINFUCK_EBOUNDS -7	/**< Indiactes the index is out of bounds */
 /** @} */
@@ -65,7 +65,9 @@ struct BrainfuckInstruction {
 	enum BrainfuckType {
 		/* Data Manipulation */
 		INC,	/**< Increase cell value */
-		MOV,	/**< Move in the memory */
+		DEC,	/**< Decrease cell value */
+		MOVL,	/**< Move left in the memory */
+		MOVR,	/**< Move right in the memory */
 		CLR,	/**< Clear cell value */
 		/* IO */
 		IN, 	/**< Read one byte from a stream and write to cell */
@@ -83,26 +85,15 @@ struct BrainfuckInstruction {
 	 */
 	union BrainfuckArgument {
 		/**
-		 * The change in cell value.
+		 * The offset in cell value or instruction address.
 		 */
-		int delta;
+		int offset;
 
 		/**
 		 * The number of times an instruction should be executed.
 		 */
 		unsigned int n;
-
-		/**
-		 * The instruction to jump to in case of a {@link BrainfuckType#JUMP}
-		 *	based instruction.
-		 */
-		struct BrainfuckInstruction *jump;
 	} argument;
-
-	/**
-	 * The instruction that follows this instruction.
- 	 */
-	struct BrainfuckInstruction *next;
 };
 
 /**
@@ -121,24 +112,78 @@ struct BrainfuckInstruction * brainfuck_instruction_alloc(void);
 void brainfuck_instruction_dealloc(struct BrainfuckInstruction *instruction);
 
 /**
- * A {@link BrainfuckScript} structure should be the first instruction in a 
- *	linked list of instructions.
+ * A {@link BrainfuckScript} is a collection of {@link BrainfuckInstruction}
+ * 	structures.
  * 
  * @see BrainfuckInstruction
  */
-#define BrainfuckScript BrainfuckInstruction
+struct BrainfuckScript {
+	/**
+	 * The index within the array.
+	 */
+	int index;
+	
+	/**
+	 * The amount of instructions in this collection.
+	 */
+	size_t size;
+	
+	/**
+	 * The array containing the instructions.
+	 */
+	struct BrainfuckInstruction *array;
+	
+	/**
+ 	 * The previous collection of instructions.
+ 	 */
+	struct BrainfuckScript *previous;
+	
+	/**
+	 * The next collection of instructions if this collection is not large
+	 *	enough.
+	 */
+	struct BrainfuckScript *next;
+};
+
+/**
+ * Allocate a {@link BrainfuckScript} structure.
+ *
+ * @return A pointer to the allocated structure or 
+ *	<code>NULL</code> if the allocation failed.
+ */
+struct BrainfuckScript * brainfuck_script_alloc(void);
 
 /** 
- * Deallocate the given script.
+ * Deallocate the given script including the structures referenced by the
+ *  <code>next</code> field.
  * 
  * @param script The script to deallocate.
- * @see brainfuck_instruction_dealloc
  */
-#define brainfuck_script_dealloc brainfuck_instruction_dealloc
+void brainfuck_script_dealloc(struct BrainfuckScript *script);
+
+/**
+ * Initialize a {@link BrainfuckScript} structure.
+ *
+ * @param script The {@link BrainfuckScript} structure to initialize.
+ * @param previous The previous {@link BrainfuckScript} structure.
+ * @param size The size of the array to allocate.
+ * @return {@link BRAINFUCK_EOK} on success, one of the defined error codes
+ *	on failure.
+ */
+int brainfuck_script_init(struct BrainfuckScript *script, 
+	struct BrainfuckScript *previous, size_t size);
+
+/**
+ * Dump the AST of the given {@link BrainfuckScript} structure.
+ *
+ * @param script The script to dump.
+ * @param file A pointer to a {@link FILE} object to write the script to.
+ */
+void brainfuck_script_dump(const struct BrainfuckScript *script, FILE *file);
 /** @} */
 
 /**
- * The parser interface that should be implemented by a proper implementation.
+ * A parser interface for the brainfuck language.
  *
  * @addtogroup parser Parser
  * @{
@@ -150,29 +195,39 @@ void brainfuck_instruction_dealloc(struct BrainfuckInstruction *instruction);
  */
 struct BrainfuckParserContext {
 	/**
-	 * The first {@link BrainfuckInstruction} parsed within the context.
+	 * The first {@link BrainfuckScript} parsed within the context.
 	 */
-	struct BrainfuckInstruction *head;
+	struct BrainfuckScript *head;
 	
 	/**
- 	* The last {@link BrainfuckInstruction} parsed within the context.
+ 	* The last {@link BrainfuckScript} parsed within the context.
  	*/
-	struct BrainfuckInstruction *tail;
+	struct BrainfuckScript *tail;
 	
 	/**
-	 * A stack that contains addresses to jump to for loop instructions.
+	 * A stack containing the jump offsets.
 	 */
-	struct BrainfuckInstruction **loop;
+	struct BrainfuckOffsetStack {
+		/**
+		* The index of the stack.
+		*/
+		int index;
 	
-	/**
-	 * The index of the loop stack.
-	 */
-	unsigned int loop_index;
-	
-	/**
-	 * The size of the loop stack.
-	 */
-	size_t loop_size;
+		/**
+		* The size of the stack.
+		*/
+		size_t size;		
+		
+		/**
+		 * The current offset.
+		 */
+		int current;
+		
+		/**
+		 * The underlying array of this stack.
+		 */
+		struct BrainfuckInstruction **array;
+	} offsets;
 };
 
 /**
@@ -206,7 +261,7 @@ int brainfuck_parser_context_init(struct BrainfuckParserContext *ctx);
  * @return <code>true</code> if the given script does not contain syntax errors,
  * 	<code>false</code> otherwise.
  */
-int brainfuck_parser_validate(struct BrainfuckParserContext *ctx);
+int brainfuck_parser_validate(const struct BrainfuckParserContext *ctx);
 
 /**
  * Parse the given string as a segment of a script.
@@ -245,12 +300,31 @@ struct BrainfuckScript * brainfuck_parser_parse_string(const char *string,
  * @return A pointer to a {@link BrainfuckScript} instance or <code>NULL</code>
  *	if the parsing failed.
  */
-struct BrainfuckScript * brainfuck_parser_parse_file(FILE *file, int *error);
+struct BrainfuckScript * brainfuck_parser_parse_file(FILE *file, 
+	int *error);
 /** @} */
 
-
 /**
- * The engine interface that should be implemented by a proper implementation.
+ * Passes that can perform transformations to or analysis of the abstract
+ * 	syntax tree.
+ *
+ * @addtogroup pass Pass
+ * @{
+ */
+/**
+ * Apply a 'clear' optimization to the given script by transformating a
+ * 	common clear operation ([-] or [+]) into a single {@link BrainfuckType#CLR}
+	instruction.
+ *
+ * @param script The script to apply the optimization pass to.
+ * @return {@link BRAINFUCK_EOK} on success, one of the defined error codes
+ *	on failure.
+ */
+int brainfuck_pass_clear(const struct BrainfuckScript *script);
+/** @} */
+	
+/**
+ * An interface of an engine that is able to run a {@link BrainfuckScript}.
  *
  * @addtogroup engine Engine
  * @{
@@ -259,6 +333,11 @@ struct BrainfuckScript * brainfuck_parser_parse_file(FILE *file, int *error);
  * This structure represents the context in which a script should run.
  */
 struct BrainfuckEngineContext {
+	/** 
+	 * The memory a script should operate on.
+	 */
+	unsigned char *memory;
+	
 	/**
 	 * Read a character from an input stream.
 	 *
@@ -274,11 +353,6 @@ struct BrainfuckEngineContext {
 	 * 	error occurs, EOF is returned.
 	 */
 	int (*write)(const int character);
-	
-	/** 
-	 * The memory a script should operate on.
-	 */
-	unsigned int *memory;
 };
 
 /**
