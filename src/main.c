@@ -27,6 +27,8 @@
 
 /*
  * Print the usage message of this program.
+ *
+ * @param name The name of this program (given by argv[0]).
  */
 void print_usage(char *name) {
 	fprintf(stderr, "usage: %s [-evh] [file...]\n", name);
