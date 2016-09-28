@@ -23,7 +23,7 @@
 	#define isatty _isatty
 #endif
 
-#include "../include/brainfuck.h"
+#include <brainfuck.h>
 
 /**
  * Print the usage message of this program.

@@ -20,7 +20,7 @@
 #include <limits.h>
 #include <assert.h>
 
-#include "../include/brainfuck.h"
+#include <brainfuck.h>
 
 /**
  * Creates a new state.

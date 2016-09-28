@@ -10,6 +10,7 @@ if(ENABLE_DEBUG)
 	add_definitions("-DBRAINFUCK_EXTENSION_DEBUG")
 endif()
 
+include_directories(include/)
 add_definitions("-Wall -Wextra -O3")
 add_library(libbrainfuck STATIC src/brainfuck.c)
 set_target_properties(libbrainfuck PROPERTIES PREFIX "")
