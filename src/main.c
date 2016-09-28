@@ -28,10 +28,10 @@
 /*
  * Print the usage message of this program.
  */
-void print_usage() {
-	fprintf(stderr, "usage: brainfuck [-veh] file...\n");
-	fprintf(stderr,	"\t-v --version\t\tshow the version information\n");
+void print_usage(char *name) {
+	fprintf(stderr, "usage: %s [-evh] [file...]\n", name);
 	fprintf(stderr,	"\t-e --eval\t\trun code directly\n");
+	fprintf(stderr, "\t-v --version\t\tshow version information\n");
 	fprintf(stderr,	"\t-h --help\t\tshow a help message\n");
 }
 
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
 				break;
 			break;
 		case 'h':
-			print_usage();
+			print_usage(argv[0]);
 			return EXIT_SUCCESS;
 		case 'v':
 			print_version();
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
 		case 'e':	
  			return run_string((char *) optarg);
 		case '?':
-			print_usage();
+			print_usage(argv[0]);
 			return EXIT_FAILURE;
 		default:
 			abort();
