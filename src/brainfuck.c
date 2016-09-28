@@ -256,8 +256,8 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int unti
 			break;
 		case BRAINFUCK_TOKEN_LOOP_END:
 			return root;
-        case BRAINFUCK_TOKEN_BREAK:
-            break;
+		case BRAINFUCK_TOKEN_BREAK:
+			break;
 		default:
 			continue;
 		}
@@ -397,7 +397,7 @@ BrainfuckInstruction * brainfuck_parse_character(char c) {
 	case BRAINFUCK_TOKEN_INPUT:
 	case BRAINFUCK_TOKEN_LOOP_START:
 	case BRAINFUCK_TOKEN_LOOP_END:
-    case BRAINFUCK_TOKEN_BREAK:
+	case BRAINFUCK_TOKEN_BREAK:
 		break;
 	default:
 		return NULL;
@@ -525,8 +525,8 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 			else
 				printf(" \t");
 			printf("\n");
-            break;
-        }
+ 		 	break;
+		}
 		default:
 			return;
 		}

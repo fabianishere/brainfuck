@@ -51,8 +51,8 @@ typedef struct BrainfuckInstruction {
 	 */
 	struct BrainfuckInstruction *next;
 	/*
- 	 * The previous instruction in the linked list.
- 	 */
+	 * The previous instruction in the linked list.
+	 */
 	struct BrainfuckInstruction *previous;
 	/*
 	 * The first instruction of a loop if this instruction is a loop. Otherwise
@@ -71,8 +71,8 @@ typedef struct BrainfuckState {
 	 */
 	struct BrainfuckInstruction *root;
 	/*
- 	 * The head instruction of the instruction linked list.
- 	 */
+	 * The head instruction of the instruction linked list.
+	 */
 	struct BrainfuckInstruction *head;
 } BrainfuckState;
 
