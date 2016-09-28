@@ -34,9 +34,9 @@ Look in the `examples` directory for a large amount of brainfuck examples.
 ## Getting the source
 Download the source code by running the following code in your command prompt:
 ```sh
-$ git clone https://github.com/FabianM/brainfuck.git
+$ git clone https://github.com/fabianishere/brainfuck.git
 ```
-or simply [grab](https://github.com/FabianM/brainfuck/archive/master.zip) a copy of the source code as a Zip file.
+or simply [grab](https://github.com/fabianishere/brainfuck/archive/master.zip) a copy of the source code as a Zip file.
 
 ## Building
 Create the build directory.
