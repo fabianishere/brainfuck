@@ -25,7 +25,7 @@
 
 #include "../include/brainfuck.h"
 
-/*
+/**
  * Print the usage message of this program.
  *
  * @param name The name of this program (given by argv[0]).
@@ -37,7 +37,7 @@ void print_usage(char *name) {
 	fprintf(stderr,	"\t-h --help\t\tshow a help message\n");
 }
 
-/*
+/**
  * Print the version information. 
  */
 void print_version() {
@@ -47,7 +47,7 @@ void print_version() {
 	fprintf(stderr, "Distributed under the Apache License Version 2.0.\n");
 }
 
-/*
+/**
  * Run the given brainfuck file.
  *
  * @param file The brainfuck file to run.
@@ -69,7 +69,7 @@ int run_file(FILE *file) {
 	return EXIT_SUCCESS;
 }
 
-/*
+/**
  * Run the given brainfuck string.
  *
  * @param code The brainfuck string to run.
@@ -86,7 +86,7 @@ int run_string(char *code) {
 	return EXIT_SUCCESS;
 }
 
-/*
+/**
  * Run the brainfuck interpreter in interactive mode.
  */
 void run_interactive_console() {
@@ -117,7 +117,7 @@ static struct option long_options[] = {
 	{0, 0, 0, 0}
 };
 
-/*
+/**
  * Main entry point of the program.
  *
  * @param argc The amount of arguments given.

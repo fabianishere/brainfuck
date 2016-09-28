@@ -33,107 +33,107 @@
 #	define BRAINFUCK_TOKEN_BREAK -10
 #endif
 
-/*
+/**
  * Represents a brainfuck instruction.
  */
 typedef struct BrainfuckInstruction {
-	/*
+	/**
 	 * The difference between the value of the byte at the currect pointer and 
 	 *   the value we want.
 	 */
 	int difference;
-	/*
+	/**
 	 * The type of this instruction.
 	 */
 	char type;
-	/*
+	/**
 	 * The next instruction in the linked list.
 	 */
 	struct BrainfuckInstruction *next;
-	/*
+	/**
 	 * The previous instruction in the linked list.
 	 */
 	struct BrainfuckInstruction *previous;
-	/*
+	/**
 	 * The first instruction of a loop if this instruction is a loop. Otherwise
 	 * 	<code>NULL</code>
 	 */
 	struct BrainfuckInstruction *loop;
 } BrainfuckInstruction;
 
-/*
+/**
  * The state structure contains the head and the root of the linked list containing
  * 	the instructions of the program.
  */
 typedef struct BrainfuckState {
-	/*
+	/**
 	 * The root instruction of the instruction linked list.
 	 */
 	struct BrainfuckInstruction *root;
-	/*
+	/**
 	 * The head instruction of the instruction linked list.
 	 */
 	struct BrainfuckInstruction *head;
 } BrainfuckState;
 
-/*
+/**
  * The callback that will be invoked when the BRAINFUCK_TOKEN_OUTPUT token is found.
  * 
  * @param chr The value of the current cell.
  */
 typedef int (*BrainfuckOutputHandler) (int chr);
 
-/*
+/**
  * The callback that will be invoked when the BRAINFUCK_TOKEN_INPUT token is found.
  * 
  * @return The character that is read.
  */
 typedef int (*BrainfuckInputHandler) (void);
 
-/*
+/**
  * This structure is used as a layer between a brainfuck program and
  * 	the outside. It allows control over input, output and memory.
  */
 typedef struct BrainfuckExecutionContext {
-	/*
+	/**
 	 * The callback that will be invoked when the BRAINFUCK_TOKEN_OUTPUT token is found.
 	 */
 	BrainfuckOutputHandler output_handler;
-	/*
+	/**
 	 * The callback that will be invoked when the BRAINFUCK_TOKEN_INPUT token is found.
 	 */
 	BrainfuckInputHandler input_handler;
-	/*
+	/**
 	 * An array containing the memory cells the program can use.
 	 */
 	unsigned char *tape;
-	/*
+	/**
 	 * Index into <code>tape</code>. Modified during execution.
 	 */
 	int tape_index;
-	/*
+	/**
 	 * size of the tape in umber of cells.
 	 */
 	size_t tape_size;
-	/*
+	/**
 	 * A flag that, if set to true, indicates that execution should stop.
 	 */
 	int shouldStop;
 } BrainfuckExecutionContext;
 
-/*
+/**
  * Creates a new state.
  */
 BrainfuckState * brainfuck_state();
 
-/*
+/**
  * Creates a new context.
  *
  * @param size The size of the tape.
  */
 BrainfuckExecutionContext * brainfuck_context(int);
 
-/*
+/**
  * Removes the given instruction from the linked list.
  * 
  * @param state The state
@@ -142,7 +142,7 @@ BrainfuckExecutionContext * brainfuck_context(int);
  */
 BrainfuckInstruction * brainfuck_remove(struct BrainfuckState *, struct BrainfuckInstruction *);
 
-/*
+/**
  * Adds an instruction to the instruction list.
  *
  * @param state The state.
@@ -151,7 +151,7 @@ BrainfuckInstruction * brainfuck_remove(struct BrainfuckState *, struct Brainfuc
  */
 BrainfuckInstruction * brainfuck_add(struct BrainfuckState *state, struct BrainfuckInstruction *);
 
-/*
+/**
  * Adds an instruction to the front of the instruction list.
  *
  * @param state The state.
@@ -160,7 +160,7 @@ BrainfuckInstruction * brainfuck_add(struct BrainfuckState *state, struct Brainf
  */
 BrainfuckInstruction * brainfuck_add_first(struct BrainfuckState *state, struct BrainfuckInstruction *);
 
-/*
+/**
  * Adds an instruction to the instruction list.
  *
  * @param state The state.
@@ -171,7 +171,7 @@ BrainfuckInstruction * brainfuck_add_first(struct BrainfuckState *state, struct 
 BrainfuckInstruction * brainfuck_insert_before(struct BrainfuckState *, struct BrainfuckInstruction *, 
 	struct BrainfuckInstruction *);
 
-/*
+/**
  * Adds an instruction to the instruction list.
  *
  * @param state The state.
@@ -182,7 +182,7 @@ BrainfuckInstruction * brainfuck_insert_before(struct BrainfuckState *, struct B
 BrainfuckInstruction * brainfuck_insert_after(struct BrainfuckState *, struct BrainfuckInstruction *, 
 	struct BrainfuckInstruction *);
 
-/*
+/**
  * Reads a character, converts it to an instruction and repeats until the EOF character
  * 	occurs and will then return a linked list containing all instructions.
  *
@@ -191,7 +191,7 @@ BrainfuckInstruction * brainfuck_insert_after(struct BrainfuckState *, struct Br
  */
 BrainfuckInstruction * brainfuck_parse_stream(FILE *);
 
-/*
+/**
  * Reads a character, converts it to an instruction and repeats until the given character
  * 	occurs and will then return a linked list containing all instructions.
  *
@@ -201,7 +201,7 @@ BrainfuckInstruction * brainfuck_parse_stream(FILE *);
  */
 BrainfuckInstruction * brainfuck_parse_stream_until(FILE *, int);
 
-/*
+/**
  * Reads a character, converts it to an instruction and repeats until the string ends
  *	and will then return a linked list containing all instructions.
  *
@@ -210,7 +210,7 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *, int);
  */
 BrainfuckInstruction * brainfuck_parse_string(char *);
 
-/*
+/**
  * Reads a character, converts it to an instruction and repeats until the string ends
  *	and will then return a linked list containing all instructions.
  *
@@ -222,7 +222,7 @@ BrainfuckInstruction * brainfuck_parse_string(char *);
  */
 BrainfuckInstruction * brainfuck_parse_substring(char *, int, int);
 
-/*
+/**
  * Reads a character, converts it to an instruction and repeats until the string ends
  *	and will then return a linked list containing all instructions.
  * This method is special because it uses the begin index as counter, so this variable
@@ -237,7 +237,7 @@ BrainfuckInstruction * brainfuck_parse_substring(char *, int, int);
  */
 BrainfuckInstruction * brainfuck_parse_substring_incremental(char *, int *, int);
 
-/*
+/**
  * Converts the given character to an instruction.
  *
  * @param c The character to convert.
@@ -245,35 +245,35 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *, int *, int)
  */
 BrainfuckInstruction * brainfuck_parse_character(char);
 
-/*
+/**
  * Destroys the given instruction.
  * 
  * @param instruction The instruction to destroy.
  */
 void brainfuck_destroy_instruction(struct BrainfuckInstruction *);
 
-/*
+/**
  * Destroys a linked list containing instructions.
  * 
  * @param head The start of the instruction list.
  */
 void brainfuck_destroy_instructions(struct BrainfuckInstruction *);
 
-/*
+/**
  * Destroys a state.
  * 
  * @param state The state to destroy
  */
 void brainfuck_destroy_state(struct BrainfuckState *);
 
-/*
+/**
  * Destroys a context.
  * 
  * @param context The context to destroy
  */
 void brainfuck_destroy_context(struct BrainfuckExecutionContext *);
 
-/*
+/**
  * Executes the given linked list containing instructions.
  *
  * @param root The start of the linked list of instructions you want
@@ -283,7 +283,7 @@ void brainfuck_destroy_context(struct BrainfuckExecutionContext *);
  */
 void brainfuck_execute(struct BrainfuckInstruction *, struct BrainfuckExecutionContext *);
 
-/*
+/**
  * Stops the currently running program referenced by the given execution context.
  *
  * @param context The context of this execution that contains the tape and

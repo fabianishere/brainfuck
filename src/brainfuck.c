@@ -22,7 +22,7 @@
 
 #include "../include/brainfuck.h"
 
-/*
+/**
  * Creates a new state.
  */
 BrainfuckState * brainfuck_state() {
@@ -32,7 +32,7 @@ BrainfuckState * brainfuck_state() {
 	return state;
 }
 
-/*
+/**
  * Creates a new brainfuck context.
  *
  * @param size The size of the tape.
@@ -55,7 +55,7 @@ BrainfuckExecutionContext * brainfuck_context(int size) {
 	return context;
 }
 
-/*
+/**
  * Removes the given instruction from the linked list.
  * 
  * @param state The state
@@ -74,7 +74,7 @@ BrainfuckInstruction * brainfuck_remove(BrainfuckState *state, BrainfuckInstruct
 	return instruction;
 }
 
-/*
+/**
  * Adds an instruction to the instruction list.
  *
  * @param state The state.
@@ -101,7 +101,7 @@ BrainfuckInstruction * brainfuck_add(BrainfuckState *state,
 	return state->head;
 }
 
-/*
+/**
  * Adds an instruction to the front of the instruction list.
  *
  * @param state The state.
@@ -127,7 +127,7 @@ BrainfuckInstruction * brainfuck_add_front(BrainfuckState *state,
 	return state->head;
 }
 
-/*
+/**
  * Adds an instruction to the instruction list.
  *
  * @param state The state.
@@ -158,7 +158,7 @@ BrainfuckInstruction * brainfuck_insert_before(BrainfuckState *state, BrainfuckI
 	return instruction;
 }
 
-/*
+/**
  * Adds an instruction to the instruction list.
  *
  * @param state The state.
@@ -190,7 +190,7 @@ BrainfuckInstruction * brainfuck_insert_after(BrainfuckState *state, BrainfuckIn
 		return instruction;		
 }
 
-/*
+/**
  * Reads a character, converts it to an instruction and repeats until the EOF character
  * 	occurs and will then return a linked list containing all instructions.
  *
@@ -202,7 +202,7 @@ BrainfuckInstruction * brainfuck_parse_stream(FILE *stream) {
 	return brainfuck_parse_stream_until(stream, EOF);
 }
 
-/*
+/**
  * Reads a character, converts it to an instruction and repeats until the given character
  * 	occurs and will then return a linked list containing all instructions.
  *
@@ -270,7 +270,7 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int unti
 	return root;
 }
 
-/*
+/**
  * Reads a character, converts it to an instruction and repeats until the string ends
  *	and will then return a linked list containing all instructions.
  *
@@ -281,7 +281,7 @@ BrainfuckInstruction * brainfuck_parse_string(char *str) {
 	return brainfuck_parse_substring(str, 0, -1);
 }
 
-/*
+/**
  * Reads a character, converts it to an instruction and repeats until the string ends
  *	and will then return a linked list containing all instructions.
  *
@@ -296,7 +296,7 @@ BrainfuckInstruction * brainfuck_parse_substring(char *str, int begin, int end) 
 	return brainfuck_parse_substring_incremental(str, &tmp, end);
 }
 
-/*
+/**
  * Reads a character, converts it to an instruction and repeats until the string ends
  *	and will then return a linked list containing all instructions.
  *
@@ -377,7 +377,7 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 		return root;
 }
 
-/*
+/**
  * Converts the given character to an instruction.
  *
  * @param c The character to convert.
@@ -406,7 +406,7 @@ BrainfuckInstruction * brainfuck_parse_character(char c) {
 	return instruction;
 }
 
-/*
+/**
  * Destroys the given instruction.
  * 
  * @param instruction The instruction to destroy.
@@ -418,7 +418,7 @@ void brainfuck_destroy_instruction(BrainfuckInstruction *instruction) {
 	instruction = 0;
 }
 
-/*
+/**
  * Destroys a linked list containing instructions.
  * 
  * @param root The start of the instruction list.
@@ -433,7 +433,7 @@ void brainfuck_destroy_instructions(BrainfuckInstruction *root) {
 	}
 }
 
-/*
+/**
  * Destroys a state.
  * 
  * @param state The state to destroy
@@ -448,7 +448,7 @@ void brainfuck_destroy_state(BrainfuckState *state) {
 	state = 0;
 }
 
-/*
+/**
  * Destroys a context.
  * 
  * @param context The context to destroy
@@ -458,7 +458,7 @@ void brainfuck_destroy_context(BrainfuckExecutionContext *context) {
 	context = 0;
 }
 
-/*
+/**
  * Executes the given linked list containing instructions.
  *
  * @param root The start of the linked list of instructions you want
