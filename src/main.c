@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Fabian M.
+ * Copyright 2016 Fabian Mastenbroek
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ void print_usage(char *name) {
 void print_version() {
 	fprintf(stderr, "brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__, 
 		__TIME__);
-	fprintf(stderr, "Copyright (c) 2014 Fabian M.\n");
+	fprintf(stderr, "Copyright (c) 2016 Fabian Mastenbroek.\n");
 	fprintf(stderr, "Distributed under the Apache License Version 2.0.\n");
 }
 
