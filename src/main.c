@@ -30,7 +30,7 @@
  */
 void print_usage() {
 	fprintf(stderr, "usage: brainfuck [-veh] file...\n");
-	fprintf(stderr,	"\t-v --version\t\trun code directly\n");
+	fprintf(stderr,	"\t-v --version\tshow the version information\t\n");
 	fprintf(stderr,	"\t-e --eval\t\trun code directly\n");
 	fprintf(stderr,	"\t-h --help\t\tshow a help message\n");
 }
