@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 2.6)
 project(brainfuck C)
 set(BRAINFUCK_VERSION_MAJOR 3)
 set(BRAINFUCK_VERSION_MINOR 0)
-set(BRAINFUCK_VERSION_PATCH 3)
+set(BRAINFUCK_VERSION_PATCH 0)
 	
 option(WITH_CLI 
 	"Build the command line interface for brainfuck." ON)
 option(WITH_DOCUMENTATION 
-	"Use Doxygen to create API documentation of this library." ON)
+	"Use Doxygen to create API documentation of this library." OFF)
 
 add_definitions("-W -Werror -Wall -Wextra -Wformat-security")
 add_definitions("-std=c89 -g -O2")
@@ -34,5 +34,4 @@ if(WITH_DOCUMENTATION)
 		SOURCES ${PROJECT_SOURCE_DIR}/Doxyfile
 		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 	)
-					 
 endif()
