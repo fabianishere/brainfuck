@@ -52,6 +52,11 @@
  */
 struct BrainfuckInstruction {
 	/**
+	 * The instruction that follows this instruction.
+	 */
+	struct BrainfuckInstruction *next;
+	
+	/**
 	 * This enum defines a basic instruction set which brainfuck code can be
 	 * compiled to, with the inclusion of multiple optimizing/debugging 
 	 * instructions.
@@ -76,7 +81,7 @@ struct BrainfuckInstruction {
 		 * @param[in] y The memory offset from the current memory cell as 
 		 * <code>int32_t</code>.
 		 */
-		DEC,
+		SUB,
 		
 		/**
 		 * Move left in the memory.
