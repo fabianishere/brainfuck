@@ -336,7 +336,7 @@ struct BrainfuckScript * brainfuck_parser_parse_string(const char *string,
  *
  * @param[in] file The handle to the file to parse.
  * @param[out] error A pointer to an integer that will be set to either a success
- *	or an error code.
+ * or an error code.
  * @return A pointer to a {@link BrainfuckScript} or <code>NULL</code> if the 
  * parsing failed.
  */
