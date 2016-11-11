@@ -50,18 +50,17 @@ int main(void)
 	/* Initialization */
 	ctx.read = &getchar;
 	ctx.write = &putchar;
-	ctx.mem_size = sizeof(int) * 30000;
 	ctx.memory = malloc(sizeof(int) * 30000);
 	
 	/* Parsing */
 	script = brainfuck_parser_parse_string("+++++++++[>+++++++++++<-].", NULL);
 	
 	/* Execution */
-	brainfuck_engine_free(script);
+	brainfuck_engine_dealloc(script);
 	
 	/* Cleaning */
 	free(ctx.memory);
-	brainfuck_script_free(script);
+	brainfuck_script_dealloc(script);
 }
 ```
 
