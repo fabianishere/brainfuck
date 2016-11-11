@@ -11,7 +11,7 @@ option(WITH_DOCUMENTATION
 	"Use Doxygen to create API documentation of this library." OFF)
 
 add_definitions("-W -Werror -Wall -Wextra -Wformat-security")
-add_definitions("-std=c89 -g -O2")
+add_definitions("-std=c89 -g -O0")
 add_definitions("-fno-exceptions")
 
 include_directories(include/)
@@ -29,7 +29,7 @@ if(WITH_DOCUMENTATION)
 		message(FATAL_ERROR
 		"Doxygen is needed to build the documentation. Please install it correctly")
 	endif()
-	add_custom_target (Docs ALL
+	add_custom_target (docs ALL
 		COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_SOURCE_DIR}/Doxyfile
 		SOURCES ${PROJECT_SOURCE_DIR}/Doxyfile
 		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
