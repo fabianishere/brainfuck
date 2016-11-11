@@ -37,7 +37,9 @@ An Application Programming Interface is also provided:
 
 ```c
 #include <stdio.h>
-#include <brainfuck.h>
+#include <brainfuck/brainfuck.h>
+#include <brainfuck/parser.h>
+#include <brainfuck/engine.h>
 
 int main(void)
 {
