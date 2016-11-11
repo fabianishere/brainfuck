@@ -40,7 +40,7 @@ const int brainfuck_pass_dump_available;
 
 /**
  * This pass dumps the intermediate representation of the given scripts to the
- * given file stream in a x86 GNU AS assembly format.
+ * given file stream in an assembly-like format.
  *
  * @param[in] script The script to dump.
  * @param[in] file The file to dump the intermediate representation to.
