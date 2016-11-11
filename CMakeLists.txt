@@ -15,7 +15,7 @@ add_definitions("-std=c89 -g -O0")
 add_definitions("-fno-exceptions")
 
 include_directories(include/)
-add_library(libbrainfuck STATIC src/brainfuck.c)
+add_library(libbrainfuck STATIC src/brainfuck.c src/passes.c)
 set_target_properties(libbrainfuck PROPERTIES PREFIX "")
 
 if(WITH_CLI)
