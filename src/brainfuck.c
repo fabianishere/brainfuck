@@ -218,6 +218,7 @@ BrainfuckInstruction * brainfuck_parse_stream_until(FILE *stream, const int unti
 	char ch;
 	char temp;
 	while ((ch = fgetc(stream)) != until) {
+		if (ch == EOF || feof(stream)) { break; }
 		instruction->type = ch;
 		instruction->difference = 1;
 		switch(ch) {

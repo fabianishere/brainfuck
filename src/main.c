@@ -103,6 +103,7 @@ void run_interactive_console() {
 	while(1) {
 		fflush(stdout);
 		instruction = brainfuck_parse_stream_until(stdin, '\n');
+		if (feof(stdin)) { break; }
 		brainfuck_add(state, instruction);
 		brainfuck_execute(instruction, context);
 		printf("\n>> ");
