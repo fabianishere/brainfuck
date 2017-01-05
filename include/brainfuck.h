@@ -18,6 +18,8 @@
 
 #define BRAINFUCK_VERSION "2.6.6"
 #define BRAINFUCK_TAPE_SIZE 30000
+// 1: EOF leaves cell unchanged; 0: EOF == 0; 1: EOF == 1
+#define BRAINFUCK_EOF_BEHAVIOR 1
 
 #define BRAINFUCK_TOKEN_PLUS '+'
 #define BRAINFUCK_TOKEN_MINUS '-'
