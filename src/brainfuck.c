@@ -501,8 +501,15 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 				context->output_handler(context->tape[context->tape_index]);
 			break;
 		case BRAINFUCK_TOKEN_INPUT:
-			for (index = 0; index < instruction->difference; index++)
-				context->tape[context->tape_index] = context->input_handler();
+			for (index = 0; index < instruction->difference; index++) {
+				int input = context->input_handler();
+				if (input == EOF) {
+					if (BRAINFUCK_EOF_BEHAVIOR != 1)
+						context->tape[context->tape_index] = BRAINFUCK_EOF_BEHAVIOR;
+				} else {
+					context->tape[context->tape_index] = input;
+				}
+			}
 			break;
 		case BRAINFUCK_TOKEN_LOOP_START:
 			while(context->tape[context->tape_index])
