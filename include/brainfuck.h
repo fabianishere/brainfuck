@@ -35,6 +35,8 @@
 #	define BRAINFUCK_TOKEN_BREAK -10
 #endif
 
+#define READLINE_HIST_SIZE 20
+
 /**
  * Represents a brainfuck instruction.
  */
@@ -90,7 +92,7 @@ typedef int (*BrainfuckOutputHandler) (int chr);
  * 
  * @return The character that is read.
  */
-typedef int (*BrainfuckInputHandler) (void);
+typedef char (*BrainfuckInputHandler) (void);
 
 /**
  * This structure is used as a layer between a brainfuck program and
@@ -114,7 +116,7 @@ typedef struct BrainfuckExecutionContext {
 	 */
 	int tape_index;
 	/**
-	 * size of the tape in umber of cells.
+	 * size of the tape in number of cells.
 	 */
 	size_t tape_size;
 	/**
@@ -292,5 +294,11 @@ void brainfuck_execute(struct BrainfuckInstruction *, struct BrainfuckExecutionC
  *	other execution related variables.
  */
 void brainfuck_execution_stop(BrainfuckExecutionContext *);
+
+/**
+ * Reads exactly one char from stdin.
+ * @return The character read from stdin. 
+ */
+char get_one_char();
 
 #endif /* BRAINFUCK_H */

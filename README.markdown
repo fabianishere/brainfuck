@@ -44,7 +44,7 @@ Create the build directory.
 $ mkdir build
 $ cd build
 ```
-Brainfuck requires CMake and a C compiler (e.g. Clang or GCC) in order to run.
+Brainfuck requires CMake and a C compiler (e.g. Clang or GCC) in order to run. It also depends on [libedit](http://thrysoee.dk/editline/), which is avialable in the main repositories of most Linux distributions (e.g. as [libedit-dev](https://packages.debian.org/stretch/libedit-dev) on Debian) and comes with the macOS XCode command line tools. 
 Then, simply create the Makefiles:
 ```sh
 $ cmake ..

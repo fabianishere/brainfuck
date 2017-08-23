@@ -1,3 +1,10 @@
+Version 2.7
+===========
+
+- add editline functionality to interactive console.
+- reduce newline output in interactive console as to make it more like other consoles.
+- read in only one byte of input on the `,` command, as per the [bf language specification](https://en.wikipedia.org/wiki/Brainfuck#Commands).
+
 Version 2.6
 ===========
 
