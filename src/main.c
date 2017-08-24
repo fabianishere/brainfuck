@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <ctype.h>
+
+#include <editline/readline.h> 
+// Some OSs might need to include 'editline/history.h' for history functionality
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 	#define isatty _isatty
@@ -38,13 +42,22 @@ void print_usage(char *name) {
 }
 
 /**
- * Print the version information. 
+ * Print the version information.
  */
 void print_version() {
 	fprintf(stderr, "brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__, 
 		__TIME__);
 	fprintf(stderr, "Copyright (c) 2016 Fabian Mastenbroek.\n");
 	fprintf(stderr, "Distributed under the Apache License Version 2.0.\n");
+}
+
+/**
+ * Readline initialization calls, in this case disabling autocompletion and
+ * enabling user input history.
+ */
+void initialize_readline() {
+	rl_bind_key ('\t', rl_insert); // disable tab autocompletion
+	stifle_history(READLINE_HIST_SIZE); // set history size
 }
 
 /**
@@ -98,15 +111,32 @@ void run_interactive_console() {
 	BrainfuckState *state = brainfuck_state();
 	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
 	BrainfuckInstruction *instruction;
-	
-	printf(">> ");
+	char *line;
+
+	initialize_readline();
 	while(1) {
-		fflush(stdout);
-		instruction = brainfuck_parse_stream_until(stdin, '\n');
-		if (feof(stdin)) { break; }
+		line = readline(">> ");		
+		if (line) {
+			// Empty string crashes on some OSs/versions of editline
+			if (line[0] == '\0') {
+				free(line);
+				continue;
+			}
+
+			char* expansion;
+			int result;
+			
+			result = history_expand(line, &expansion);
+			if (result >= 0 && result != 2 ) { add_history(expansion); }
+			free(expansion);
+		} else { // EOF
+			break;
+		}
+		instruction = brainfuck_parse_string(line);
 		brainfuck_add(state, instruction);
 		brainfuck_execute(instruction, context);
-		printf("\n>> ");
+		free(line);
+		/* printf("\n"); */
 	}
 }
 
@@ -128,14 +158,14 @@ int main(int argc, char *argv[]) {
 	int c;
 	int i = 1;
 	int option_index = 0;
-	
+
 	while (1) {
 		option_index = 0;
 		c = getopt_long (argc, argv, "vhe:",
 			long_options, &option_index);
 		if (c == -1)
 			break;
-			
+
 		switch (c) {
 		case 0:
 			if (long_options[option_index].flag != 0)
@@ -147,8 +177,8 @@ int main(int argc, char *argv[]) {
 		case 'v':
 			print_version();
 			return EXIT_SUCCESS;
-		case 'e':	
- 			return run_string((char *) optarg);
+		case 'e':
+			return run_string((char *) optarg);
 		case '?':
 			print_usage(argv[0]);
 			return EXIT_FAILURE;
@@ -165,7 +195,7 @@ int main(int argc, char *argv[]) {
 		if (isatty(fileno(stdin))) {
 			run_interactive_console();
 		} else {
-			if (run_file(stdin) == EXIT_FAILURE) 
+			if (run_file(stdin) == EXIT_FAILURE)
 				fprintf(stderr, "error: failed to read from stdin\n");
 		}
 	}

@@ -15,7 +15,7 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
@@ -40,14 +40,14 @@ BrainfuckState * brainfuck_state() {
 BrainfuckExecutionContext * brainfuck_context(int size) {
 	if (size < 0)
 		size = BRAINFUCK_TAPE_SIZE;
-		
+
 	unsigned char* tape = malloc(sizeof(char) * size);
 	
 	BrainfuckExecutionContext *context = (BrainfuckExecutionContext *) 
 			malloc(sizeof(BrainfuckExecutionContext));
 	
 	context->output_handler = &putchar;
-	context->input_handler = &getchar;
+	context->input_handler = &get_one_char;
 	context->tape = tape;
 	context->tape_index = 0;
 	context->tape_size = size;
@@ -148,7 +148,7 @@ BrainfuckInstruction * brainfuck_insert_before(BrainfuckState *state, BrainfuckI
 	}
 	before->previous = iter;
 	iter->next = iter;
-	
+
 	if (previous != NULL) {
 		previous->next = instruction;
 		instruction->previous = previous;
@@ -180,14 +180,14 @@ BrainfuckInstruction * brainfuck_insert_after(BrainfuckState *state, BrainfuckIn
 				break;
 			iter = iter->next;
 		}
-	
+
 		if (next != NULL) {
 			next->previous = iter;
 			iter->next = next;
 		}
 		if (state->head == after)
 			state->head = iter;
-		return instruction;		
+		return instruction;
 }
 
 /**
@@ -334,7 +334,7 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 						instruction->difference--;
 					}
 				}
-				(*ptr)--;	
+				(*ptr)--;
 				break;
 			case BRAINFUCK_TOKEN_NEXT:
 			case BRAINFUCK_TOKEN_PREVIOUS:
@@ -347,7 +347,7 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 						instruction->difference--;
 					}
 				}
-				(*ptr)--;		
+				(*ptr)--;
 				break;
 			case BRAINFUCK_TOKEN_OUTPUT:
 			case BRAINFUCK_TOKEN_INPUT:
@@ -355,7 +355,7 @@ BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr
 				for (; *ptr < end && (str[*ptr] == c); (*ptr)++) {
 					instruction->difference++;
 				}
-				(*ptr)--;		
+				(*ptr)--;
 				break;
 			case BRAINFUCK_TOKEN_LOOP_START:
 				(*ptr)++;
@@ -461,7 +461,7 @@ void brainfuck_destroy_context(BrainfuckExecutionContext *context) {
 
 /**
  * Executes the given linked list containing instructions.
- *
+ * 
  * @param root The start of the linked list of instructions you want
  * 	to execute.
  * @param context The context of this execution that contains the tape and
@@ -502,7 +502,7 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 			break;
 		case BRAINFUCK_TOKEN_INPUT:
 			for (index = 0; index < instruction->difference; index++) {
-				int input = context->input_handler();
+				char input = context->input_handler();
 				if (input == EOF) {
 					if (BRAINFUCK_EOF_BEHAVIOR != 1)
 						context->tape[context->tape_index] = BRAINFUCK_EOF_BEHAVIOR;
@@ -533,7 +533,7 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 			else
 				printf(" \t");
 			printf("\n");
- 		 	break;
+			break;
 		}
 		default:
 			return;
@@ -544,7 +544,7 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 			instruction = NULL;
 			return;
 		}
-	} 
+	}
 }
 
 /*
@@ -555,4 +555,15 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
  */
 void brainfuck_execution_stop(BrainfuckExecutionContext *context) {
 	context->shouldStop = 1;
+}
+
+/**
+ * Reads exactly one char from stdin.
+ * @return The character read from stdin.
+ */
+char get_one_char() {
+	char ch, t;
+	ch = getchar();
+	while ((t = getchar()) != '\n' && t != EOF) { }	// Clear stdin
+	return ch;
 }
