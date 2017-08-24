@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,8 @@
 #include <getopt.h>
 #include <ctype.h>
 
-#include <editline/readline.h> 
-// Some OSs might need to include 'editline/history.h' for history functionality
+#include <editline/readline.h>
+#include <editline/history.h>
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 	#define isatty _isatty
@@ -56,8 +56,8 @@ void print_version() {
  * enabling user input history.
  */
 void initialize_readline() {
-	rl_bind_key ('\t', rl_insert); // disable tab autocompletion
-	stifle_history(READLINE_HIST_SIZE); // set history size
+	rl_bind_key ('\t', rl_insert); /* disable tab autocompletion */
+	stifle_history(READLINE_HIST_SIZE); /* set history size */
 }
 
 /**
@@ -117,7 +117,7 @@ void run_interactive_console() {
 	while(1) {
 		line = readline(">> ");		
 		if (line) {
-			// Empty string crashes on some OSs/versions of editline
+			/* Empty string crashes on some OSs/versions of editline */
 			if (line[0] == '\0') {
 				free(line);
 				continue;
@@ -129,7 +129,8 @@ void run_interactive_console() {
 			result = history_expand(line, &expansion);
 			if (result >= 0 && result != 2 ) { add_history(expansion); }
 			free(expansion);
-		} else { // EOF
+		} else { 
+			/* EOF */
 			break;
 		}
 		instruction = brainfuck_parse_string(line);
@@ -191,8 +192,8 @@ int main(int argc, char *argv[]) {
 			if (run_file(fopen(argv[i++], "r")) == EXIT_FAILURE)
 				fprintf(stderr, "error: failed to read file %s\n", argv[i - 1]);
 	} else {
-		// checks if someone is piping code or just calling it the normal way.
-		if (isatty(fileno(stdin))) {
+		/* Check if someone is piping code or just calling it the normal way */
+		if (isatty(STDIN_FILENO)) {
 			run_interactive_console();
 		} else {
 			if (run_file(stdin) == EXIT_FAILURE)

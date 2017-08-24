@@ -11,7 +11,7 @@ if(ENABLE_DEBUG)
 endif()
 
 include_directories(include/)
-add_definitions("-Wall -Wextra -O3")
+add_definitions("-Wall -Wextra -O2 -std=c89")
 add_library(libbrainfuck STATIC src/brainfuck.c)
 set_target_properties(libbrainfuck PROPERTIES PREFIX "")
 add_executable(brainfuck src/main.c)

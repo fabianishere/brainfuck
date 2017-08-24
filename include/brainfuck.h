@@ -18,7 +18,7 @@
 
 #define BRAINFUCK_VERSION "2.6.6"
 #define BRAINFUCK_TAPE_SIZE 30000
-// 1: EOF leaves cell unchanged; 0: EOF == 0; 1: EOF == 1
+/* 1: EOF leaves cell unchanged; 0: EOF == 0; 1: EOF ==  1 */
 #define BRAINFUCK_EOF_BEHAVIOR 1
 
 #define BRAINFUCK_TOKEN_PLUS '+'
@@ -299,6 +299,6 @@ void brainfuck_execution_stop(BrainfuckExecutionContext *);
  * Reads exactly one char from stdin.
  * @return The character read from stdin. 
  */
-char get_one_char();
+char brainfuck_getchar(void);
 
 #endif /* BRAINFUCK_H */

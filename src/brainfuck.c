@@ -47,7 +47,7 @@ BrainfuckExecutionContext * brainfuck_context(int size) {
 			malloc(sizeof(BrainfuckExecutionContext));
 	
 	context->output_handler = &putchar;
-	context->input_handler = &get_one_char;
+	context->input_handler = &brainfuck_getchar;
 	context->tape = tape;
 	context->tape_index = 0;
 	context->tape_size = size;
@@ -561,9 +561,9 @@ void brainfuck_execution_stop(BrainfuckExecutionContext *context) {
  * Reads exactly one char from stdin.
  * @return The character read from stdin.
  */
-char get_one_char() {
+char brainfuck_getchar() {
 	char ch, t;
 	ch = getchar();
-	while ((t = getchar()) != '\n' && t != EOF) { }	// Clear stdin
+	while ((t = getchar()) != '\n' && t != EOF) { }	/* Clear stdin */
 	return ch;
 }
