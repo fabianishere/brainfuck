@@ -21,7 +21,9 @@
 #include <ctype.h>
 
 #include <editline/readline.h>
-#include <editline/history.h>
+#ifndef __APPLE__
+	#include <editline/history.h>
+#endif
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 	#define isatty _isatty

@@ -16,3 +16,9 @@ CMakeCache.txt
 CMakeFiles
 cmake_install.cmake
 install_manifest.txt
+
+brainfuck.rb
+CmakeListsINSTALL.txt
+libbrainfuck.a
+brainfuck
+
