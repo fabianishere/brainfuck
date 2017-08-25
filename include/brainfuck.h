@@ -16,7 +16,9 @@
 #ifndef BRAINFUCK_H
 #define BRAINFUCK_H
 
-#define BRAINFUCK_VERSION "2.6.6"
+#define BRAINFUCK_VERSION_MAJOR @brainfuck_VERSION_MAJOR@
+#define BRAINFUCK_VERSION_MINOR @brainfuck_VERSION_MINOR@
+#define BRAINFUCK_VERSION_PATCH @brainfuck_VERSION_PATCH@
 #define BRAINFUCK_TAPE_SIZE 30000
 /* 1: EOF leaves cell unchanged; 0: EOF == 0; 1: EOF ==  1 */
 #define BRAINFUCK_EOF_BEHAVIOR 1
@@ -42,7 +44,7 @@
  */
 typedef struct BrainfuckInstruction {
 	/**
-	 * The difference between the value of the byte at the currect pointer and 
+	 * The difference between the value of the byte at the currect pointer and
 	 *   the value we want.
 	 */
 	int difference;

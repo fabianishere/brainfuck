@@ -10,6 +10,10 @@ if(ENABLE_DEBUG)
 	add_definitions("-DBRAINFUCK_EXTENSION_DEBUG")
 endif()
 
+configure_file (
+  "${PROJECT_SOURCE_DIR}/include/brainfuck.h"
+  "${PROJECT_SOURCE_DIR}/include/brainfuck.h"
+)
 include_directories(include/)
 add_definitions("-Wall -Wextra -O2 -std=c89")
 add_library(libbrainfuck STATIC src/brainfuck.c)

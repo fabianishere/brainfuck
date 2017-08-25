@@ -47,8 +47,8 @@ void print_usage(char *name) {
  * Print the version information.
  */
 void print_version() {
-	fprintf(stderr, "brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__, 
-		__TIME__);
+	fprintf(stderr, "brainfuck %d.%d.%d (%s, %s)\n", BRAINFUCK_VERSION_MAJOR,
+		BRAINFUCK_VERSION_MINOR, BRAINFUCK_VERSION_PATCH, __DATE__, __TIME__);
 	fprintf(stderr, "Copyright (c) 2016 Fabian Mastenbroek.\n");
 	fprintf(stderr, "Distributed under the Apache License Version 2.0.\n");
 }
@@ -105,8 +105,8 @@ int run_string(char *code) {
  * Run the brainfuck interpreter in interactive mode.
  */
 void run_interactive_console() {
-	printf("brainfuck %s (%s, %s)\n", BRAINFUCK_VERSION, __DATE__,
-		__TIME__);
+	printf("brainfuck %d.%d.%d (%s, %s)\n", BRAINFUCK_VERSION_MAJOR,
+		BRAINFUCK_VERSION_MINOR, BRAINFUCK_VERSION_PATCH, __DATE__, __TIME__);
 #ifdef BRAINFUCK_EXTENSION_DEBUG
 	printf("Use # to inspect tape\n");
 #endif
@@ -117,7 +117,7 @@ void run_interactive_console() {
 
 	initialize_readline();
 	while(1) {
-		line = readline(">> ");		
+		line = readline(">> ");
 		if (line) {
 			/* Empty string crashes on some OSs/versions of editline */
 			if (line[0] == '\0') {
@@ -127,11 +127,11 @@ void run_interactive_console() {
 
 			char* expansion;
 			int result;
-			
+
 			result = history_expand(line, &expansion);
 			if (result >= 0 && result != 2 ) { add_history(expansion); }
 			free(expansion);
-		} else { 
+		} else {
 			/* EOF */
 			break;
 		}
