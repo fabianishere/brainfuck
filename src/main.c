@@ -20,9 +20,11 @@
 #include <getopt.h>
 #include <ctype.h>
 
-#include <editline/readline.h>
-#ifndef __APPLE__
-	#include <editline/history.h>
+#ifdef BRAINFUCK_EDITLINE_LIB
+	#include <editline/readline.h>
+	#ifndef __APPLE__
+		#include <editline/history.h>
+	#endif
 #endif
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
@@ -38,9 +40,9 @@
  */
 void print_usage(char *name) {
 	fprintf(stderr, "usage: %s [-evh] [file...]\n", name);
-	fprintf(stderr,	"\t-e --eval\t\trun code directly\n");
+	fprintf(stderr, "\t-e --eval\t\trun code directly\n");
 	fprintf(stderr, "\t-v --version\t\tshow version information\n");
-	fprintf(stderr,	"\t-h --help\t\tshow a help message\n");
+	fprintf(stderr, "\t-h --help\t\tshow a help message\n");
 }
 
 /**
@@ -53,6 +55,7 @@ void print_version() {
 	fprintf(stderr, "Distributed under the Apache License Version 2.0.\n");
 }
 
+#ifdef BRAINFUCK_EDITLINE_LIB
 /**
  * Readline initialization calls, in this case disabling autocompletion and
  * enabling user input history.
@@ -61,6 +64,7 @@ void initialize_readline() {
 	rl_bind_key ('\t', rl_insert); /* disable tab autocompletion */
 	stifle_history(READLINE_HIST_SIZE); /* set history size */
 }
+#endif
 
 /**
  * Run the given brainfuck file.
@@ -113,6 +117,7 @@ void run_interactive_console() {
 	BrainfuckState *state = brainfuck_state();
 	BrainfuckExecutionContext *context = brainfuck_context(BRAINFUCK_TAPE_SIZE);
 	BrainfuckInstruction *instruction;
+#ifdef BRAINFUCK_EDITLINE_LIB
 	char *line;
 
 	initialize_readline();
@@ -136,11 +141,22 @@ void run_interactive_console() {
 			break;
 		}
 		instruction = brainfuck_parse_string(line);
+		free(line);
 		brainfuck_add(state, instruction);
 		brainfuck_execute(instruction, context);
-		free(line);
-		/* printf("\n"); */
 	}
+#else
+	printf(">> ");
+	while(1) {
+		fflush(stdout);
+		instruction = brainfuck_parse_stream_until(stdin, '\n');
+		if (feof(stdin)) { break; }
+		fflush(stdin);
+		brainfuck_add(state, instruction);
+		brainfuck_execute(instruction, context);
+		printf(">> ");
+	}
+#endif
 }
 
 /* Command line options */
