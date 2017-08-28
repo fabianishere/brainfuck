@@ -1,0 +1,33 @@
+# Enable C support
+language: c
+
+# Build matrix
+matrix:
+    include:
+        - os: linux
+          compiler: gcc
+          addons:
+              apt:
+                  packages:
+                      - libedit-dev
+        - os: linux
+          compiler: clang
+          addons:
+              apt:
+                  packages:
+                      - libedit-dev
+        - os: osx
+          compiler: gcc
+        - os: osx
+          compiler: clang
+
+# macOS dependencies
+before_install:  
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update         ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libedit; fi
+
+# Build steps
+script:
+    - mkdir build
+    - cd build
+    - cmake .. && make VERBOSE=1

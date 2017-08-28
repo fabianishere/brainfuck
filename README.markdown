@@ -1,4 +1,4 @@
-brainfuck
+brainfuck [![Build Status](https://travis-ci.org/fabianishere/brainfuck.svg?branch=master)](https://travis-ci.org/fabianishere/brainfuck)
 ===========
 Brainfuck interpreter written in C.
 
