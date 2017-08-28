@@ -5,13 +5,26 @@ language: c
 matrix:
     include:
         - os: linux
-          compiler: gcc 
+          compiler: gcc
+          addons:
+              apt:
+                  packages:
+                      - libedit-dev
         - os: linux
           compiler: clang
+          addons:
+              apt:
+                  packages:
+                      - libedit-dev
         - os: osx
           compiler: gcc
         - os: osx
           compiler: clang
+
+# macOS dependencies
+before_install:  
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update         ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libedit; fi
 
 # Build steps
 script:
