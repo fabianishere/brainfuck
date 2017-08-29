@@ -30,8 +30,4 @@ if(ENABLE_EDITLINE)
   target_link_libraries(brainfuck libbrainfuck_static -ledit)
 else()
   target_link_libraries(brainfuck libbrainfuck_static)
-<<<<<<< HEAD
 endif()
-=======
-endif()
->>>>>>> 5e703b90d947cc79303e6cee8251a6b07df69cfa
