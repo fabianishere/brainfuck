@@ -8,10 +8,7 @@ set(brainfuck_VERSION_PATCH 1)
 option(ENABLE_DEBUG "Enable the debug extension for brainfuck.")
 option(BUILD_SHARED_LIB "Build a shared library.")
 option(ENABLE_EDITLINE "Enable GNU readline functionality provided by the editline library." ON)
-configure_file (
-  "${PROJECT_SOURCE_DIR}/include/brainfuck.h"
-  "${PROJECT_SOURCE_DIR}/include/brainfuck.h"
-)
+
 include_directories(include/)
 add_definitions("-Wall -Wextra -O2 -std=c89")
 add_library(libbrainfuck_static STATIC src/brainfuck.c)

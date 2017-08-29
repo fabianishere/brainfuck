@@ -40,9 +40,9 @@
  */
 void print_usage(char *name) {
 	fprintf(stderr, "usage: %s [-evh] [file...]\n", name);
-	fprintf(stderr,	"\t-e --eval\t\trun code directly\n");
+	fprintf(stderr, "\t-e --eval\t\trun code directly\n");
 	fprintf(stderr, "\t-v --version\t\tshow version information\n");
-	fprintf(stderr,	"\t-h --help\t\tshow a help message\n");
+	fprintf(stderr, "\t-h --help\t\tshow a help message\n");
 }
 
 /**
