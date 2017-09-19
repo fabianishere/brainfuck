@@ -22,9 +22,6 @@
 
 #ifdef BRAINFUCK_EDITLINE_LIB
 	#include <editline/readline.h>
-	#ifndef __APPLE__
-		#include <editline/history.h>
-	#endif
 #endif
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
