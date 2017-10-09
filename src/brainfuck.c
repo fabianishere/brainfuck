@@ -455,6 +455,7 @@ void brainfuck_destroy_state(BrainfuckState *state) {
  * @param context The context to destroy
  */
 void brainfuck_destroy_context(BrainfuckExecutionContext *context) {
+	free(context->tape);
 	free(context);
 	context = 0;
 }
