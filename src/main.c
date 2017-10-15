@@ -29,6 +29,7 @@
 #endif
 
 #include <brainfuck.h>
+#include <jit.h>
 
 /**
  * Print the usage message of this program.
@@ -78,7 +79,7 @@ int run_file(FILE *file) {
 		return EXIT_FAILURE;
 	}
 	brainfuck_add(state, brainfuck_parse_stream(file));
-	brainfuck_execute(state->root, context);
+	brainfuck_execute_jit(state->root, context);
 	brainfuck_destroy_context(context);
 	brainfuck_destroy_state(state);
 	fclose(file);

@@ -13,7 +13,7 @@ option(ENABLE_EDITLINE "Enable GNU readline functionality provided by the editli
 
 include_directories(include/)
 add_definitions("-Wall -Wextra -O2 -std=c89")
-add_executable(brainfuck src/main.c src/brainfuck.c)
+add_executable(brainfuck include/brainfuck.h include/jit.h src/main.c src/brainfuck.c src/jit/x86_64.c)
 install(TARGETS brainfuck RUNTIME DESTINATION bin)
 install(FILES include/brainfuck.h DESTINATION "include")
 install(FILES man/brainfuck.1 DESTINATION "share/man/man1")
