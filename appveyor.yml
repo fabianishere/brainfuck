@@ -1,0 +1,47 @@
+version: '{build}'
+clone_folder: c:\projects\brainfuck
+image:
+    - Visual Studio 2015
+    - Visual Studio 2017
+configuration:
+    - Release
+    - Debug
+platform:
+    - x64
+environment:
+  matrix:
+      - arch: Win64
+matrix:
+    fast_finish: true
+
+# Install scripts (runs after repo cloning)
+install:
+    - cmd: git submodule update --init --recursive
+
+# skip unsupported combinations
+init:
+    - set arch=
+    - if "%arch%"=="Win64" ( set arch= Win64)
+    - echo %arch%
+    - echo %APPVEYOR_BUILD_WORKER_IMAGE%
+    - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
+    - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( set generator="Visual Studio 14 2015%arch%" )
+    - echo %generator%
+
+# run CMake generator
+before_build:
+    - cmd: >-
+        mkdir build
+
+        cd build
+
+        cmake --version
+
+        cmake .. -G %generator% -DENABLE_EDITLINE=OFF
+
+
+# build Visual Studio project
+build:
+    project: c:\projects\brainfuck\build\brainfuck.sln
+    verbosity: minimal
+    parallel: true

@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <getopt.h>
 #include <ctype.h>
 
@@ -25,7 +24,11 @@
 #endif
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+    #include <io.h>
 	#define isatty _isatty
+	#define STDIN_FILENO 0
+#else
+	#include <unistd.h>
 #endif
 
 #include <brainfuck.h>

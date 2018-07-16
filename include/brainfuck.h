@@ -16,9 +16,6 @@
 #ifndef BRAINFUCK_H
 #define BRAINFUCK_H
 
-#define BRAINFUCK_VERSION_MAJOR 2 
-#define BRAINFUCK_VERSION_MINOR 7
-#define BRAINFUCK_VERSION_PATCH 2
 #define BRAINFUCK_TAPE_SIZE 30000
 /* 1: EOF leaves cell unchanged; 0: EOF == 0; 1: EOF ==  1 */
 #define BRAINFUCK_EOF_BEHAVIOR 1
