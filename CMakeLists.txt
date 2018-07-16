@@ -10,12 +10,17 @@ option(ENABLE_EDITLINE "Enable GNU readline functionality provided by the editli
 option(ENABLE_EXTENSION_DEBUG "Enable the debug extension for brainfuck.")
 option(INSTALL_EXAMPLES "Installs the examples.")
 
+# getopt shim for windows
+add_library(getopt INTERFACE)
+if (MSVC)
+    target_include_directories(getopt INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/deps/getopt)
+endif()
+
 add_library(brainfuck include/brainfuck.h src/brainfuck.c)
 set_target_properties(brainfuck PROPERTIES
     PUBLIC_HEADER "include/brainfuck.h"
     C_STANDARD 90
 )
-target_compile_options(brainfuck PRIVATE -Wall -Wextra -O2)
 target_include_directories(brainfuck PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
     $<INSTALL_INTERFACE:include/brainfuck/>
@@ -37,8 +42,7 @@ if(ENABLE_CLI)
         OUTPUT_NAME "brainfuck"
         C_STANDARD 90
     )
-    target_compile_options(brainfuck-cli PRIVATE -Wall -Wextra -O2)
-    target_link_libraries(brainfuck-cli brainfuck)
+    target_link_libraries(brainfuck-cli brainfuck getopt)
     install(TARGETS brainfuck-cli RUNTIME DESTINATION bin)
     install(FILES man/brainfuck.1 DESTINATION "share/man/man1")
 
@@ -56,4 +60,15 @@ if(INSTALL_EXAMPLES)
     set(EXAMPLES_DIR "share/brainfuck")
     file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${EXAMPLES_DIR})
     install(DIRECTORY examples DESTINATION ${EXAMPLES_DIR})
+endif()
+
+if(MSVC)
+    # Force to always compile with W4
+    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
 endif()
