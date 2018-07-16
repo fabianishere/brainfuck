@@ -1,49 +1,59 @@
-cmake_minimum_required(VERSION 2.6)
+﻿cmake_minimum_required(VERSION 3.1)
 
-project(brainfuck C)
-set(brainfuck_VERSION_MAJOR 2)
-set(brainfuck_VERSION_MINOR 7)
-set(brainfuck_VERSION_PATCH 2)
+project(brainfuck
+    LANGUAGES C
+    VERSION 2.7.3
+)
 
-option(ENABLE_DEBUG "Enable the debug extension for brainfuck.")
-option(BUILD_SHARED_LIB "Build a shared library.")
-option(INSTALL_EXAMPLES "Installs the examples.")
-option(BUILD_STATIC_LIB "Build a static library." ON)
+option(ENABLE_CLI "Enable the command line interface." ON)
 option(ENABLE_EDITLINE "Enable GNU readline functionality provided by the editline library." ON)
+option(ENABLE_EXTENSION_DEBUG "Enable the debug extension for brainfuck.")
+option(INSTALL_EXAMPLES "Installs the examples.")
 
-include_directories(include/)
-add_definitions("-Wall -Wextra -O2 -std=c89")
-add_executable(brainfuck src/main.c src/brainfuck.c)
-install(TARGETS brainfuck RUNTIME DESTINATION bin)
-install(FILES include/brainfuck.h DESTINATION "include")
-install(FILES man/brainfuck.1 DESTINATION "share/man/man1")
+add_library(brainfuck include/brainfuck.h src/brainfuck.c)
+set_target_properties(brainfuck PROPERTIES
+    PUBLIC_HEADER "include/brainfuck.h"
+    C_STANDARD 90
+)
+target_compile_options(brainfuck PRIVATE -Wall -Wextra -O2)
+target_include_directories(brainfuck PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+    $<INSTALL_INTERFACE:include/brainfuck/>
+)
+target_compile_definitions(brainfuck PUBLIC
+    "-DBRAINFUCK_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}"
+    "-DBRAINFUCK_VERSION_MINOR=${PROJECT_VERSION_MINOR}"
+    "-DBRAINFUCK_VERSION_PATCH=${PROJECT_VERSION_PATCH}"
+)
+install(TARGETS brainfuck
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    PUBLIC_HEADER DESTINATION include/brainfuck
+)
+
+if(ENABLE_CLI)
+    add_executable(brainfuck-cli src/main.c)
+    set_target_properties(brainfuck-cli PROPERTIES
+        OUTPUT_NAME "brainfuck"
+        C_STANDARD 90
+    )
+    target_compile_options(brainfuck-cli PRIVATE -Wall -Wextra -O2)
+    target_link_libraries(brainfuck-cli brainfuck)
+    install(TARGETS brainfuck-cli RUNTIME DESTINATION bin)
+    install(FILES man/brainfuck.1 DESTINATION "share/man/man1")
+
+    if(ENABLE_EDITLINE)
+        target_compile_definitions(brainfuck-cli PRIVATE "-DBRAINFUCK_EDITLINE_LIB")
+        target_link_libraries(brainfuck-cli -ledit)
+    endif()
+endif()
+
+if(ENABLE_EXTENSION_DEBUG)
+    add_definitions("-DBRAINFUCK_EXTENSION_DEBUG")
+endif()
 
 if(INSTALL_EXAMPLES)
-	set(EXAMPLES_DIR "share/brainfuck")
-	file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${EXAMPLES_DIR})
-	install(DIRECTORY examples DESTINATION ${EXAMPLES_DIR})
-endif()
-
-if(ENABLE_EDITLINE)
-  add_definitions("-DBRAINFUCK_EDITLINE_LIB")
-  target_link_libraries(brainfuck -ledit)
-endif()
-
-if(ENABLE_DEBUG)
-  add_definitions("-DBRAINFUCK_EXTENSION_DEBUG")
-endif()
-
-if(BUILD_STATIC_LIB)
-	add_library(libbrainfuck_static STATIC src/brainfuck.c)
-	set_target_properties(libbrainfuck_static PROPERTIES PREFIX "")
-	set_target_properties(libbrainfuck_static PROPERTIES OUTPUT_NAME "libbrainfuck")
-	target_link_libraries(brainfuck libbrainfuck_static)
-	install(TARGETS libbrainfuck_static ARCHIVE DESTINATION lib)
-endif()
-
-if(BUILD_SHARED_LIB)
-  add_library(libbrainfuck_shared SHARED src/brainfuck.c)
-  set_target_properties(libbrainfuck_shared PROPERTIES PREFIX "")
-  set_target_properties(libbrainfuck_shared PROPERTIES OUTPUT_NAME "libbrainfuck")
-  install(TARGETS libbrainfuck_shared LIBRARY DESTINATION lib)
+    set(EXAMPLES_DIR "share/brainfuck")
+    file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${EXAMPLES_DIR})
+    install(DIRECTORY examples DESTINATION ${EXAMPLES_DIR})
 endif()
