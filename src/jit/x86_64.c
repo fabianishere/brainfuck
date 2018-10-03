@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <sys/mman.h>
 
 #include <brainfuck.h>
@@ -28,7 +29,7 @@ struct BrainfuckJitState {
     /**
      * The memory containing the (partially) compiled program.
      */
-    unsigned char *memory;
+    uint8_t *memory;
 
     /**
      * The size of the memory block.
@@ -87,6 +88,22 @@ static int brainfuck_jit_mark_executable(struct BrainfuckJitState *state)
 }
 
 /**
+ * Write the given bytes to memory at the given position.
+ *
+ * @param state The state of the compiler.
+ * @param index The index to write the memory at.
+ * @param memory The memory to write.
+ * @param size The size of the memory block to write.
+ */
+static void brainfuck_jit_emit_index(struct BrainfuckJitState *state,
+                                     int index,
+                                     const uint8_t *memory,
+                                     size_t size)
+{
+    memcpy(state->memory + index, memory, size);
+}
+
+/**
  * Write the given bytes to memory.
  *
  * @param state The state of the compiler.
@@ -94,24 +111,47 @@ static int brainfuck_jit_mark_executable(struct BrainfuckJitState *state)
  * @param size The size of the memory block to write.
  */
 static void brainfuck_jit_emit(struct BrainfuckJitState *state,
-                               const unsigned char *memory,
-                               size_t size) {
-    memcpy(state->memory + state->index, memory, size);
+                               const uint8_t *memory,
+                               size_t size)
+{
+    brainfuck_jit_emit_index(state, state->index, memory, size);
     state->index += size;
+}
+
+/**
+ * Reserve the specified amount of bytes in the memory and return the ticket.
+ *
+ * @param state The compiler state.
+ * @param size The amount of bytes to reserve.
+ */
+static int brainfuck_jit_reserve(struct BrainfuckJitState *state,
+                                 size_t size)
+{
+    int res = state->index;
+    state->index += size;
+    return res;
 }
 
 /**
  * Write the prologue of the program to the memory.
  *
  * @param state The state of the compiler.
+ * @param context The context within the execution takes place.
  */
-static void brainfuck_jit_emit_prologue(struct BrainfuckJitState *state)
+static void brainfuck_jit_emit_prologue(struct BrainfuckJitState *state,
+                                        struct BrainfuckExecutionContext *context)
 {
-    static const unsigned char prologue[] = {
-            0x55,                   /* push %rbp */
-            0x48, 0x89, 0xE5,       /* mov %rsp, %rbp */
-            0x48, 0x83, 0xEC, 0x20  /* sub $20, %rsp */
+    uint8_t prologue[] = {
+        0x55,                   /* push %rbp */
+        0x48, 0x89, 0xE5,       /* mov %rsp, %rbp */
+        0x41, 0x54,             /* push %r12 */
+
+        0x49, 0xBC,             /* movabs imm32, %r12 */
+        0x1, 0x0, 0x0, 0x0,
+        0x0, 0x0, 0x0, 0x0,
     };
+
+    *((uint64_t *) (prologue + 8)) = context->tape;
     brainfuck_jit_emit(state, prologue, sizeof(prologue));
 }
 
@@ -122,10 +162,11 @@ static void brainfuck_jit_emit_prologue(struct BrainfuckJitState *state)
  */
 static void brainfuck_jit_emit_epilogue(struct BrainfuckJitState *state)
 {
-    static const unsigned char epilogue[] = {
-            0x48, 0x89, 0xEC,   /* mov %rbp, %rsp */
-            0x5D,               /* pop %rbp */
-            0xC3                /* ret */
+    static const uint8_t epilogue[] = {
+        0x41, 0x5C,         /* pop %r12 */
+        0x48, 0x89, 0xEC,   /* mov %rbp, %rsp */
+        0x5D,               /* pop %rbp */
+        0xC3                /* ret */
     };
     brainfuck_jit_emit(state, epilogue, sizeof(epilogue));
 }
@@ -184,7 +225,12 @@ static void brainfuck_jit_emit_add(struct BrainfuckJitState *state,
                                    BrainfuckInstruction *instruction,
                                    BrainfuckExecutionContext *context)
 {
-    const unsigned char code[] = {};
+    uint8_t code[] = {
+        0x41, 0x81, 0x04, 0x24, /* add imm32, (r12) */
+        0x0, 0x0, 0x0, 0x0,     /* imm32 */
+    };
+
+    ((uint32_t *) code)[1] = instruction->difference;
     brainfuck_jit_emit(state, code, sizeof(code));
 }
 
@@ -199,7 +245,12 @@ static void brainfuck_jit_emit_sub(struct BrainfuckJitState *state,
                                    BrainfuckInstruction *instruction,
                                    BrainfuckExecutionContext *context)
 {
-    const unsigned char code[] = {};
+    uint8_t code[] = {
+        0x41, 0x81, 0x2C, 0x24, /* sub imm32, (r12) */
+        0x0, 0x0, 0x0, 0x0,     /* imm32 */
+    };
+
+    ((uint32_t *) code)[1] = instruction->difference;
     brainfuck_jit_emit(state, code, sizeof(code));
 }
 
@@ -214,7 +265,12 @@ static void brainfuck_jit_emit_movl(struct BrainfuckJitState *state,
                                     BrainfuckInstruction *instruction,
                                     BrainfuckExecutionContext *context)
 {
-    const unsigned char code[] = {};
+    uint8_t code[] = {
+        0x49, 0x81, 0xEC,   /* sub imm32, r12 */
+        0x0, 0x0, 0x0, 0x0, /* imm32 */
+    };
+
+    ((uint32_t *) code)[1] = instruction->difference;
     brainfuck_jit_emit(state, code, sizeof(code));
 }
 
@@ -229,7 +285,12 @@ static void brainfuck_jit_emit_movr(struct BrainfuckJitState *state,
                                     BrainfuckInstruction *instruction,
                                     BrainfuckExecutionContext *context)
 {
-    const unsigned char code[] = {};
+    uint8_t code[] = {
+        0x49, 0x81, 0xC4,   /* add imm32, %r12 */
+        0x0, 0x0, 0x0, 0x0, /* imm32 */
+    };
+
+    ((uint32_t *) code)[1] = instruction->difference;
     brainfuck_jit_emit(state, code, sizeof(code));
 }
 
@@ -244,7 +305,15 @@ static void brainfuck_jit_emit_input(struct BrainfuckJitState *state,
                                      BrainfuckInstruction *instruction,
                                      BrainfuckExecutionContext *context)
 {
-    const unsigned char code[] = {};
+    uint8_t code[] = {
+        0x48, 0xB8,             /* movabs imm64, %rax */
+        0x0, 0x0, 0x0, 0x0,
+        0x0, 0x0, 0x0, 0x0,
+        0xFF, 0xD0,             /* call rax */
+        0x41, 0x89, 0x04, 0x24  /* mov %rax, (%r12) */
+    };
+
+    *((uint64_t *) (code + 2)) = context->input_handler;
     brainfuck_jit_emit(state, code, sizeof(code));
 }
 
@@ -259,8 +328,50 @@ static void brainfuck_jit_emit_output(struct BrainfuckJitState *state,
                                       BrainfuckInstruction *instruction,
                                       BrainfuckExecutionContext *context)
 {
-    const unsigned char code[] = {};
+
+    uint8_t code[] = {
+        0x48, 0xB8,             /* movabs imm64, %rax */
+        0x0, 0x0, 0x0, 0x0,
+        0x0, 0x0, 0x0, 0x0,
+        0x49, 0x8B, 0x3C, 0x24, /* mov (%r12), %rdi */
+        0xFF, 0xD0,             /* call rax */
+    };
+
+    *((uint64_t *) (code + 2)) = context->output_handler;
     brainfuck_jit_emit(state, code, sizeof(code));
+}
+
+/**
+ * Emit a LOOP instruction to memory.
+ *
+ * @param state The state of the JIT compiler.
+ * @param instruction The instruction to emit.
+ * @param context The context the execution takes place in.
+ */
+static void brainfuck_jit_emit_loop(struct BrainfuckJitState *state,
+                                    BrainfuckInstruction *instruction,
+                                    BrainfuckExecutionContext *context)
+{
+    uint8_t jmp[] = {
+        0xE9,                           /* jmp rel32 */
+        0x0, 0x0, 0x0, 0x0,
+    };
+
+    int ticket = brainfuck_jit_reserve(state, sizeof(jmp));
+
+    brainfuck_jit_emit_program(state, instruction->loop, context);
+
+    uint8_t jnz[] = {
+        0x41, 0x83, 0x3C, 0x24, 0x00,   /* cmp $0, (r12) */
+        0x0F, 0x85,                     /* jnz rel32 */
+        0x00, 0x00, 0x00, 0x00,
+    };
+
+    *((uint32_t *) (jmp + 1)) = (state->index + sizeof(jmp)) - ticket - 10;
+    brainfuck_jit_emit_index(state, ticket, jmp, sizeof(jmp));
+
+    *((uint32_t *) (jnz + 7)) = ticket - (state->index + sizeof(jmp)) - 1;
+    brainfuck_jit_emit(state, jnz, sizeof(jnz));
 }
 
 /**
@@ -294,7 +405,7 @@ static void brainfuck_jit_emit_instruction(struct BrainfuckJitState *state,
             brainfuck_jit_emit_output(state, instruction, context);
             break;
         case BRAINFUCK_TOKEN_LOOP_START:
-            brainfuck_jit_emit_program(state, instruction, context);
+            brainfuck_jit_emit_loop(state, instruction, context);
             break;
         default:
             break;
@@ -336,11 +447,11 @@ int brainfuck_execute_jit(BrainfuckInstruction *root,
     state.size = size;
     state.index = 0;
 
-    brainfuck_jit_emit_prologue(&state);
+    brainfuck_jit_emit_prologue(&state, context);
     brainfuck_jit_emit_program(&state, root, context);
     brainfuck_jit_emit_epilogue(&state);
     brainfuck_jit_mark_executable(&state);
-    brainfuck_jit_dump(&state);
+    // brainfuck_jit_dump(&state);
     void (*program)() = (void *) state.memory;
     program();
     return 0;
