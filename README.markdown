@@ -6,9 +6,9 @@ Brainfuck interpreter written in C.
 
 ## Usage
     brainfuck [-veh] file...
-	-e --eval		run code directly
+	-e --eval	run code directly
 	-v --version	show version information
-	-h --help		show a help message.
+	-h --help	show a help message.
 
 The interactive console can be accessed by passing no arguments.    
 
@@ -32,7 +32,9 @@ int main() {
 ```
 
 ## Examples
-Look in the `examples` directory for a large amount of brainfuck examples.
+The [examples/](/examples) directory contains a large amount of 
+brainfuck example programs. We have tried to attribute the original
+authors of these programs where possible.
 
 ## Getting the source
 Download the source code by running the following code in your command prompt:
@@ -58,7 +60,7 @@ $ make
 ```
 
 ## License
-See LICENSE file.
+The code is released under the Apache License version 2.0. See [LICENSE](/LICENSE).
 
 ## Contributors
     Fabian Mastenbroek https://github.com/fabianishere

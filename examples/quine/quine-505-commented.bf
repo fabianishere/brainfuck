@@ -30,4 +30,3 @@ WHILE_THERE_IS_ONE_BACKWARDS: [
 	              >+++[>+++++ +++++ +++++<-]>--.<<<
 
 ]
-
