@@ -9,6 +9,7 @@ Debug
 bin
 lib
 build
+Testing
 
 # CMake Files
 Makefile

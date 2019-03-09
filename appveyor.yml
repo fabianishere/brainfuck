@@ -45,3 +45,7 @@ build:
     project: c:\projects\brainfuck\build\brainfuck.sln
     verbosity: minimal
     parallel: true
+
+# Test the project
+test_script:
+  - ctest -VV

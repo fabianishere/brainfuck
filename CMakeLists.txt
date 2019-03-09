@@ -5,10 +5,23 @@ project(brainfuck
     VERSION 2.7.3
 )
 
+include(CTest)
+
 option(ENABLE_CLI "Enable the command line interface." ON)
 option(ENABLE_EDITLINE "Enable GNU readline functionality provided by the editline library." ON)
 option(ENABLE_EXTENSION_DEBUG "Enable the debug extension for brainfuck.")
 option(INSTALL_EXAMPLES "Installs the examples.")
+
+if(MSVC)
+    # Force to always compile with W4
+    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
+endif()
 
 # getopt shim for windows
 add_library(getopt INTERFACE)
@@ -62,13 +75,6 @@ if(INSTALL_EXAMPLES)
     install(DIRECTORY examples DESTINATION ${EXAMPLES_DIR})
 endif()
 
-if(MSVC)
-    # Force to always compile with W4
-    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-    endif()
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
+if(BUILD_TESTING)
+    add_subdirectory(tests)
 endif()
