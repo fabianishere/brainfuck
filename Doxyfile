@@ -1,0 +1,19 @@
+# Doxyfile 1.8.9.1
+
+DOXYFILE_ENCODING      = UTF-8
+PROJECT_NAME           = brainfuck
+PROJECT_NUMBER         = 3.0.0
+OUTPUT_DIRECTORY       = docs
+JAVADOC_AUTOBRIEF      = YES
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_STATIC         = YES
+CASE_SENSE_NAMES       = YES
+INPUT                  = include \
+                         src
+RECURSIVE              = YES
+EXCLUDE_SYMLINKS       = YES
+SOURCE_BROWSER         = YES
+STRIP_CODE_COMMENTS    = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+ALPHABETICAL_INDEX     = NO
