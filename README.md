@@ -60,7 +60,7 @@ $ make
 ```
 
 ## License
-The code is released under the Apache License version 2.0. See [LICENSE](/LICENSE).
+The code is released under the Apache License version 2.0. See [LICENSE.txt](/LICENSE.txt).
 
 ## Contributors
     Fabian Mastenbroek https://github.com/fabianishere
