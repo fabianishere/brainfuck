@@ -2,7 +2,7 @@
 
 project(brainfuck
     LANGUAGES C
-    VERSION 2.7.3
+    VERSION 3.0.0
 )
 
 include(CTest)
@@ -29,19 +29,20 @@ if (MSVC)
     target_include_directories(getopt INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/deps/getopt)
 endif()
 
-add_library(brainfuck include/brainfuck.h src/brainfuck.c)
-set_target_properties(brainfuck PROPERTIES
-    PUBLIC_HEADER "include/brainfuck.h"
-    C_STANDARD 90
+add_library(brainfuck
+        include/brainfuck/brainfuck.h
+        include/brainfuck/ir.h
+        include/brainfuck/parser.h
+        include/brainfuck/vm.h
+        src/brainfuck.h
+        src/brainfuck.c
+        src/parser/parser.c
+        src/vm/vm.c
 )
+set_target_properties(brainfuck PROPERTIES C_STANDARD 90)
 target_include_directories(brainfuck PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
-    $<INSTALL_INTERFACE:include/brainfuck/>
-)
-target_compile_definitions(brainfuck PUBLIC
-    "-DBRAINFUCK_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}"
-    "-DBRAINFUCK_VERSION_MINOR=${PROJECT_VERSION_MINOR}"
-    "-DBRAINFUCK_VERSION_PATCH=${PROJECT_VERSION_PATCH}"
+    $<INSTALL_INTERFACE:include/>
 )
 install(TARGETS brainfuck
     LIBRARY DESTINATION lib
@@ -50,7 +51,7 @@ install(TARGETS brainfuck
 )
 
 if(ENABLE_CLI)
-    add_executable(brainfuck-cli src/main.c)
+    add_executable(brainfuck-cli src/cli.c)
     set_target_properties(brainfuck-cli PROPERTIES
         OUTPUT_NAME "brainfuck"
         C_STANDARD 90
