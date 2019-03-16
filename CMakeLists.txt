@@ -7,10 +7,11 @@ project(brainfuck
 
 include(CTest)
 
-option(ENABLE_CLI "Enable the command line interface." ON)
-option(ENABLE_EDITLINE "Enable GNU readline functionality provided by the editline library." ON)
-option(ENABLE_EXTENSION_DEBUG "Enable the debug extension for brainfuck.")
-option(INSTALL_EXAMPLES "Installs the examples.")
+option(ENABLE_PARSER_BRAINFUCK "Enable brainfuck parser implementation" ON)
+option(ENABLE_CLI "Enable the command line interface" ON)
+option(ENABLE_EDITLINE "Enable GNU readline functionality provided by the editline library" ON)
+option(ENABLE_EXTENSION_DEBUG "Enable the debug extension for brainfuck")
+option(INSTALL_EXAMPLES "Installs the examples")
 
 if(MSVC)
     # Force to always compile with W4
@@ -37,6 +38,8 @@ add_library(brainfuck
         src/brainfuck.h
         src/brainfuck.c
         src/parser/parser.c
+        src/parser/brainfuck.h
+        src/parser/brainfuck.c
         src/vm/vm.c
 )
 set_target_properties(brainfuck PROPERTIES C_STANDARD 90)
@@ -49,6 +52,10 @@ install(TARGETS brainfuck
     ARCHIVE DESTINATION lib
     PUBLIC_HEADER DESTINATION include/brainfuck
 )
+
+if(ENABLE_PARSER_BRAINFUCK)
+    target_compile_definitions(brainfuck PUBLIC BRAINFUCK_PARSER_BRAINFUCK_ENABLED)
+endif()
 
 if(ENABLE_CLI)
     add_executable(brainfuck-cli src/cli.c)

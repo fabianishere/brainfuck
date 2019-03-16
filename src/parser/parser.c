@@ -26,11 +26,16 @@
 #include <brainfuck/parser.h>
 
 #include "../brainfuck.h"
+#include "brainfuck.h"
 
 /**
  * Internal array containing the available parser implementations.
  */
-static struct BrainfuckParser *parsers[] = {NULL};
+static struct BrainfuckParser *parsers[] = {
+#ifdef BRAINFUCK_PARSER_BRAINFUCK_ENABLED
+    &brainfuck_parser_brainfuck,
+#endif
+};
 
 struct BrainfuckParserContext * brainfuck_parser_alloc(struct BrainfuckParser *parser,
                                                        struct BrainfuckProgram *program)
