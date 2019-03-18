@@ -9,6 +9,7 @@ include(CTest)
 
 option(ENABLE_PARSER_BRAINFUCK "Enable brainfuck parser implementation" ON)
 option(ENABLE_VM_INTERPRETER "Enable interpreter" ON)
+option(ENABLE_VM_LIGHTNING "Enable GNU lightning JIT" ON)
 option(ENABLE_CLI "Enable the command line interface" ON)
 option(ENABLE_EDITLINE "Enable GNU readline functionality provided by the editline library" ON)
 option(ENABLE_EXTENSION_DEBUG "Enable the debug extension for brainfuck")
@@ -44,6 +45,8 @@ add_library(brainfuck
         src/vm/vm.c
         src/vm/interpreter.h
         src/vm/interpreter.c
+        src/vm/lightning.h
+        src/vm/lightning.c
 )
 set_target_properties(brainfuck PROPERTIES C_STANDARD 90)
 target_include_directories(brainfuck PUBLIC
@@ -62,6 +65,11 @@ endif()
 
 if(ENABLE_VM_INTERPRETER)
     target_compile_definitions(brainfuck PUBLIC BRAINFUCK_VM_INTERPRETER_ENABLED)
+endif()
+
+if(ENABLE_VM_LIGHTNING)
+    target_compile_definitions(brainfuck PUBLIC BRAINFUCK_VM_LIGHTNING_ENABLED)
+    target_link_libraries(brainfuck -llightning)
 endif()
 
 if(ENABLE_CLI)

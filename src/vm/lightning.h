@@ -20,57 +20,13 @@
  * THE SOFTWARE.
  */
 
-#include <string.h>
+#ifndef BRAINFUCK_VM_LIGHTNING_H
+#define BRAINFUCK_VM_LIGHTNING_H
 
-#include <brainfuck/brainfuck.h>
 #include <brainfuck/vm.h>
 
-#include "../brainfuck.h"
-#include "interpreter.h"
-#include "lightning.h"
-
-/**
- * Internal array containing the available virtual machine implementations.
- */
-static struct BrainfuckVm *vms[] = {
 #ifdef BRAINFUCK_VM_LIGHTNING_ENABLED
-    &brainfuck_vm_lightning,
+extern struct BrainfuckVm brainfuck_vm_lightning;
 #endif
-#ifdef BRAINFUCK_VM_INTERPRETER_ENABLED
-    &brainfuck_vm_interpreter,
-#endif
-};
 
-struct BrainfuckVmContext * brainfuck_vm_alloc(struct BrainfuckVm *vm)
-{
-    return vm->alloc(vm);
-}
-
-void brainfuck_vm_dealloc(struct BrainfuckVmContext *ctx)
-{
-    ctx->vm->dealloc(ctx);
-}
-
-int brainfuck_vm_run(struct BrainfuckVmContext *ctx,
-                     const struct BrainfuckProgram *program)
-{
-    return ctx->vm->run(ctx, program);
-}
-
-struct BrainfuckVm ** brainfuck_vm_list(void)
-{
-    return vms;
-}
-
-struct BrainfuckVm * brainfuck_vm_find(const char *name)
-{
-    struct BrainfuckVm **vm;
-
-    for (vm = vms; vm; vm++) {
-        if (!name || !strcmp((*vm)->name, name)) {
-            return *vm;
-        }
-    }
-
-    return NULL;
-}
+#endif /* BRAINFUCK_VM_LIGHTNING_H */
