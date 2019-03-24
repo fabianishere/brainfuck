@@ -20,13 +20,11 @@
  * THE SOFTWARE.
  */
 
-#ifndef BRAINFUCK_VM_INTERPRETER_H
-#define BRAINFUCK_VM_INTERPRETER_H
+#ifndef BRAINIAC_PARSER_BRAINFUCK_H
+#define BRAINIAC_PARSER_BRAINFUCK_H
 
-#include <brainfuck/vm.h>
+#include <brainiac/parser.h>
 
-#ifdef BRAINFUCK_VM_INTERPRETER_ENABLED
-extern struct BrainfuckVm brainfuck_vm_interpreter;
-#endif
+extern struct BrainiacParser brainiac_parser_brainfuck;
 
-#endif /* BRAINFUCK_VM_INTERPRETER_H */
+#endif /* BRAINIAC_PARSER_BRAINFUCK_H */

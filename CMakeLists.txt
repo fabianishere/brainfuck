@@ -1,18 +1,17 @@
 ﻿cmake_minimum_required(VERSION 3.1)
 
-project(brainfuck
+project(brainiac
     LANGUAGES C
     VERSION 3.0.0
 )
 
 include(CTest)
 
-option(ENABLE_PARSER_BRAINFUCK "Enable brainfuck parser implementation" ON)
-option(ENABLE_VM_INTERPRETER "Enable interpreter" ON)
-option(ENABLE_VM_LIGHTNING "Enable GNU lightning JIT" ON)
-option(ENABLE_CLI "Enable the command line interface" ON)
-option(ENABLE_EDITLINE "Enable GNU readline functionality provided by the editline library" ON)
-option(ENABLE_EXTENSION_DEBUG "Enable the debug extension for brainfuck")
+option(WITH_PARSER_BRAINFUCK "Enable brainfuck parser implementation" ON)
+option(WITH_VM_INTERPRETER "Enable interpreter" ON)
+option(WITH_VM_LIGHTNING "Enable GNU lightning JIT" ON)
+option(WITH_CLI "Enable the command line interface" ON)
+option(WITH_EDITLINE "Enable GNU readline functionality provided by the editline library" ON)
 option(INSTALL_EXAMPLES "Installs the examples")
 
 if(MSVC)
@@ -32,64 +31,55 @@ if (MSVC)
     target_include_directories(getopt INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/deps/getopt)
 endif()
 
-add_library(brainfuck
-        include/brainfuck/brainfuck.h
-        include/brainfuck/ir.h
-        include/brainfuck/parser.h
-        include/brainfuck/vm.h
-        src/brainfuck.h
-        src/brainfuck.c
+add_library(brainiac
+        include/brainiac/brainiac.h
+        include/brainiac/ir.h
+        include/brainiac/parser.h
+        include/brainiac/vm.h
+        src/brainiac.h
+        src/brainiac.c
         src/parser/parser.c
-        src/parser/brainfuck.h
-        src/parser/brainfuck.c
-        src/vm/vm.c
-        src/vm/interpreter.h
-        src/vm/interpreter.c
-        src/vm/lightning.h
-        src/vm/lightning.c
-)
-set_target_properties(brainfuck PROPERTIES C_STANDARD 90)
-target_include_directories(brainfuck PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
-    $<INSTALL_INTERFACE:include/>
-)
-install(TARGETS brainfuck
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    PUBLIC_HEADER DESTINATION include/brainfuck
-)
+        src/vm/vm.c)
+set_target_properties(brainiac PROPERTIES C_STANDARD 90)
+target_include_directories(brainiac
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/> $<INSTALL_INTERFACE:include/>
+        PRIVATE src)
+install(TARGETS brainiac
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        PUBLIC_HEADER DESTINATION include/brainiac)
 
-if(ENABLE_PARSER_BRAINFUCK)
-    target_compile_definitions(brainfuck PUBLIC BRAINFUCK_PARSER_BRAINFUCK_ENABLED)
+if(WITH_PARSER_BRAINFUCK)
+    add_subdirectory(src/parser/brainfuck)
+    target_link_libraries(brainiac PRIVATE brainiac-parser-brainfuck)
+    target_compile_definitions(brainiac PRIVATE BRAINIAC_PARSER_BRAINFUCK_ENABLED)
 endif()
 
-if(ENABLE_VM_INTERPRETER)
-    target_compile_definitions(brainfuck PUBLIC BRAINFUCK_VM_INTERPRETER_ENABLED)
+if(WITH_VM_INTERPRETER)
+    add_subdirectory(src/vm/interpreter)
+    target_link_libraries(brainiac PRIVATE brainiac-vm-interpreter)
+    target_compile_definitions(brainiac PRIVATE BRAINIAC_VM_INTERPRETER_ENABLED)
 endif()
 
-if(ENABLE_VM_LIGHTNING)
-    target_compile_definitions(brainfuck PUBLIC BRAINFUCK_VM_LIGHTNING_ENABLED)
-    target_link_libraries(brainfuck -llightning)
+if(WITH_VM_LIGHTNING)
+    add_subdirectory(src/vm/lightning)
+    target_link_libraries(brainiac PRIVATE brainiac-vm-lightning)
+    target_compile_definitions(brainiac PRIVATE BRAINIAC_VM_LIGHTNING_ENABLED)
 endif()
 
-if(ENABLE_CLI)
-    add_executable(brainfuck-cli src/cli.c)
-    set_target_properties(brainfuck-cli PROPERTIES
-        OUTPUT_NAME "brainfuck"
-        C_STANDARD 90
-    )
-    target_link_libraries(brainfuck-cli brainfuck getopt)
-    install(TARGETS brainfuck-cli RUNTIME DESTINATION bin)
+if(WITH_CLI)
+    add_executable(brainiac-cli src/cli.c)
+    set_target_properties(brainiac-cli PROPERTIES
+            OUTPUT_NAME "brainiac"
+            C_STANDARD 90)
+    target_link_libraries(brainiac-cli brainiac getopt)
+    install(TARGETS brainiac-cli RUNTIME DESTINATION bin)
     install(FILES man/brainfuck.1 DESTINATION "share/man/man1")
 
-    if(ENABLE_EDITLINE)
-        target_compile_definitions(brainfuck-cli PRIVATE "-DBRAINFUCK_EDITLINE_LIB")
-        target_link_libraries(brainfuck-cli -ledit)
+    if(WITH_EDITLINE)
+        target_compile_definitions(brainiac-cli PRIVATE "-DBRAINIAC_EDITLINE_ENABLED")
+        target_link_libraries(brainiac-cli -ledit)
     endif()
-endif()
-
-if(ENABLE_EXTENSION_DEBUG)
-    add_definitions("-DBRAINFUCK_EXTENSION_DEBUG")
 endif()
 
 if(INSTALL_EXAMPLES)

@@ -30,10 +30,10 @@
 #include <errno.h>
 #include <getopt.h>
 
-#include <brainfuck/brainfuck.h>
-#include <brainfuck/parser.h>
-#include <brainfuck/vm.h>
-#include <brainfuck/ir.h>
+#include <brainiac/brainiac.h>
+#include <brainiac/parser.h>
+#include <brainiac/vm.h>
+#include <brainiac/ir.h>
 
 /* isatty for Windows */
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
@@ -43,8 +43,9 @@
 /**
  * Print the version information of this program.
  */
-void print_version(void) {
-    fprintf(stderr, "brainfuck %s\n", brainfuck_version);
+void print_version(void)
+{
+    fprintf(stderr, "brainiac %s\n", brainiac_version);
     fprintf(stderr, "Copyright (c) 2019 Fabian Mastenbroek.\n");
     fprintf(stderr, "Distributed under the MIT License.\n");
 }
@@ -54,7 +55,8 @@ void print_version(void) {
  *
  * @param[in] name The name of this program's binary.
  */
-void print_usage(char *name) {
+void print_usage(char *name)
+{
     fprintf(stderr, "usage: %s [-hv] [-x vm] [-p parser] file...\n", name);
     fprintf(stderr, "\t-x\t--vm\t\tspecify the virtual machine to use\n");
     fprintf(stderr, "\t-p\t--parser\tspecify the parser to use\n");
@@ -62,10 +64,41 @@ void print_usage(char *name) {
     fprintf(stderr, "\t-h\t--help\t\tshow this help message\n");
 }
 
+/**
+ * Print the available virtual machines.
+ */
+void print_vms(void)
+{
+    struct BrainiacVm **vm;
+
+    fprintf(stderr, "Available virtual machines:\n");
+    for (vm = brainiac_vm_list(); *vm; vm++) {
+        fprintf(stderr, "%s %s\n", (*vm)->name, (*vm)->version);
+    }
+}
+
+/**
+ * Print the available parsers.
+ */
+void print_parsers(void)
+{
+    struct BrainiacParser **parser;
+
+    fprintf(stderr, "Available parsers:\n");
+    for (parser = brainiac_parser_list(); *parser; parser++) {
+        fprintf(stderr, "%s %s\n", (*parser)->name, (*parser)->version);
+    }
+}
+
 /* Command line options */
+static int list_vms_option = 0;
+static int list_parsers_option = 0;
+
 static struct option long_options[] = {
     {"vm", required_argument, 0, 'x'},
+    {"list-vms", no_argument, &list_vms_option, 1},
     {"parser", required_argument, 0, 'p'},
+    {"list-parsers", no_argument, &list_parsers_option, 1},
     {"version", no_argument, 0, 'v'},
     {"help", no_argument, 0, 'h'},
     {0, 0, 0, 0}
@@ -104,6 +137,15 @@ int main(int argc, char *argv[])
         }
     }
 
+    /* Handle long options */
+    if (list_vms_option) {
+        print_vms();
+        return EXIT_SUCCESS;
+    } else if (list_parsers_option) {
+        print_parsers();
+        return EXIT_SUCCESS;
+    }
+
     /* Check if code is piped */
     int pipe = !isatty(fileno(stdin));
 
@@ -122,31 +164,31 @@ int main(int argc, char *argv[])
     }
 
     /* Parsing */
-    struct BrainfuckProgram program;
-    struct BrainfuckParser *parser;
-    struct BrainfuckParserContext *pctx;
+    struct BrainiacProgram program;
+    struct BrainiacParser *parser;
+    struct BrainiacParserContext *pctx;
     int err;
 
-    if ((parser = brainfuck_parser_find(parser_name)) == NULL ||
-        (pctx = brainfuck_parser_alloc(parser, &program)) == NULL) {
+    if ((parser = brainiac_parser_find(parser_name)) == NULL ||
+        (pctx = brainiac_parser_alloc(parser, &program)) == NULL) {
         goto err_parser;
     }
 
-    brainfuck_parser_start(pctx);
-    if ((err = brainfuck_parser_consume_file(pctx, file)) != BRAINFUCK_EOK ||
-        (err = brainfuck_parser_end(pctx)) != BRAINFUCK_EOK) {
+    brainiac_parser_start(pctx);
+    if ((err = brainiac_parser_consume_file(pctx, file)) != BRAINIAC_EOK ||
+        (err = brainiac_parser_end(pctx)) != BRAINIAC_EOK) {
         goto err_parsing;
     }
 
     fclose(file);
-    brainfuck_parser_dealloc(pctx);
+    brainiac_parser_dealloc(pctx);
 
     /* Execution */
-    struct BrainfuckVm *vm;
-    struct BrainfuckVmContext *vctx;
+    struct BrainiacVm *vm;
+    struct BrainiacVmContext *vctx;
 
-    if ((vm = brainfuck_vm_find(vm_name)) == NULL ||
-        (vctx = brainfuck_vm_alloc(vm)) == NULL) {
+    if ((vm = brainiac_vm_find(vm_name)) == NULL ||
+        (vctx = brainiac_vm_alloc(vm)) == NULL) {
         goto err_vm;
     }
 
@@ -154,24 +196,25 @@ int main(int argc, char *argv[])
     vctx->write = &putchar;
     vctx->memory = calloc(30000, sizeof(uint8_t));
 
-    if ((err = brainfuck_vm_run(vctx, &program)) != BRAINFUCK_EOK) {
+    if ((err = brainiac_vm_run(vctx, &program)) != BRAINIAC_EOK) {
         goto err_vm_run;
     }
 
     free(vctx->memory);
-    brainfuck_vm_dealloc(vctx);
-    brainfuck_ir_clear(&program);
+    brainiac_vm_dealloc(vctx);
+    brainiac_ir_clear(&program);
+
     return 0;
 
     err_parser:
-        fprintf(stderr, "error: parser not available: \"brainfuck\".\n");
+        fprintf(stderr, "error: parser not available: \"%s\".\n", parser_name);
         fclose(file);
         return 1;
     err_parsing:
         fprintf(stderr, "error: parser exited with code %i.\n", err);
         fclose(file);
-        brainfuck_parser_dealloc(pctx);
-        brainfuck_ir_clear(&program);
+        brainiac_parser_dealloc(pctx);
+        brainiac_ir_clear(&program);
         return 1;
     err_vm:
         fprintf(stderr, "error: no virtual machine available\n");
@@ -179,7 +222,7 @@ int main(int argc, char *argv[])
     err_vm_run:
         fprintf(stderr, "error: vm exited with code %i.\n", err);
         free(vctx->memory);
-        brainfuck_vm_dealloc(vctx);
-        brainfuck_ir_clear(&program);
+        brainiac_vm_dealloc(vctx);
+        brainiac_ir_clear(&program);
         return 1;
 }

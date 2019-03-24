@@ -22,82 +22,86 @@
 
 #include <string.h>
 
-#include <brainfuck/brainfuck.h>
-#include <brainfuck/parser.h>
+#include <brainiac/brainiac.h>
+#include <brainiac/parser.h>
 
-#include "../brainfuck.h"
-#include "brainfuck.h"
+#include "brainiac.h"
+
+#ifdef BRAINIAC_PARSER_BRAINFUCK_ENABLED
+    #include "./brainfuck/brainfuck.h"
+#endif
 
 /**
  * Internal array containing the available parser implementations.
  */
-static struct BrainfuckParser *parsers[] = {
-#ifdef BRAINFUCK_PARSER_BRAINFUCK_ENABLED
-    &brainfuck_parser_brainfuck,
+static struct BrainiacParser *parsers[] = {
+#ifdef BRAINIAC_PARSER_BRAINFUCK_ENABLED
+    &brainiac_parser_brainfuck,
 #endif
+    NULL
 };
 
-struct BrainfuckParserContext * brainfuck_parser_alloc(struct BrainfuckParser *parser,
-                                                       struct BrainfuckProgram *program)
+struct BrainiacParserContext * brainiac_parser_alloc(struct BrainiacParser *parser,
+                                                     struct BrainiacProgram *program)
 {
     return parser->alloc(parser, program);
 }
 
-void brainfuck_parser_dealloc(struct BrainfuckParserContext *ctx)
+void brainiac_parser_dealloc(struct BrainiacParserContext *ctx)
 {
     ctx->parser->dealloc(ctx);
 }
 
-void brainfuck_parser_start(struct BrainfuckParserContext *ctx)
+void brainiac_parser_start(struct BrainiacParserContext *ctx)
 {
     ctx->program->head = NULL;
     ctx->program->tail = NULL;
     ctx->parser->start(ctx);
 }
 
-int brainfuck_parser_consume_string(struct BrainfuckParserContext *ctx,
-                                    const char *input)
+int brainiac_parser_consume_string(struct BrainiacParserContext *ctx,
+                                   const char *input)
 {
     return ctx->parser->consume(ctx, input);
 }
 
-int brainfuck_parser_consume_file(struct BrainfuckParserContext *ctx,
-                                  FILE *file)
+int brainiac_parser_consume_file(struct BrainiacParserContext *ctx,
+                                 FILE *file)
 {
-    char buffer[BRAINFUCK_BUFFER_SIZE] = {0};
+    char buffer[BRAINIAC_BUFFER_SIZE] = {0};
     int err;
 
     while (!feof(file)) {
         size_t count = sizeof(buffer) - 1, read;
         if ((read = fread(&buffer, sizeof(char), count, file)) != count) {
             if (ferror(file))
-                return BRAINFUCK_EIO;
+                return BRAINIAC_EIO;
         }
         buffer[read] = '\0'; /* Null-terminate buffer */
 
-        if ((err = brainfuck_parser_consume_string(ctx, buffer)) != BRAINFUCK_EOK) {
+        if ((err = brainiac_parser_consume_string(ctx, buffer)) != BRAINIAC_EOK) {
             return err;
         }
     }
 
-    return BRAINFUCK_EOK;
+    return BRAINIAC_EOK;
 }
 
-int brainfuck_parser_end(struct BrainfuckParserContext *ctx)
+int brainiac_parser_end(struct BrainiacParserContext *ctx)
 {
     return ctx->parser->end(ctx);
 }
 
-struct BrainfuckParser ** brainfuck_parser_list(void)
+struct BrainiacParser ** brainiac_parser_list(void)
 {
     return parsers;
 }
 
-struct BrainfuckParser * brainfuck_parser_find(const char *name)
+struct BrainiacParser * brainiac_parser_find(const char *name)
 {
-    struct BrainfuckParser **parser;
+    struct BrainiacParser **parser;
 
-    for (parser = parsers; parser; parser++) {
+    for (parser = parsers; *parser; parser++) {
         if (!name || !strcmp((*parser)->name, name)) {
             return *parser;
         }
@@ -107,13 +111,13 @@ struct BrainfuckParser * brainfuck_parser_find(const char *name)
 }
 
 
-struct BrainfuckParser * brainfuck_parser_find_by_extension(const char *ext)
+struct BrainiacParser * brainiac_parser_find_by_extension(const char *ext)
 {
-    struct BrainfuckParser **parser;
+    struct BrainiacParser **parser;
     const char **exts;
 
     for (parser = parsers; parser; parser++) {
-        for (exts = (*parser)->extensions; exts; exts++) {
+        for (exts = (*parser)->extensions; *exts; exts++) {
             if (!strcmp(*exts, ext)) {
                 return *parser;
             }

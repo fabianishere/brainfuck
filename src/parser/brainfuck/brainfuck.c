@@ -20,14 +20,15 @@
  * THE SOFTWARE.
  */
 
-#include <brainfuck/brainfuck.h>
-#include <brainfuck/parser.h>
-#include <brainfuck/ir.h>
+#include <brainiac/brainiac.h>
+#include <brainiac/parser.h>
+#include <brainiac/ir.h>
 
-#include "../brainfuck.h"
+#include "brainfuck.h"
+#include "../../brainiac.h"
 
-struct BrainfuckParserContextBf {
-    struct BrainfuckParserContext base;
+struct BrainfuckParserContext {
+    struct BrainiacParserContext base;
 
     /**
      * A stack of instructions which represents the scopes.
@@ -46,7 +47,7 @@ struct BrainfuckParserContextBf {
         /*
          * The array of instructions.
          */
-        struct BrainfuckInstruction **array;
+        struct BrainiacInstruction **array;
     } scopes;
 
     /**
@@ -55,49 +56,49 @@ struct BrainfuckParserContextBf {
     int32_t offset;
 };
 
-static struct BrainfuckParserContext * alloc(struct BrainfuckParser *parser,
-                                             struct BrainfuckProgram *program)
+static struct BrainiacParserContext * alloc(struct BrainiacParser *parser,
+                                             struct BrainiacProgram *program)
 {
-    struct BrainfuckParserContextBf *ctx = BRAINFUCK_ALLOC(sizeof(struct BrainfuckParserContextBf));
+    struct BrainfuckParserContext *ctx = BRAINIAC_ALLOC(sizeof(struct BrainfuckParserContext));
 
     if (ctx) {
         ctx->base.parser = parser;
         ctx->base.program = program;
-        ctx->scopes.size = BRAINFUCK_SCOPE_DEPTH;
+        ctx->scopes.size = BRAINIAC_SCOPE_DEPTH;
         ctx->scopes.index = 0;
-        ctx->scopes.array = BRAINFUCK_ALLOC(
-            sizeof(struct BrainfuckInstruction *) * BRAINFUCK_SCOPE_DEPTH);
+        ctx->scopes.array = BRAINIAC_ALLOC(
+            sizeof(struct BrainiacInstruction *) * BRAINIAC_SCOPE_DEPTH);
         ctx->offset = 0;
 
         if (!ctx->scopes.array) {
-            BRAINFUCK_DEALLOC(ctx);
+            BRAINIAC_DEALLOC(ctx);
             return NULL;
         }
     }
 
-    return (struct BrainfuckParserContext *) ctx;
+    return (struct BrainiacParserContext *) ctx;
 }
 
-static void dealloc(struct BrainfuckParserContext *ctx)
+static void dealloc(struct BrainiacParserContext *ctx)
 {
-    BRAINFUCK_DEALLOC(((struct BrainfuckParserContextBf *) ctx)->scopes.array);
-    BRAINFUCK_DEALLOC(ctx);
+    BRAINIAC_DEALLOC(((struct BrainfuckParserContext *) ctx)->scopes.array);
+    BRAINIAC_DEALLOC(ctx);
 }
 
-static void start(struct BrainfuckParserContext *ctx)
+static void start(struct BrainiacParserContext *ctx)
 {
     (void) ctx;
 }
 
-static int consume(struct BrainfuckParserContext *ctx, const char *input)
+static int consume(struct BrainiacParserContext *ctx, const char *input)
 {
     char c;
     int32_t delta = 0;
     int32_t offset = 0;
 
-    struct BrainfuckParserContextBf *bctx = (void *) ctx;
-    struct BrainfuckInstruction *inst;
-    struct BrainfuckInstruction *tmp;
+    struct BrainfuckParserContext *bctx = (void *) ctx;
+    struct BrainiacInstruction *inst;
+    struct BrainiacInstruction *tmp;
 
     /* Set current offset */
     offset = bctx->offset;
@@ -115,12 +116,12 @@ static int consume(struct BrainfuckParserContext *ctx, const char *input)
 
                 if (delta == 0) {
                     continue;
-                } else if ((inst = brainfuck_ir_alloc(ADD)) == NULL) {
-                    return BRAINFUCK_ENOMEM;
+                } else if ((inst = brainiac_ir_alloc(ADD)) == NULL) {
+                    return BRAINIAC_ENOMEM;
                 }
                 inst->operands[0].i32 = offset;
                 inst->operands[1].i32 = delta;
-                brainfuck_ir_append(ctx->program, inst);
+                brainiac_ir_append(ctx->program, inst);
                 break;
 
                 /* MOV instructions */
@@ -137,43 +138,43 @@ static int consume(struct BrainfuckParserContext *ctx, const char *input)
                 break; /* Don't allocate new instruction */
                 /* I/O instructions */
             case ',':
-                if ((inst = brainfuck_ir_alloc(IN)) == NULL) {
-                    return BRAINFUCK_ENOMEM;
+                if ((inst = brainiac_ir_alloc(IN)) == NULL) {
+                    return BRAINIAC_ENOMEM;
                 }
                 inst->operands[0].i32 = offset;
-                brainfuck_ir_append(ctx->program, inst);
+                brainiac_ir_append(ctx->program, inst);
                 break;
             case '.':
-                if ((inst = brainfuck_ir_alloc(OUT)) == NULL) {
-                    return BRAINFUCK_ENOMEM;
+                if ((inst = brainiac_ir_alloc(OUT)) == NULL) {
+                    return BRAINIAC_ENOMEM;
                 }
                 inst->operands[0].i32 = offset;
-                brainfuck_ir_append(ctx->program, inst);
+                brainiac_ir_append(ctx->program, inst);
                 break;
 
                 /* Flow control instructions */
             case '[':
                 /* Have we reached the scope upper limit */
                 if ((size_t) bctx->scopes.index >= bctx->scopes.size) {
-                    return BRAINFUCK_ENOMEM;
+                    return BRAINIAC_ENOMEM;
                 }
 
                 /* Reset offset before jump */
                 if (offset != 0) {
-                    if ((inst = brainfuck_ir_alloc(MOV)) == NULL) {
-                        return BRAINFUCK_ENOMEM;
+                    if ((inst = brainiac_ir_alloc(MOV)) == NULL) {
+                        return BRAINIAC_ENOMEM;
                     }
                     inst->operands[0].i32 = offset;
-                    brainfuck_ir_append(ctx->program, inst);
+                    brainiac_ir_append(ctx->program, inst);
                     offset = 0;
                 }
 
                 /* Add JMP instruction */
-                if ((inst = brainfuck_ir_alloc(JMP)) == NULL) {
-                    return BRAINFUCK_ENOMEM;
+                if ((inst = brainiac_ir_alloc(JMP)) == NULL) {
+                    return BRAINIAC_ENOMEM;
                 }
                 inst->operands[0].ref = NULL;
-                brainfuck_ir_append(ctx->program, inst);
+                brainiac_ir_append(ctx->program, inst);
 
                 /* Put jump on stack */
                 bctx->scopes.array[bctx->scopes.index++] = inst;
@@ -181,25 +182,25 @@ static int consume(struct BrainfuckParserContext *ctx, const char *input)
             case ']':
                 /* Have we reached the scope lower limit */
                 if (bctx->scopes.index <= 0) {
-                    return BRAINFUCK_ESYNTAX;
+                    return BRAINIAC_ESYNTAX;
                 }
 
                 /* Reset offset before jump */
                 if (offset != 0) {
-                    if ((inst = brainfuck_ir_alloc(MOV)) == NULL) {
-                        return BRAINFUCK_ENOMEM;
+                    if ((inst = brainiac_ir_alloc(MOV)) == NULL) {
+                        return BRAINIAC_ENOMEM;
                     }
                     inst->operands[0].i32 = offset;
-                    brainfuck_ir_append(ctx->program, inst);
+                    brainiac_ir_append(ctx->program, inst);
                     offset = 0;
                 }
 
                 /* Add JNZ instruction */
-                if ((inst = brainfuck_ir_alloc(JNZ)) == NULL) {
-                    return BRAINFUCK_ENOMEM;
+                if ((inst = brainiac_ir_alloc(JNZ)) == NULL) {
+                    return BRAINIAC_ENOMEM;
                 }
                 inst->operands[0].ref = NULL;
-                brainfuck_ir_append(ctx->program, inst);
+                brainiac_ir_append(ctx->program, inst);
 
                 /* Get and set the jump targets */
                 tmp = bctx->scopes.array[--bctx->scopes.index];
@@ -214,19 +215,19 @@ static int consume(struct BrainfuckParserContext *ctx, const char *input)
 
     /* Set offset */
     bctx->offset = offset;
-    return BRAINFUCK_EOK;
+    return BRAINIAC_EOK;
 }
 
-int end(struct BrainfuckParserContext *ctx)
+int end(struct BrainiacParserContext *ctx)
 {
-    if (((struct BrainfuckParserContextBf *) ctx)->scopes.index != 0) {
-        return BRAINFUCK_ESYNTAX;
+    if (((struct BrainfuckParserContext *) ctx)->scopes.index != 0) {
+        return BRAINIAC_ESYNTAX;
     }
 
-    return BRAINFUCK_EOK;
+    return BRAINIAC_EOK;
 }
 
-struct BrainfuckParser brainfuck_parser_brainfuck = {
+struct BrainiacParser brainiac_parser_brainfuck = {
     .name = "brainfuck",
     .version = "1.0.0",
     .extensions = (const char *[]) { "b", "bf", "brainfuck", NULL },

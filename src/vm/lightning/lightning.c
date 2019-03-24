@@ -20,22 +20,23 @@
  * THE SOFTWARE.
  */
 
-#include <brainfuck/brainfuck.h>
-#include <brainfuck/vm.h>
-#include <brainfuck/ir.h>
+#include <brainiac/brainiac.h>
+#include <brainiac/vm.h>
+#include <brainiac/ir.h>
 
 #include <lightning.h>
 
-#include "../brainfuck.h"
+#include "lightning.h"
+#include "../../brainiac.h"
 
-struct BrainfuckVmContextLightning {
-    struct BrainfuckVmContext base;
+struct BrainiacVmContextLightning {
+    struct BrainiacVmContext base;
     jit_state_t *jit;
 };
 
-static struct BrainfuckVmContext * alloc(struct BrainfuckVm *vm)
+static struct BrainiacVmContext * alloc(struct BrainiacVm *vm)
 {
-    struct BrainfuckVmContextLightning *ctx = BRAINFUCK_ALLOC(sizeof(struct BrainfuckVmContextLightning));
+    struct BrainiacVmContextLightning *ctx = BRAINIAC_ALLOC(sizeof(struct BrainiacVmContextLightning));
 
     if (ctx) {
         ctx->base.vm = vm;
@@ -51,17 +52,17 @@ static struct BrainfuckVmContext * alloc(struct BrainfuckVm *vm)
     return (void *) ctx;
 }
 
-static void dealloc(struct BrainfuckVmContext *ctx)
+static void dealloc(struct BrainiacVmContext *ctx)
 {
     finish_jit();
-    BRAINFUCK_DEALLOC(ctx);
+    BRAINIAC_DEALLOC(ctx);
 }
 
-static struct BrainfuckInstruction * emit(struct BrainfuckVmContext *ctx,
-                                          const struct BrainfuckInstruction *inst,
+static struct BrainiacInstruction * emit(struct BrainiacVmContext *ctx,
+                                          const struct BrainiacInstruction *inst,
                                           jit_node_t *target_label, jit_node_t *target_jmp)
 {
-    jit_state_t *_jit = ((struct BrainfuckVmContextLightning *) ctx)->jit;
+    jit_state_t *_jit = ((struct BrainiacVmContextLightning *) ctx)->jit;
     int word_size = 4;
 
     while (inst) {
@@ -121,12 +122,12 @@ static struct BrainfuckInstruction * emit(struct BrainfuckVmContext *ctx,
     return NULL;
 }
 
-static int run(struct BrainfuckVmContext *ctx,
-               const struct BrainfuckProgram *program)
+static int run(struct BrainiacVmContext *ctx,
+               const struct BrainiacProgram *program)
 {
-    jit_state_t *_jit = ((struct BrainfuckVmContextLightning *) ctx)->jit;
+    jit_state_t *_jit = ((struct BrainiacVmContextLightning *) ctx)->jit;
     uint8_t *mem = ctx->memory;
-    struct BrainfuckInstruction *inst = program->head;
+    struct BrainiacInstruction *inst = program->head;
     jit_prolog();
     jit_movi(JIT_V0, (jit_word_t) mem);
     emit(ctx, inst, NULL, NULL);
@@ -135,10 +136,10 @@ static int run(struct BrainfuckVmContext *ctx,
     void (*run)(void) = jit_emit();
     run();
     jit_clear_state();
-    return BRAINFUCK_EOK;
+    return BRAINIAC_EOK;
 }
 
-struct BrainfuckVm brainfuck_vm_lightning = {
+struct BrainiacVm brainiac_vm_lightning = {
     .name = "lightning",
     .version = "1.0.0",
     .alloc = &alloc,

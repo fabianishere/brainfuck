@@ -24,13 +24,13 @@
  * This header file defines the virtual machine interface that runs a
  * brainfuck-based instruction set.
  */
-#ifndef BRAINFUCK_VM_H
-#define BRAINFUCK_VM_H
+#ifndef BRAINIAC_VM_H
+#define BRAINIAC_VM_H
 
-#include <brainfuck/ir.h>
+#include <brainiac/ir.h>
 
 /**
- * An interface of an engine that is able to run a {@link BrainfuckProgram}.
+ * An interface of an engine that is able to run a {@link BrainiacProgram}.
  *
  * @addtogroup vm Virtual Machine
  * @{
@@ -39,11 +39,11 @@
  * This structure represents the virtual machine context in which a program
  * runs.
  */
-struct BrainfuckVmContext {
+struct BrainiacVmContext {
     /**
-     * The {@link BrainfuckVm} associated with this context.
+     * The {@link BrainiacVm} associated with this context.
      */
-    const struct BrainfuckVm *vm;
+    const struct BrainiacVm *vm;
 
     /**
      * The size of the memory to operate on.
@@ -76,7 +76,7 @@ struct BrainfuckVmContext {
  * This structure represents some virtual machine that provides an execution
  * engine for the brainfuck-based instruction set defined in @ref ir.
  */
-struct BrainfuckVm {
+struct BrainiacVm {
     /**
      * A unique, full name of the virtual machine implementation.
      */
@@ -88,65 +88,65 @@ struct BrainfuckVm {
     const char *version;
 
     /**
-     * Allocate a {@link BrainfuckVmContext} in which a brainfuck program runs.
+     * Allocate a {@link BrainiacVmContext} in which a brainfuck program runs.
      *
-     * @param[in] vm The {@link BrainfuckVm} to allocate a context for.
+     * @param[in] vm The {@link BrainiacVm} to allocate a context for.
      * @return The allocated context or <code>NULL</code> on allocation failure.
      */
-    struct BrainfuckVmContext * (*alloc)(struct BrainfuckVm *vm);
+    struct BrainiacVmContext * (*alloc)(struct BrainiacVm *vm);
 
     /**
-     * Deallocate the specified {@link BrainfuckVmContext}.
+     * Deallocate the specified {@link BrainiacVmContext}.
      *
      * @param[in] ctx The virtual machine context to deallocate.
      */
-    void (*dealloc)(struct BrainfuckVmContext *ctx);
+    void (*dealloc)(struct BrainiacVmContext *ctx);
 
     /**
-     * Run the given program in the specified {@link BrainfuckVmContext}.
+     * Run the given program in the specified {@link BrainiacVmContext}.
      *
      * @param[in] ctx The virtual machine context to run the program in.
      * @param[in] program The program to run.
-     * @return {@link BRAINFUCK_EOK} on success, one of the defined error codes
+     * @return {@link BRAINIAC_EOK} on success, one of the defined error codes
      * on failure.
      */
-    int (*run)(struct BrainfuckVmContext *ctx,
-               const struct BrainfuckProgram *program);
+    int (*run)(struct BrainiacVmContext *ctx,
+               const struct BrainiacProgram *program);
 };
 
 /**
- * Allocate a {@link BrainfuckVmContext} in which a brainfuck program runs.
+ * Allocate a {@link BrainiacVmContext} in which a brainfuck program runs.
  *
- * @param[in] vm The {@link BrainfuckVm} to allocate a context for.
- * @return The allocated {@link BrainfuckVmContext} or <code>NULL</code> on
+ * @param[in] vm The {@link BrainiacVm} to allocate a context for.
+ * @return The allocated {@link BrainiacVmContext} or <code>NULL</code> on
  * allocation failure.
  */
-struct BrainfuckVmContext * brainfuck_vm_alloc(struct BrainfuckVm *vm);
+struct BrainiacVmContext * brainiac_vm_alloc(struct BrainiacVm *vm);
 
 /**
- * Deallocate the specified {@link BrainfuckVmContext}.
+ * Deallocate the specified {@link BrainiacVmContext}.
  *
  * @param[in] ctx The virtual machine context to deallocate.
  */
-void brainfuck_vm_dealloc(struct BrainfuckVmContext *ctx);
+void brainiac_vm_dealloc(struct BrainiacVmContext *ctx);
 
 /**
- * Run the given program in the specified {@link BrainfuckVmContext}.
+ * Run the given program in the specified {@link BrainiacVmContext}.
  *
  * @param[in] ctx The virtual machine context to run the program in.
  * @param[in] program The program to run.
- * @return {@link BRAINFUCK_EOK} on success, one of the defined error codes
+ * @return {@link BRAINIAC_EOK} on success, one of the defined error codes
  * on failure.
  */
-int brainfuck_vm_run(struct BrainfuckVmContext *ctx,
-                     const struct BrainfuckProgram *program);
+int brainiac_vm_run(struct BrainiacVmContext *ctx,
+                    const struct BrainiacProgram *program);
 
 /**
  * Retrieve an array of available virtual machines on this platform.
  *
  * @return A <code>NULL</code>-terminated array of available virtual machines.
  */
-struct BrainfuckVm ** brainfuck_vm_list(void);
+struct BrainiacVm ** brainiac_vm_list(void);
 
 /**
  * Find the first virtual machine available.
@@ -156,7 +156,7 @@ struct BrainfuckVm ** brainfuck_vm_list(void);
  * @return The virtual machine that was found or <code>NULL</code> if none are
  * available.
  */
-struct BrainfuckVm * brainfuck_vm_find(const char *name);
+struct BrainiacVm * brainiac_vm_find(const char *name);
 /** @} */
 
-#endif /* BRAINFUCK_VM_H */
+#endif /* BRAINIAC_VM_H */

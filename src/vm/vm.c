@@ -22,51 +22,58 @@
 
 #include <string.h>
 
-#include <brainfuck/brainfuck.h>
-#include <brainfuck/vm.h>
+#include <brainiac/brainiac.h>
+#include <brainiac/vm.h>
 
-#include "../brainfuck.h"
-#include "interpreter.h"
-#include "lightning.h"
+#include "brainiac.h"
+
+#ifdef BRAINIAC_VM_INTERPRETER_ENABLED
+    #include "./interpreter/interpreter.h"
+#endif
+
+#ifdef BRAINIAC_VM_LIGHTNING_ENABLED
+    #include "./lightning/lightning.h"
+#endif
 
 /**
  * Internal array containing the available virtual machine implementations.
  */
-static struct BrainfuckVm *vms[] = {
-#ifdef BRAINFUCK_VM_LIGHTNING_ENABLED
-    &brainfuck_vm_lightning,
+static struct BrainiacVm *vms[] = {
+#ifdef BRAINIAC_VM_LIGHTNING_ENABLED
+    &brainiac_vm_lightning,
 #endif
-#ifdef BRAINFUCK_VM_INTERPRETER_ENABLED
-    &brainfuck_vm_interpreter,
+#ifdef BRAINIAC_VM_INTERPRETER_ENABLED
+    &brainiac_vm_interpreter,
 #endif
+    NULL
 };
 
-struct BrainfuckVmContext * brainfuck_vm_alloc(struct BrainfuckVm *vm)
+struct BrainiacVmContext * brainiac_vm_alloc(struct BrainiacVm *vm)
 {
     return vm->alloc(vm);
 }
 
-void brainfuck_vm_dealloc(struct BrainfuckVmContext *ctx)
+void brainiac_vm_dealloc(struct BrainiacVmContext *ctx)
 {
     ctx->vm->dealloc(ctx);
 }
 
-int brainfuck_vm_run(struct BrainfuckVmContext *ctx,
-                     const struct BrainfuckProgram *program)
+int brainiac_vm_run(struct BrainiacVmContext *ctx,
+                     const struct BrainiacProgram *program)
 {
     return ctx->vm->run(ctx, program);
 }
 
-struct BrainfuckVm ** brainfuck_vm_list(void)
+struct BrainiacVm ** brainiac_vm_list(void)
 {
     return vms;
 }
 
-struct BrainfuckVm * brainfuck_vm_find(const char *name)
+struct BrainiacVm * brainiac_vm_find(const char *name)
 {
-    struct BrainfuckVm **vm;
+    struct BrainiacVm **vm;
 
-    for (vm = vms; vm; vm++) {
+    for (vm = vms; *vm; vm++) {
         if (!name || !strcmp((*vm)->name, name)) {
             return *vm;
         }

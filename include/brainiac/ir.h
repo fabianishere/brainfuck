@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef BRAINFUCK_IR_H
-#define BRAINFUCK_IR_H
+#ifndef BRAINIAC_IR_H
+#define BRAINIAC_IR_H
 
 #include <stdio.h>
 #include <stdint.h>
@@ -29,7 +29,7 @@
 /**
  * This submodule defines the Intermediate Representation (IR) to which input
  * is converted to by the parser. This intermediate representation is then
- * consumed by (optimizing) passes or a {@link BrainfuckVm}.
+ * consumed by (optimizing) passes or a {@link BrainiacVm}.
  *
  * @addtogroup ir Intermediate Representation
  * @{
@@ -38,23 +38,23 @@
  * This structure represents a single operation that could be executed. It
  * contains the opcode of the operation and its operands.
  */
-struct BrainfuckInstruction {
+struct BrainiacInstruction {
     /**
      * The instruction that follows this instruction.
      */
-    struct BrainfuckInstruction *next;
+    struct BrainiacInstruction *next;
 
     /**
      * The instruction that precedes this instruction.
      */
-    struct BrainfuckInstruction *prev;
+    struct BrainiacInstruction *prev;
 
     /**
      * This enum defines a basic instruction set which brainfuck code can be
      * compiled to, with the inclusion of multiple optimizing/debugging
      * instructions.
      */
-    enum BrainfuckOpcode {
+    enum BrainiacOpcode {
         /* Data Manipulation */
         /**
          * Add value to memory cell.
@@ -141,40 +141,40 @@ struct BrainfuckInstruction {
         /**
          * A pointer to an instruction.
          */
-        struct BrainfuckInstruction *ref;
+        struct BrainiacInstruction *ref;
     } operands[3];
 };
 
 /**
- * Allocate a {@link BrainfuckInstruction}.
+ * Allocate a {@link BrainiacInstruction}.
  *
  * @param[in] opcode The opcode of the instruction to allocate.
  * @return The allocated instruction or <code>NULL</code> on allocation failure.
  */
-struct BrainfuckInstruction * brainfuck_ir_alloc(enum BrainfuckOpcode opcode);
+struct BrainiacInstruction * brainiac_ir_alloc(enum BrainiacOpcode opcode);
 
 /**
- * Deallocate an individual {@link BrainfuckInstruction}.
+ * Deallocate an individual {@link BrainiacInstruction}.
  *
  * @param[in] inst The instruction to deallocate.
  */
-void brainfuck_ir_dealloc(struct BrainfuckInstruction *inst);
+void brainiac_ir_dealloc(struct BrainiacInstruction *inst);
 
 /**
- * This structure represents a linked list of {@link BrainfuckInstruction}s.
+ * This structure represents a linked list of {@link BrainiacInstruction}s.
  *
- * @see BrainfuckInstruction
+ * @see BrainiacInstruction
  */
-struct BrainfuckProgram {
+struct BrainiacProgram {
     /**
      * The head of the instruction list.
      */
-    struct BrainfuckInstruction *head;
+    struct BrainiacInstruction *head;
 
     /**
      * The tail of the instruction list.
      */
-    struct BrainfuckInstruction *tail;
+    struct BrainiacInstruction *tail;
 };
 
 /**
@@ -183,15 +183,15 @@ struct BrainfuckProgram {
  * @param[in] program The program to append the instruction to.
  * @param[in] inst The instruction to append to the program.
  */
-void brainfuck_ir_append(struct BrainfuckProgram *program,
-                         struct BrainfuckInstruction *inst);
+void brainiac_ir_append(struct BrainiacProgram *program,
+                        struct BrainiacInstruction *inst);
 
 /**
  * Remove all instructions in the specified program.
  *
  * @param[in] program The program remove all instructions from.
  */
-void brainfuck_ir_clear(struct BrainfuckProgram *program);
+void brainiac_ir_clear(struct BrainiacProgram *program);
 /** @} */
 
-#endif /* BRAINFUCK_IR_H */
+#endif /* BRAINIAC_IR_H */

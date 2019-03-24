@@ -20,16 +20,17 @@
  * THE SOFTWARE.
  */
 
-#include <brainfuck/brainfuck.h>
-#include <brainfuck/vm.h>
-#include <brainfuck/ir.h>
+#include <brainiac/brainiac.h>
+#include <brainiac/vm.h>
+#include <brainiac/ir.h>
 
-#include "../brainfuck.h"
+#include "interpreter.h"
+#include "../../brainiac.h"
 
 
-static struct BrainfuckVmContext * alloc(struct BrainfuckVm *vm)
+static struct BrainiacVmContext * alloc(struct BrainiacVm *vm)
 {
-    struct BrainfuckVmContext *ctx = BRAINFUCK_ALLOC(sizeof(struct BrainfuckVmContext));
+    struct BrainiacVmContext *ctx = BRAINIAC_ALLOC(sizeof(struct BrainiacVmContext));
 
     if (ctx) {
         ctx->vm = vm;
@@ -42,15 +43,15 @@ static struct BrainfuckVmContext * alloc(struct BrainfuckVm *vm)
     return ctx;
 }
 
-static void dealloc(struct BrainfuckVmContext *ctx)
+static void dealloc(struct BrainiacVmContext *ctx)
 {
-    BRAINFUCK_DEALLOC(ctx);
+    BRAINIAC_DEALLOC(ctx);
 }
 
-static int run(struct BrainfuckVmContext *ctx,
-               const struct BrainfuckProgram *program)
+static int run(struct BrainiacVmContext *ctx,
+               const struct BrainiacProgram *program)
 {
-    register struct BrainfuckInstruction *inst = program->head;
+    register struct BrainiacInstruction *inst = program->head;
     register uint8_t *mem = ctx->memory;
     register int index = 0;
 
@@ -89,10 +90,10 @@ static int run(struct BrainfuckVmContext *ctx,
         }
         inst = inst->next;
     }
-    return BRAINFUCK_EOK;
+    return BRAINIAC_EOK;
 }
 
-struct BrainfuckVm brainfuck_vm_interpreter = {
+struct BrainiacVm brainiac_vm_interpreter = {
     .name = "interpreter",
     .version = "1.0.0",
     .alloc = &alloc,

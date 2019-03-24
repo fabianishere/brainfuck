@@ -22,36 +22,36 @@
 
 #include <string.h>
 
-#include <brainfuck/brainfuck.h>
-#include <brainfuck/ir.h>
+#include <brainiac/brainiac.h>
+#include <brainiac/ir.h>
 
-#include "brainfuck.h"
+#include "brainiac.h"
 
-/* brainfuck/brainfuck.h */
-const char brainfuck_version[] = BRAINFUCK_VERSION;
+/* brainiac/brainiac.h */
+const char brainiac_version[] = BRAINIAC_VERSION;
 
-const int brainfuck_version_number = BRAINFUCK_VERSION_NUMBER;
+const int brainiac_version_number = BRAINIAC_VERSION_NUMBER;
 
-/* brainfuck/ir.h */
-struct BrainfuckInstruction * brainfuck_ir_alloc(enum BrainfuckOpcode opcode)
+/* brainiac/ir.h */
+struct BrainiacInstruction * brainiac_ir_alloc(enum BrainiacOpcode opcode)
 {
-    struct BrainfuckInstruction *inst = BRAINFUCK_ALLOC(sizeof(struct BrainfuckInstruction));
+    struct BrainiacInstruction *inst = BRAINIAC_ALLOC(sizeof(struct BrainiacInstruction));
 
     if (inst) {
-        memset(inst, 0, sizeof(struct BrainfuckInstruction));
+        memset(inst, 0, sizeof(struct BrainiacInstruction));
         inst->opcode =  opcode;
     }
 
     return inst;
 }
 
-void brainfuck_ir_dealloc(struct BrainfuckInstruction *inst)
+void brainiac_ir_dealloc(struct BrainiacInstruction *inst)
 {
-    BRAINFUCK_DEALLOC(inst);
+    BRAINIAC_DEALLOC(inst);
 }
 
-void brainfuck_ir_append(struct BrainfuckProgram *program,
-                         struct BrainfuckInstruction *inst)
+void brainiac_ir_append(struct BrainiacProgram *program,
+                         struct BrainiacInstruction *inst)
 {
     if (!program->head) {
         program->head = inst;
@@ -65,10 +65,10 @@ void brainfuck_ir_append(struct BrainfuckProgram *program,
     program->tail = inst;
 }
 
-void brainfuck_ir_clear(struct BrainfuckProgram *program)
+void brainiac_ir_clear(struct BrainiacProgram *program)
 {
-    struct BrainfuckInstruction *inst = program->head;
-    struct BrainfuckInstruction *tmp;
+    struct BrainiacInstruction *inst = program->head;
+    struct BrainiacInstruction *tmp;
 
     program->head = NULL;
     program->tail = NULL;
@@ -76,6 +76,6 @@ void brainfuck_ir_clear(struct BrainfuckProgram *program)
     while (inst) {
         tmp = inst;
         inst = inst->next;
-        brainfuck_ir_dealloc(tmp);
+        brainiac_ir_dealloc(tmp);
     }
 }

@@ -20,13 +20,16 @@
  * THE SOFTWARE.
  */
 
-#ifndef BRAINFUCK_VM_LIGHTNING_H
-#define BRAINFUCK_VM_LIGHTNING_H
+#ifndef BRAINIAC_INTERNAL_H
+#define BRAINIAC_INTERNAL_H
 
-#include <brainfuck/vm.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#ifdef BRAINFUCK_VM_LIGHTNING_ENABLED
-extern struct BrainfuckVm brainfuck_vm_lightning;
-#endif
+#define BRAINIAC_ALLOC malloc
+#define BRAINIAC_REALLOC realloc
+#define BRAINIAC_DEALLOC free
+#define BRAINIAC_SCOPE_DEPTH 16
+#define BRAINIAC_BUFFER_SIZE 1024
 
-#endif /* BRAINFUCK_VM_LIGHTNING_H */
+#endif /* BRAINIAC_INTERNAL_H */

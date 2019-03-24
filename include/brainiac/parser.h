@@ -20,11 +20,11 @@
  * THE SOFTWARE.
  */
 
-#ifndef BRAINFUCK_PARSER_H
-#define BRAINFUCK_PARSER_H
+#ifndef BRAINIAC_PARSER_H
+#define BRAINIAC_PARSER_H
 
 #include <stdio.h>
-#include <brainfuck/ir.h>
+#include <brainiac/ir.h>
 
 /**
  * This module defines the library's parser interface for the brainfuck
@@ -36,23 +36,23 @@
 /**
  * This structure represents the state of the parser.
  */
-struct BrainfuckParserContext {
+struct BrainiacParserContext {
     /**
      * The parser associated with this context.
      */
-    const struct BrainfuckParser *parser;
+    const struct BrainiacParser *parser;
 
     /**
      * The program structure in which instructions are inserted.
      */
-    struct BrainfuckProgram *program;
+    struct BrainiacProgram *program;
 };
 
 /**
  * This structure represents a parser which parses a language into the
  * brainfuck-based intermediate representation defined in @ref ir.
  */
-struct BrainfuckParser {
+struct BrainiacParser {
     /**
      * A unique, full name of the parser implementation.
      */
@@ -70,30 +70,30 @@ struct BrainfuckParser {
     const char **extensions;
 
     /**
-     * Allocate a {@link BrainfuckParserContext}.
+     * Allocate a {@link BrainiacParserContext}.
      *
      * @param[in] parser The parser to allocate a context for.
      * @param[in] program The program to insert the parsed instructions into.
      * May be <code>NULL</code>.
      * @return The allocated context or <code>NULL</code> on allocation failure.
      */
-    struct BrainfuckParserContext * (*alloc)(struct BrainfuckParser *parser,
-                                             struct BrainfuckProgram *program);
+    struct BrainiacParserContext * (*alloc)(struct BrainiacParser *parser,
+                                            struct BrainiacProgram *program);
 
     /**
-     * Deallocate the specified {@link BrainfuckParserContext}.
+     * Deallocate the specified {@link BrainiacParserContext}.
      *
      * @param[in] ctx The parser context to deallocate.
      */
-    void (*dealloc)(struct BrainfuckParserContext *ctx);
+    void (*dealloc)(struct BrainiacParserContext *ctx);
 
     /**
      * Indicate to the parser to start parsing. This might reset the parser's
-     * internal state and clear the specified {@link BrainfuckProgram}.
+     * internal state and clear the specified {@link BrainiacProgram}.
      *
      * @param[in] ctx The parser context to start.
      */
-    void (*start)(struct BrainfuckParserContext *ctx);
+    void (*start)(struct BrainiacParserContext *ctx);
 
     /**
      * Consume the given string of characters.
@@ -101,84 +101,84 @@ struct BrainfuckParser {
      * @param[in] ctx The parser context in which the characters should be
      * consumed.
      * @param[in] input The input string to consume.
-     * @return {@link BRAINFUCK_EOK} on success, one of the defined error codes
+     * @return {@link BRAINIAC_EOK} on success, one of the defined error codes
      * on failure.
      */
-    int (*consume)(struct BrainfuckParserContext *ctx, const char *input);
+    int (*consume)(struct BrainiacParserContext *ctx, const char *input);
 
     /**
      * Indicate to the parser that the end of the input has been reached.
      *
      * @param[ctx] ctx The parser context to indicate to.
-     * @return {@link BRAINFUCK_EOK} on success, one of the defined error codes
+     * @return {@link BRAINIAC_EOK} on success, one of the defined error codes
      * on failure.
      */
-    int (*end)(struct BrainfuckParserContext *ctx);
+    int (*end)(struct BrainiacParserContext *ctx);
 };
 
 /**
- * Allocate a {@link BrainfuckParserContext}.
+ * Allocate a {@link BrainiacParserContext}.
  *
  * @param[in] parser The parser to allocate a context for.
  * @param[in] program The program to insert the parsed instructions into.
  * May be <code>NULL</code>.
  * @return The allocated context or <code>NULL</code> on allocation failure.
  */
-struct BrainfuckParserContext * brainfuck_parser_alloc(struct BrainfuckParser *parser,
-                                                       struct BrainfuckProgram *program);
+struct BrainiacParserContext * brainiac_parser_alloc(struct BrainiacParser *parser,
+                                                     struct BrainiacProgram *program);
 
 /**
- * Deallocate the specified {@link BrainfuckParserContext}.
+ * Deallocate the specified {@link BrainiacParserContext}.
  *
  * @param[in] ctx The parser context to deallocate.
  */
-void brainfuck_parser_dealloc(struct BrainfuckParserContext *ctx);
+void brainiac_parser_dealloc(struct BrainiacParserContext *ctx);
 
 /**
  * Indicate to the parser to start parsing. This might reset the parser's
- * internal state and clear the specified {@link BrainfuckProgram}.
+ * internal state and clear the specified {@link BrainiacProgram}.
  *
  * @param[in] ctx The parser context to start.
  */
-void brainfuck_parser_start(struct BrainfuckParserContext *ctx);
+void brainiac_parser_start(struct BrainiacParserContext *ctx);
 
 /**
  * Parse the given string.
  *
  * @param[in] ctx The parser context in which to consume the string.
  * @param[in] input The string to parse.
- * @return {@link BRAINFUCK_EOK} on success, one of the defined error codes
+ * @return {@link BRAINIAC_EOK} on success, one of the defined error codes
  * on failure.
  */
-int brainfuck_parser_consume_string(struct BrainfuckParserContext *ctx,
-                                    const char *input);
+int brainiac_parser_consume_string(struct BrainiacParserContext *ctx,
+                                   const char *input);
 
 /**
  * Parse the given file.
  *
  * @param[in] ctx The parser context in which to consume the file.
  * @param[in] file The handle to the file to parse.
- * @return {@link BRAINFUCK_EOK} on success, one of the defined error codes
+ * @return {@link BRAINIAC_EOK} on success, one of the defined error codes
  * on failure.
  */
-int brainfuck_parser_consume_file(struct BrainfuckParserContext *ctx,
-                                  FILE *file);
+int brainiac_parser_consume_file(struct BrainiacParserContext *ctx,
+                                 FILE *file);
 
 /**
  * Indicate to the parser that the end of the input has been reached.
  *
  * @param[in] ctx The parser context to indicate to.
- * @return {@link BRAINFUCK_EOK} on success, one of the defined error codes
+ * @return {@link BRAINIAC_EOK} on success, one of the defined error codes
  * on failure.
  */
-int brainfuck_parser_end(struct BrainfuckParserContext *ctx);
+int brainiac_parser_end(struct BrainiacParserContext *ctx);
 
 /**
  * Retrieve an array of available parsers on this platform.
  *
  * @return A <code>NULL</code>-terminated array of available parsers.
  */
-struct BrainfuckParser ** brainfuck_parser_list(void);
+struct BrainiacParser ** brainiac_parser_list(void);
 
 /**
  * Find the first parser available with the given name.
@@ -188,7 +188,7 @@ struct BrainfuckParser ** brainfuck_parser_list(void);
  * @return The found parser or <code>NULL</code> if it could not be
  * found.
  */
-struct BrainfuckParser * brainfuck_parser_find(const char *name);
+struct BrainiacParser * brainiac_parser_find(const char *name);
 
 /**
  * Find the first parser that supports the specified file extension.
@@ -197,7 +197,7 @@ struct BrainfuckParser * brainfuck_parser_find(const char *name);
  * @return The found parser or <code>NULL</code> if it could not be
  * found.
  */
-struct BrainfuckParser * brainfuck_parser_find_by_extension(const char *ext);
+struct BrainiacParser * brainiac_parser_find_by_extension(const char *ext);
 /** @} */
 
-#endif /* BRAINFUCK_PARSER_H */
+#endif /* BRAINIAC_PARSER_H */

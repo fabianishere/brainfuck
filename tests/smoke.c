@@ -23,9 +23,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <brainfuck/brainfuck.h>
-#include <brainfuck/vm.h>
-#include <brainfuck/parser.h>
+#include <brainiac/brainiac.h>
+#include <brainiac/vm.h>
+#include <brainiac/parser.h>
 
 /**
  * Smoke test running a simple "Hello World" brainfuck program.
@@ -35,29 +35,29 @@ int main() {
     const char *str = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
 
     /* Parsing */
-    struct BrainfuckProgram program;
-    struct BrainfuckParser *parser;
-    struct BrainfuckParserContext *pctx;
+    struct BrainiacProgram program;
+    struct BrainiacParser *parser;
+    struct BrainiacParserContext *pctx;
 
-    if ((parser = brainfuck_parser_find("brainfuck")) == NULL ||
-        (pctx = brainfuck_parser_alloc(parser, &program)) == NULL) {
+    if ((parser = brainiac_parser_find("brainfuck")) == NULL ||
+        (pctx = brainiac_parser_alloc(parser, &program)) == NULL) {
         goto err_parser;
     }
 
-    brainfuck_parser_start(pctx);
-    if ((err = brainfuck_parser_consume_string(pctx, str)) != BRAINFUCK_EOK ||
-        (err = brainfuck_parser_end(pctx)) != BRAINFUCK_EOK) {
+    brainiac_parser_start(pctx);
+    if ((err = brainiac_parser_consume_string(pctx, str)) != BRAINIAC_EOK ||
+        (err = brainiac_parser_end(pctx)) != BRAINIAC_EOK) {
         goto err_parsing;
     }
 
-    brainfuck_parser_dealloc(pctx);
+    brainiac_parser_dealloc(pctx);
 
     /* Execution */
-    struct BrainfuckVm *vm;
-    struct BrainfuckVmContext *vctx;
+    struct BrainiacVm *vm;
+    struct BrainiacVmContext *vctx;
 
-    if ((vm = brainfuck_vm_find(NULL)) == NULL ||
-        (vctx = brainfuck_vm_alloc(vm)) == NULL) {
+    if ((vm = brainiac_vm_find(NULL)) == NULL ||
+        (vctx = brainiac_vm_alloc(vm)) == NULL) {
         goto err_vm;
     }
 
@@ -65,12 +65,12 @@ int main() {
     vctx->write = &putchar;
     vctx->memory = calloc(30000, sizeof(uint8_t));
 
-    if ((err = brainfuck_vm_run(vctx, &program)) != BRAINFUCK_EOK) {
+    if ((err = brainiac_vm_run(vctx, &program)) != BRAINIAC_EOK) {
         goto err_vm_run;
     }
 
-    brainfuck_vm_dealloc(vctx);
-    brainfuck_ir_clear(&program);
+    brainiac_vm_dealloc(vctx);
+    brainiac_ir_clear(&program);
 
     return 0;
 
@@ -79,15 +79,15 @@ int main() {
         return 1;
     err_parsing:
         fprintf(stderr, "error: parser exited with code %i.\n", err);
-        brainfuck_parser_dealloc(pctx);
-        brainfuck_ir_clear(&program);
+        brainiac_parser_dealloc(pctx);
+        brainiac_ir_clear(&program);
         return 1;
     err_vm:
         fprintf(stderr, "error: no virtual machine available\n");
         return 1;
     err_vm_run:
         fprintf(stderr, "error: vm exited with code %i.\n", err);
-        brainfuck_vm_dealloc(vctx);
-        brainfuck_ir_clear(&program);
+        brainiac_vm_dealloc(vctx);
+        brainiac_ir_clear(&program);
         return 1;
 }

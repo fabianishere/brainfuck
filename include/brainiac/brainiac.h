@@ -24,8 +24,8 @@
  * This header file defines some general information about this library and
  * introduces constants used by the library.
  */
-#ifndef BRAINFUCK_H
-#define BRAINFUCK_H
+#ifndef BRAINIAC_H
+#define BRAINIAC_H
 
 /**
  * The macro definitions defined by this library.
@@ -44,13 +44,13 @@
  * A macro that evaluates to a string version of the library with which the
  * header file is associated.
  */
-#define BRAINFUCK_VERSION        "3.0.0"
+#define BRAINIAC_VERSION        "3.0.0"
 
 /**
  * A macro that resolves to an integer <code>(X*1000000 + Y*1000 + Z)</code>
  * where X, Y, and Z are the major version, minor version, and release number.
  */
-#define BRAINFUCK_VERSION_NUMBER  3000000
+#define BRAINIAC_VERSION_NUMBER  3000000
 /** @} */
 
 /**
@@ -62,13 +62,13 @@
  * @addtogroup error Error codes
  * @{
  */
-#define BRAINFUCK_EOK          0  /**< Successful result */
-#define BRAINFUCK_EINTERNAL    1  /**< Internal logic error in implementation */
-#define BRAINFUCK_EUNAVAILABLE 2  /**< Feature not implemented or unavailable */
-#define BRAINFUCK_ENOMEM       3  /**< A malloc() failure */
-#define BRAINFUCK_ESYNTAX      4  /**< Syntax error in input */
-#define BRAINFUCK_EBOUNDS      5  /**< Input caused index to go out of bounds */
-#define BRAINFUCK_EIO          6  /**< I/O error while reading or writing */
+#define BRAINIAC_EOK          0  /**< Successful result */
+#define BRAINIAC_EINTERNAL    1  /**< Internal logic error in implementation */
+#define BRAINIAC_EUNAVAILABLE 2  /**< Feature not implemented or unavailable */
+#define BRAINIAC_ENOMEM       3  /**< A malloc() failure */
+#define BRAINIAC_ESYNTAX      4  /**< Syntax error in input */
+#define BRAINIAC_EBOUNDS      5  /**< Input caused index to go out of bounds */
+#define BRAINIAC_EIO          6  /**< I/O error while reading or writing */
 /** @} */
 /** @} */
 
@@ -86,16 +86,16 @@
  * @{
  */
 /**
- * A constant string identical to the contents of the {@link BRAINFUCK_VERSION}
+ * A constant string identical to the contents of the {@link BRAINIAC_VERSION}
  * macro of the header the library is compiled against.
  */
-extern const char brainfuck_version[];
+extern const char brainiac_version[];
 
 /**
- * An integer equal to {@link BRAINFUCK_VERSION_NUMBER} of the header
+ * An integer equal to {@link BRAINIAC_VERSION_NUMBER} of the header
  * the library is compiled against.
  */
-extern const int brainfuck_version_number;
+extern const int brainiac_version_number;
 /** @} */
 /** @} */
-#endif /* BRAINFUCK_H */
+#endif /* BRAINIAC_H */

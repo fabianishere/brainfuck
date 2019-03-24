@@ -22,27 +22,27 @@
 
 #include <assert.h>
 
-#include <brainfuck/brainfuck.h>
-#include <brainfuck/ir.h>
+#include <brainiac/brainiac.h>
+#include <brainiac/ir.h>
 
 void test_ir_append_empty()
 {
-    struct BrainfuckProgram program = {0};
-    struct BrainfuckInstruction *nop = brainfuck_ir_alloc(NOP);
+    struct BrainiacProgram program = {0};
+    struct BrainiacInstruction *nop = brainiac_ir_alloc(NOP);
 
-    brainfuck_ir_append(&program, nop);
+    brainiac_ir_append(&program, nop);
 
     assert(program.head == nop && program.tail == nop);
 }
 
 void test_ir_append_singleton()
 {
-    struct BrainfuckProgram program = {0};
-    struct BrainfuckInstruction *x = brainfuck_ir_alloc(NOP);
-    struct BrainfuckInstruction *y = brainfuck_ir_alloc(NOP);
+    struct BrainiacProgram program = {0};
+    struct BrainiacInstruction *x = brainiac_ir_alloc(NOP);
+    struct BrainiacInstruction *y = brainiac_ir_alloc(NOP);
 
-    brainfuck_ir_append(&program, x);
-    brainfuck_ir_append(&program, y);
+    brainiac_ir_append(&program, x);
+    brainiac_ir_append(&program, y);
 
     assert(program.head == x);
     assert(program.tail == y);
@@ -52,14 +52,14 @@ void test_ir_append_singleton()
 
 void test_ir_append_multiple()
 {
-    struct BrainfuckProgram program = {0};
-    struct BrainfuckInstruction *x = brainfuck_ir_alloc(NOP);
-    struct BrainfuckInstruction *y = brainfuck_ir_alloc(NOP);
-    struct BrainfuckInstruction *z = brainfuck_ir_alloc(NOP);
+    struct BrainiacProgram program = {0};
+    struct BrainiacInstruction *x = brainiac_ir_alloc(NOP);
+    struct BrainiacInstruction *y = brainiac_ir_alloc(NOP);
+    struct BrainiacInstruction *z = brainiac_ir_alloc(NOP);
 
-    brainfuck_ir_append(&program, x);
-    brainfuck_ir_append(&program, y);
-    brainfuck_ir_append(&program, z);
+    brainiac_ir_append(&program, x);
+    brainiac_ir_append(&program, y);
+    brainiac_ir_append(&program, z);
 
     assert(program.head == x);
     assert(program.tail == z);
@@ -71,13 +71,13 @@ void test_ir_append_multiple()
 
 void test_ir_clear()
 {
-    struct BrainfuckProgram program = {0};
-    struct BrainfuckInstruction *x = brainfuck_ir_alloc(NOP);
-    struct BrainfuckInstruction *y = brainfuck_ir_alloc(NOP);
+    struct BrainiacProgram program = {0};
+    struct BrainiacInstruction *x = brainiac_ir_alloc(NOP);
+    struct BrainiacInstruction *y = brainiac_ir_alloc(NOP);
 
-    brainfuck_ir_append(&program, x);
-    brainfuck_ir_append(&program, y);
-    brainfuck_ir_clear(&program);
+    brainiac_ir_append(&program, x);
+    brainiac_ir_append(&program, y);
+    brainiac_ir_clear(&program);
 
     assert(program.head == NULL && program.tail == NULL);
 }
