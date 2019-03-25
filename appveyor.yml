@@ -37,12 +37,12 @@ before_build:
 
         cmake --version
 
-        cmake .. -G %generator% -DENABLE_EDITLINE=OFF
+        cmake .. -G %generator% -DWITH_EDITLINE=OFF -DWITH_VM_LIGHTNING=OFF
 
 
 # build Visual Studio project
 build:
-    project: c:\projects\brainfuck\build\brainfuck.sln
+    project: c:\projects\brainfuck\build\brainiac.sln
     verbosity: minimal
     parallel: true
 

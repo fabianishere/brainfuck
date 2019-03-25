@@ -10,24 +10,32 @@ matrix:
               apt:
                   packages:
                       - libedit-dev
+          env:
+            - WITH_VM_LIGHTNING=OFF
         - os: linux
           compiler: clang
           addons:
               apt:
                   packages:
                       - libedit-dev
+          env:
+            - WITH_VM_LIGHTNING=OFF
         - os: osx
           compiler: gcc
+          env:
+            - WITH_VM_LIGHTNING=ON
         - os: osx
           compiler: clang
+          env:
+            - WITH_VM_LIGHTNING=ON
 
 # macOS dependencies
 before_install:  
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update         ; fi
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libedit; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libedit lightning; fi
 
 # Build steps
 script:
     - mkdir build && cd build
-    - cmake .. && make VERBOSE=1
+    - cmake -DWITH_VM_LIGHTNING=$WITH_VM_LIGHTNING .. && make VERBOSE=1
     - ctest -VV

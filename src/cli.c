@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 {
     int opt, opt_index = 0;
     char *vm_name = NULL;
-    char *parser_name  = "brainfuck";
+    char *parser_name  = NULL;
 
     while ((opt = getopt_long(argc, argv, "hvx:p:", long_options, &opt_index)) != -1) {
         switch (opt) {
@@ -155,11 +155,13 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    FILE *file = pipe ? stdin : fopen(argv[optind], "r");
+    const char *path = argv[optind];
+    const char *ext = strrchr(path, '.');
+    FILE *file = pipe ? stdin : fopen(path, "r");
 
     /* Test if file exists */
     if (!file) {
-        fprintf(stderr, "error: cannot open file %s (%s).\n", argv[optind], strerror(errno));
+        fprintf(stderr, "error: cannot open file %s (%s).\n", path, strerror(errno));
         return 1;
     }
 
@@ -169,8 +171,13 @@ int main(int argc, char *argv[])
     struct BrainiacParserContext *pctx;
     int err;
 
-    if ((parser = brainiac_parser_find(parser_name)) == NULL ||
-        (pctx = brainiac_parser_alloc(parser, &program)) == NULL) {
+    if (pipe || parser_name || !ext) {
+        parser = brainiac_parser_find(parser_name);
+    } else {
+        parser = brainiac_parser_find_by_extension(ext + 1);
+    }
+
+    if (!parser || (pctx = brainiac_parser_alloc(parser, &program)) == NULL) {
         goto err_parser;
     }
 
