@@ -26,6 +26,12 @@
 #include <stdio.h>
 #include <stdint.h>
 
+/* Fix for Windows, which defines IN and OUT as empty macro definition */
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#undef IN
+#undef OUT
+#endif
+
 /**
  * This submodule defines the Intermediate Representation (IR) to which input
  * is converted to by the parser. This intermediate representation is then

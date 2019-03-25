@@ -37,7 +37,11 @@
 
 /* isatty for Windows */
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-#   define isatty _isatty
+    #include <io.h>
+    #define isatty _isatty
+    #define STDIN_FILENO 0
+#else
+    #include <unistd.h>
 #endif
 
 /**
@@ -147,7 +151,7 @@ int main(int argc, char *argv[])
     }
 
     /* Check if code is piped */
-    int pipe = !isatty(fileno(stdin));
+    int pipe = !isatty(STDIN_FILENO);
 
     /* Print usage if no arguments and no piping */
     if (optind >= argc && !pipe) {
