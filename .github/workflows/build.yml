@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os.type }}
+    name: Build (${{ matrix.os.type }})
+    strategy:
+      matrix:
+        os: 
+        - type: windows-latest
+          deps: cd .
+          editline: OFF
+        - type: ubuntu-latest
+          deps: sudo apt-get install libedit-dev
+          editline: ON
+        - type: macos-latest
+          deps: brew install libedit
+          editline: ON
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Setup System Dependencies
+      run: ${{ matrix.os.deps }}
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DENABLE_EDITLINE=${{ matrix.os.editline }}
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: ctest -VV

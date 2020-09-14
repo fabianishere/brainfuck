@@ -1,6 +1,5 @@
 brainfuck
-[![Build Status](https://travis-ci.org/fabianishere/brainfuck.svg?branch=master)](https://travis-ci.org/fabianishere/brainfuck)
-[![Build status](https://ci.appveyor.com/api/projects/status/tvhw2ft8apnwypx5/branch/master?svg=true)](https://ci.appveyor.com/project/fabianishere/brainfuck/branch/master)
+[![Build Status](https://github.com/fabianishere/brainfuck/workflows/Build/badge.svg)](https://github.com/fabianishere/brainfuck/actions?query=workflow%3ABuild)
 ===========
 Brainfuck interpreter written in C.
 
@@ -49,7 +48,7 @@ Create the build directory.
 $ mkdir build
 $ cd build
 ```
-Brainfuck requires CMake and a C compiler (e.g. Clang or GCC) in order to run. It also depends on [libedit](http://thrysoee.dk/editline/), which is available in the main repositories of most Linux distributions (e.g. as [libedit-dev](https://packages.debian.org/stretch/libedit-dev) on Debian) and comes with the macOS XCode command line tools. 
+Brainfuck requires CMake and a C compiler (e.g. Clang or GCC) in order to run. It also depends on [libedit](http://thrysoee.dk/editline/), which is available in the main repositories of most Linux distributions (e.g. as [libedit-dev](https://packages.debian.org/stretch/libedit-dev) on Debian/Ubuntu) and comes with the macOS XCode command line tools. 
 Then, simply create the Makefiles:
 ```sh
 $ cmake ..
