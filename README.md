@@ -58,6 +58,15 @@ and finally, build it using the building system you chose (e.g. Make):
 $ make
 ```
 
+After the build has been finished, you may install the binaries to your local system (see [CMAKE\_INSTALL\_PREFIX](https://cmake.org/cmake/help/v3.0/variable/CMAKE_INSTALL_PREFIX.html) for information about the install prefix):
+```sh
+$ make install
+```
+Alternatively, you may run the interpreter directly without installation, for instance:
+```sh
+$ ./brainfuck ../examples/hello.bf
+```
+
 ## License
 The code is released under the Apache License version 2.0. See [LICENSE.txt](/LICENSE.txt).
 
