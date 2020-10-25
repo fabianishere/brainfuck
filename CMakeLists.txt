@@ -13,12 +13,6 @@ option(ENABLE_EDITLINE "Enable GNU readline functionality provided by the editli
 option(ENABLE_EXTENSION_DEBUG "Enable the debug extension for brainfuck")
 option(INSTALL_EXAMPLES "Install the examples")
 
-# getopt shim for windows
-add_library(getopt INTERFACE)
-if (MSVC)
-    target_include_directories(getopt INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/deps/getopt)
-endif()
-
 ## Target ##
 set(BRAINFUCK_H include/brainfuck.h)
 set(BRAINFUCK_C_FLAGS
@@ -46,6 +40,7 @@ if(ENABLE_EXTENSION_DEBUG)
 endif()
 
 if(ENABLE_CLI)
+    find_package(getopt REQUIRED)
     add_executable(brainfuck-cli src/main.c)
     set_target_properties(brainfuck-cli PROPERTIES
         OUTPUT_NAME "brainfuck"
