@@ -5,6 +5,8 @@ project(brainfuck
         VERSION 2.7.3
         DESCRIPTION "Brainfuck interpreter written in C")
 
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
 ## Compile-time options ##
 option(ENABLE_CLI "Enable the command line interface" ON)
 option(ENABLE_EDITLINE "Enable GNU readline functionality provided by the editline library" ON)
@@ -38,26 +40,25 @@ target_compile_definitions(brainfuck PUBLIC
 target_compile_features(brainfuck PRIVATE c_std_90)
 target_compile_options(brainfuck PRIVATE ${BRAINFUCK_C_FLAGS})
 
+## Compile-time features ##
+if(ENABLE_EXTENSION_DEBUG)
+    target_compile_definitions(brainfuck PRIVATE "-DBRAINFUCK_EXTENSION_DEBUG")
+endif()
+
 if(ENABLE_CLI)
     add_executable(brainfuck-cli src/main.c)
     set_target_properties(brainfuck-cli PROPERTIES
         OUTPUT_NAME "brainfuck"
     )
-    target_link_libraries(brainfuck-cli brainfuck getopt)
-    target_compile_options(brainfuck-cli PRIVATE ${BRAINFUCK_C_FLAGS})
-
+    target_link_libraries(brainfuck-cli PRIVATE brainfuck getopt)
+    target_compile_options(brainfuck-cli PRIVATE "${BRAINFUCK_C_FLAGS}")
 
     if(ENABLE_EDITLINE)
-        target_compile_definitions(brainfuck-cli PRIVATE "-DBRAINFUCK_EDITLINE_LIB")
-        target_link_libraries(brainfuck-cli -ledit)
+        find_package(editline REQUIRED)
+        target_compile_definitions(brainfuck-cli PRIVATE BRAINFUCK_EDITLINE_LIB)
+        target_link_libraries(brainfuck-cli PRIVATE editline)
     endif()
 endif()
-
-if(ENABLE_EXTENSION_DEBUG)
-    target_compile_definitions(brainfuck PRIVATE "-DBRAINFUCK_EXTENSION_DEBUG")
-endif()
-
-
 
 ## Installation ##
 include(GNUInstallDirs)
