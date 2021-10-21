@@ -42,6 +42,11 @@ BrainfuckExecutionContext * brainfuck_context(int size) {
 		size = BRAINFUCK_TAPE_SIZE;
 
 	unsigned char* tape = calloc(size, sizeof(char));
+	int i;
+	for (i = 0; i < size; ++i)
+	{
+		tape[i]=0;
+	}
 	
 	BrainfuckExecutionContext *context = (BrainfuckExecutionContext *) 
 			malloc(sizeof(BrainfuckExecutionContext));
