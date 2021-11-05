@@ -482,16 +482,16 @@ void brainfuck_execute(BrainfuckInstruction *root, BrainfuckExecutionContext *co
 			context->tape[context->tape_index] -= instruction->difference;
 			break;
 		case BRAINFUCK_TOKEN_NEXT:
-			if ((unsigned long) instruction->difference >= INT_MAX - context->tape_size || 
-					(unsigned long) context->tape_index + instruction->difference >= context->tape_size) {
+			if (instruction->difference >= INT_MAX - (long) context->tape_size ||
+					(long) context->tape_index + instruction->difference >= (long) context->tape_size) {
 				fprintf(stderr, "error: tape memory out of bounds (overrun)\nexceeded the tape size of %zd cells\n", context->tape_size);
 				exit(EXIT_FAILURE);
 			}
 			context->tape_index += instruction->difference;
 			break;
 		case BRAINFUCK_TOKEN_PREVIOUS:
-			if ((unsigned long) instruction->difference >= INT_MAX - context->tape_size || 
-					context->tape_index - instruction->difference < 0) {
+			if (instruction->difference >= INT_MAX - (long) context->tape_size ||
+                    (long) context->tape_index - instruction->difference < 0) {
 				fprintf(stderr, "error: tape memory out of bounds (underrun)\nundershot the tape size of %zd cells\n", context->tape_size);
 				exit(EXIT_FAILURE);
 			}
