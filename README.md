@@ -71,10 +71,17 @@ $ ./brainfuck ../examples/hello.bf
 The code is released under the Apache License version 2.0. See [LICENSE.txt](/LICENSE.txt).
 
 ## Contributors
-    Fabian Mastenbroek https://github.com/fabianishere
-    aliclubb https://github.com/aliclubb
-    diekmann https://github.com/diekmann
-    SevenBits https://github.com/SevenBits
-    Alex Burka https://github.com/durka
+	Fabian Mastenbroek https://github.com/fabianishere
+	aliclubb https://github.com/aliclubb
+	diekmann https://github.com/diekmann
+	SevenBits https://github.com/SevenBits
+	Alex Burka https://github.com/durka
 	outis https://github.com/outis
 	rien333 https://github.com/rien333
+	boweiliu https://github.com/boweiliu
+	Rotartsi https://github.com/ROTARTSI82
+	Saket Upadhyay https://github.com/Saket-Upadhyay
+	outis https://github.com/outis
+	Jalmari91 https://github.com/Jalmari91
+	Alok Singh https://github.com/alok
+	Lasse Damsgaard Skaalum https://github.com/humleflue
