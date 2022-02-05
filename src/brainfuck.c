@@ -22,6 +22,16 @@
 
 #include <brainfuck.h>
 
+#define CheckForNull(element) \
+do \
+{\
+    if (element == NULL) \
+    { \
+        return NULL; \
+    } \
+} \
+while (0)
+
 /**
  * Creates a new state.
  */
@@ -63,8 +73,8 @@ BrainfuckExecutionContext * brainfuck_context(int size) {
  * @return The instruction that is removed.
  */
 BrainfuckInstruction * brainfuck_remove(BrainfuckState *state, BrainfuckInstruction *instruction) {
-	if (state == NULL || instruction == NULL)
-		return NULL;
+    CheckForNull(state); 
+    CheckForNull(instruction);
 	if (state->head == instruction)
 		state->head = instruction->previous;
 	instruction->previous->next = instruction->next;
@@ -83,8 +93,8 @@ BrainfuckInstruction * brainfuck_remove(BrainfuckState *state, BrainfuckInstruct
  */
 BrainfuckInstruction * brainfuck_add(BrainfuckState *state, 
 		BrainfuckInstruction *instruction) {
-	if (state == NULL || instruction == NULL)
-		return NULL;
+	CheckForNull(state); 
+    CheckForNull(instruction);
 	instruction->previous = state->head;
 	if (state->head != NULL) 
 		state->head->next = instruction;
@@ -110,8 +120,8 @@ BrainfuckInstruction * brainfuck_add(BrainfuckState *state,
  */
 BrainfuckInstruction * brainfuck_add_front(BrainfuckState *state, 
 		BrainfuckInstruction *instruction) {
-	if (state == NULL || instruction == NULL)
-		return NULL;
+    CheckForNull(state); 
+    CheckForNull(instruction);
 	instruction->previous = 0;
 	BrainfuckInstruction *iter = instruction;
 	while (iter != NULL) {
@@ -137,8 +147,9 @@ BrainfuckInstruction * brainfuck_add_front(BrainfuckState *state,
  */
 BrainfuckInstruction * brainfuck_insert_before(BrainfuckState *state, BrainfuckInstruction *before, 
 		BrainfuckInstruction *instruction) {
-	if (state == NULL || before == NULL || instruction == NULL)
-			return NULL;
+    CheckForNull(state); 
+    CheckForNull(before);
+    CheckForNull(instruction);
 	BrainfuckInstruction *previous = before->previous;
 	BrainfuckInstruction *iter = instruction;
 	while (iter != NULL) {
@@ -168,8 +179,9 @@ BrainfuckInstruction * brainfuck_insert_before(BrainfuckState *state, BrainfuckI
  */
 BrainfuckInstruction * brainfuck_insert_after(BrainfuckState *state, BrainfuckInstruction *after, 
 			BrainfuckInstruction *instruction) {
-		if (state == NULL || after == NULL || instruction == NULL)
-			return NULL;
+        CheckForNull(state); 
+        CheckForNull(after);
+        CheckForNull(instruction)
 		BrainfuckInstruction *next = after->next;
 		BrainfuckInstruction *iter = instruction;
 
@@ -309,8 +321,8 @@ BrainfuckInstruction * brainfuck_parse_substring(char *str, int begin, int end) 
  * @param The head of the linked list containing the instructions.
  */
 BrainfuckInstruction * brainfuck_parse_substring_incremental(char *str, int *ptr, int end) {
-	if (str == NULL || ptr == NULL)
-		return NULL;
+    CheckForNull(str);
+    CheckForNull(ptr);
 	if (end < 0)
 		end = strlen(str);
 	BrainfuckInstruction *root = (BrainfuckInstruction *) malloc(sizeof(BrainfuckInstruction));
